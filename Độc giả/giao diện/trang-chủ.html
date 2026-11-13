@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f7f3">
+  <link rel="stylesheet" href="doc-gia.css">
+  <link rel="stylesheet" href="../../dùng-chung/giao%20di%E1%BB%87n/giao-di%E1%BB%87n.css">
+  <title>Mộc Thư — Quản lý thư viện</title>
+</head>
+<body data-role="reader">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <button class="mobile-menu" id="mobileMenuButton" aria-label="Mở menu">☰</button>
+        <div class="brand-mark">M</div>
+        <div>
+          <div class="brand-name">mộc thư</div>
+          <div class="brand-caption">Không gian tri thức</div>
+        </div>
+      </div>
+      <div class="mode-switch" aria-label="Vai trò hiện tại"><span class="mode-button active">Độc giả</span></div>
+      <div class="top-actions">
+        <button class="button logout-button" id="logoutButton" type="button">Đăng xuất</button>
+        <button class="icon-button" aria-label="Thông báo" id="notificationButton">♧<span class="notification-dot"></span></button>
+        <div class="user-chip">
+          <div class="avatar" id="topAvatar">…</div>
+          <div class="user-details">
+            <div class="user-name" id="topUserName">Đang tải tài khoản…</div>
+            <div class="user-role" id="topUserRole">Độc giả</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-label" id="sidebarLabel">Tổng quan</div>
+        <nav class="nav-list" id="sidebarNav" aria-label="Điều hướng"></nav>
+        <div class="sidebar-bottom">
+          <div class="help-card">
+            <strong>Cần hỗ trợ?</strong>
+            <p>Xem hướng dẫn sử dụng và các mẹo quản lý thư viện.</p>
+            <a href="#" id="helpLink">Trung tâm trợ giúp →</a>
+          </div>
+          <div class="sidebar-user">
+            <div class="avatar">AL</div>
+            <div><div class="user-name" id="sidebarUserName">Đang tải tài khoản…</div><div class="user-role" id="sidebarUserRole">Độc giả · Thành viên</div></div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="page active" id="page-reader-home" data-page="reader-home">
+          <nav class="reader-nav" aria-label="Menu độc giả"><button class="active" data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav>
+          <div class="reader-page-content">
+            <div class="reader-hero"><div class="reader-hero-copy"><div class="eyebrow">Một góc nhỏ dành cho bạn</div><h2>Tìm cuốn sách<br>chạm đến bạn.</h2><p>Khám phá hàng ngàn đầu sách và để mỗi trang giấy đưa bạn đến một hành trình mới.</p><button class="button primary" data-reader-page="reader-catalog">Khám phá sách <span>→</span></button></div><div class="hero-books" aria-hidden="true"><div class="hero-book">Những ngày thơ ấu</div><div class="hero-book">Đi tìm lẽ sống</div><div class="hero-book">Gió qua mùa hạ</div></div></div>
+            <div class="section-heading"><div><h2>Được yêu thích tuần này</h2><p>Những cuốn sách độc giả đang chuyền tay nhau</p></div><button class="text-link" data-reader-page="reader-catalog">Xem tất cả →</button></div>
+            <div class="book-grid">
+              <article class="reader-book-card"><div class="reader-book-cover">Nhà giả kim</div><div class="reader-book-info"><h3>Nhà giả kim</h3><p>Paulo Coelho · Văn học</p><div class="reader-book-meta"><span>★★★★★</span><button data-borrow>Đặt mượn</button></div></div></article>
+              <article class="reader-book-card"><div class="reader-book-cover cover-2">Đi tìm lẽ sống</div><div class="reader-book-info"><h3>Đi tìm lẽ sống</h3><p>Viktor E. Frankl · Kỹ năng</p><div class="reader-book-meta"><span>★★★★★</span><button data-borrow>Đặt mượn</button></div></div></article>
+              <article class="reader-book-card"><div class="reader-book-cover cover-3">Rừng Na Uy</div><div class="reader-book-info"><h3>Rừng Na Uy</h3><p>Haruki Murakami · Văn học</p><div class="reader-book-meta"><span>★★★★☆</span><button data-borrow>Đặt mượn</button></div></div></article>
+              <article class="reader-book-card"><div class="reader-book-cover cover-4">Tuổi trẻ đáng giá bao nhiêu</div><div class="reader-book-info"><h3>Tuổi trẻ đáng giá bao nhiêu</h3><p>Rosie Nguyễn · Kỹ năng</p><div class="reader-book-meta"><span>★★★★★</span><button data-borrow>Đặt mượn</button></div></div></article>
+            </div>
+            <div class="reader-features"><article class="feature-card"><span>⌕</span><div><strong>Tra cứu dễ dàng</strong><p>Tìm sách theo tên, tác giả và thể loại yêu thích.</p></div></article><article class="feature-card"><span>◷</span><div><strong>Giữ chỗ trực tuyến</strong><p>Đặt trước cuốn sách bạn muốn đọc tiếp theo.</p></div></article><article class="feature-card"><span>♡</span><div><strong>Không gian cho mọi người</strong><p>Đọc, học hỏi và kết nối cùng cộng đồng.</p></div></article></div>
+          </div>
+          <div class="footer-note">Mộc Thư · Góc đọc dành cho bạn</div>
+        </section>
+
+<section class="page" id="page-reader-catalog" data-page="reader-catalog">
+          <nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button class="active" data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav>
+          <div class="reader-page-content"><div class="section-heading" style="margin-top:5px"><div><div class="eyebrow">Danh mục sách</div><h2>Những câu chuyện đang chờ bạn</h2><p>Tìm kiếm trong bộ sưu tập của thư viện.</p></div></div>
+            <div class="toolbar-row"><div class="filter-group"><button class="filter-button active">Tất cả</button><button class="filter-button">Văn học</button><button class="filter-button">Kỹ năng</button><button class="filter-button">Thiếu nhi</button></div><label class="search-box"><span>⌕</span><input id="readerSearch" type="search" placeholder="Tìm theo tên sách, tác giả..."></label></div>
+            <div class="book-grid" id="readerCatalogGrid">
+              <article class="reader-book-card"><div class="reader-book-cover">Nhà giả kim</div><div class="reader-book-info"><h3>Nhà giả kim</h3><p>Paulo Coelho · Văn học</p><div class="reader-book-meta"><span>Còn 7 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
+              <article class="reader-book-card"><div class="reader-book-cover cover-2">Đi tìm lẽ sống</div><div class="reader-book-info"><h3>Đi tìm lẽ sống</h3><p>Viktor E. Frankl · Kỹ năng</p><div class="reader-book-meta"><span>Còn 5 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
+              <article class="reader-book-card"><div class="reader-book-cover cover-3">Rừng Na Uy</div><div class="reader-book-info"><h3>Rừng Na Uy</h3><p>Haruki Murakami · Văn học</p><div class="reader-book-meta"><span>Còn 7 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
+              <article class="reader-book-card"><div class="reader-book-cover cover-4">Tuổi trẻ đáng giá bao nhiêu</div><div class="reader-book-info"><h3>Tuổi trẻ đáng giá bao nhiêu</h3><p>Rosie Nguyễn · Kỹ năng</p><div class="reader-book-meta"><span>Còn 6 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
+            </div></div>
+          <div class="footer-note">Mộc Thư · Danh mục sách dành cho độc giả</div>
+        </section>
+
+<section class="page" id="page-reader-new" data-page="reader-new"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button class="active" data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Mới trên kệ</div><h2>Những trang sách vừa cập bến</h2><p>Các đầu sách mới được cập nhật trong tháng này — lựa chọn hoàn hảo cho hành trình đọc tiếp theo.</p><div class="notice">Tháng 11 có 24 đầu sách mới đã được bổ sung vào bộ sưu tập.</div><div class="category-pills"><span>Ngày mai của những ngày mai</span><span>Thế giới rộng lớn, lòng người chật hẹp</span><span>Vũ trụ trong vỏ hạt dẻ</span><span>Chuyện con mèo dạy hải âu bay</span><span>Hiểu về trái tim</span></div></div><div class="section-heading"><div><h2>Gợi ý dành cho bạn</h2><p>Thêm lựa chọn mới trong bộ sưu tập</p></div><button class="text-link" data-reader-page="reader-catalog">Xem tất cả →</button></div><div class="book-grid"><article class="reader-book-card"><div class="reader-book-cover">Vũ trụ trong vỏ hạt dẻ</div><div class="reader-book-info"><h3>Vũ trụ trong vỏ hạt dẻ</h3><p>Stephen Hawking · Khoa học</p><div class="reader-book-meta"><span>Mới cập nhật</span><button data-borrow>Đặt mượn</button></div></div></article><article class="reader-book-card"><div class="reader-book-cover cover-2">Chuyện con mèo dạy hải âu bay</div><div class="reader-book-info"><h3>Chuyện con mèo dạy hải âu bay</h3><p>Luis Sepúlveda · Thiếu nhi</p><div class="reader-book-meta"><span>Mới cập nhật</span><button data-borrow>Đặt mượn</button></div></div></article></div></div></section>
+
+<section class="page" id="page-reader-categories" data-page="reader-categories"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button class="active" data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Khám phá theo chủ đề</div><h2>Một thể loại, ngàn thế giới</h2><p>Chọn chủ đề bạn yêu thích và tìm thấy những cuốn sách phù hợp với mình.</p><div class="category-pills"><span>Văn học Việt Nam · 324 sách</span><span>Văn học nước ngoài · 418 sách</span><span>Kỹ năng sống · 216 sách</span><span>Khoa học · 154 sách</span><span>Lịch sử · 96 sách</span><span>Thiếu nhi · 182 sách</span><span>Nghệ thuật · 72 sách</span><span>Tâm lý học · 88 sách</span></div></div></div></section>
+
+<section class="page" id="page-reader-services" data-page="reader-services"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button class="active" data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Tiện ích thư viện</div><h2>Để việc đọc dễ dàng hơn</h2><p>Những dịch vụ hỗ trợ bạn khám phá, mượn và chia sẻ tri thức mỗi ngày.</p><div class="reader-features"><article class="feature-card"><span>♧</span><div><strong>Mượn và gia hạn</strong><p>Mượn tối đa 5 cuốn trong 14 ngày, gia hạn khi sách chưa có người đặt.</p></div></article><article class="feature-card"><span>⌕</span><div><strong>Tra cứu tài liệu</strong><p>Tìm kiếm sách và kiểm tra tình trạng sẵn có trước khi ghé thăm.</p></div></article><article class="feature-card"><span>♡</span><div><strong>Không gian đọc</strong><p>Không gian yên tĩnh và thân thiện cho mọi lứa tuổi.</p></div></article></div><div class="notice">Độc giả cần có thẻ thư viện hợp lệ để mượn sách. Vui lòng liên hệ quầy thủ thư nếu cần hỗ trợ.</div></div></div></section>
+
+<section class="page" id="page-reader-about" data-page="reader-about"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button class="active" data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Về Mộc Thư</div><h2>Nơi những câu chuyện gặp nhau</h2><p>Mộc Thư là không gian đọc và học tập dành cho cộng đồng — nơi mỗi người có thể tự do khám phá tri thức, chia sẻ niềm yêu sách và tìm thấy cảm hứng trong những trang giấy.</p><div class="category-pills"><span>1.284 đầu sách</span><span>1.026 độc giả hoạt động</span><span>Không gian mở mỗi ngày</span></div><div class="notice">Giờ mở cửa: Thứ Hai — Thứ Bảy, 08:00–20:00 · Địa chỉ: 12 Đường Sách, Quận 1.</div></div></div></section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../../dùng-chung/chức%20n%C4%83ng/quy%E1%BB%81n-h%E1%BA%A1n.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/th%C3%A0nh-ph%E1%BA%A7n-d%C3%B9ng-chung.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/d%E1%BB%AF-li%E1%BB%87u-m%E1%BA%ABu.js"></script>
+  <script src="../chức năng/độc-giả.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/b%C3%A1o-c%C3%A1o.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/%C4%91i%E1%BB%81u-h%C6%B0%E1%BB%9Bng.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/kh%E1%BB%9Fi-%C4%91%E1%BB%99ng.js"></script>
+</body>
+</html>

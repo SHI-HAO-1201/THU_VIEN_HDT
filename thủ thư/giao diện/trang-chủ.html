@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f7f3">
+  <link rel="stylesheet" href="kho.css">
+  <link rel="stylesheet" href="../../dùng-chung/giao%20di%E1%BB%87n/giao-di%E1%BB%87n.css">
+  <title>Mộc Thư — Quản lý thư viện</title>
+</head>
+<body data-role="librarian">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <button class="mobile-menu" id="mobileMenuButton" aria-label="Mở menu">☰</button>
+        <div class="brand-mark">M</div>
+        <div>
+          <div class="brand-name">mộc thư</div>
+          <div class="brand-caption">Không gian tri thức</div>
+        </div>
+      </div>
+      <div class="mode-switch" aria-label="Vai trò hiện tại"><span class="mode-button active">Thủ thư</span></div>
+      <div class="top-actions">
+        <button class="button logout-button" id="logoutButton" type="button">Đăng xuất</button>
+        <button class="icon-button" aria-label="Thông báo" id="notificationButton">♧<span class="notification-dot"></span></button>
+        <div class="user-chip">
+          <div class="avatar" id="topAvatar">…</div>
+          <div class="user-details">
+            <div class="user-name" id="topUserName">Đang tải tài khoản…</div>
+            <div class="user-role" id="topUserRole">Thủ thư</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-label" id="sidebarLabel">Tổng quan</div>
+        <nav class="nav-list" id="sidebarNav" aria-label="Điều hướng"></nav>
+        <div class="sidebar-bottom">
+          <div class="help-card">
+            <strong>Cần hỗ trợ?</strong>
+            <p>Xem hướng dẫn sử dụng và các mẹo quản lý thư viện.</p>
+            <a href="#" id="helpLink">Trung tâm trợ giúp →</a>
+          </div>
+          <div class="sidebar-user">
+            <div class="avatar">AL</div>
+            <div><div class="user-name" id="sidebarUserName">Đang tải tài khoản…</div><div class="user-role" id="sidebarUserRole">Thủ thư · Cơ sở trung tâm</div></div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="page active" id="page-books" data-page="books">
+          <div class="page-heading">
+            <div><div class="eyebrow">Bộ sưu tập</div><h1>Quản lý đầu sách</h1><p class="page-subtitle">Danh mục tài liệu, bản sách và tình trạng trong thư viện.</p></div>
+            <div class="heading-actions"><button class="button" id="booksExport">↧ Xuất danh mục</button><button class="button primary" data-open-book>＋ Thêm đầu sách</button></div>
+          </div>
+          <div class="stats-grid">
+            <article class="card stat-card"><div class="stat-top"><span>Tổng đầu sách</span><span class="stat-icon">▤</span></div><div class="stat-number" id="booksCount">1,284</div><div class="stat-foot">Phân loại theo 18 thể loại</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Tổng bản sách</span><span class="stat-icon blue">▥</span></div><div class="stat-number">4,820</div><div class="stat-foot">Tại 3 khu vực lưu trữ</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Đang lưu hành</span><span class="stat-icon gold">⇄</span></div><div class="stat-number">3,642</div><div class="stat-foot">75,6% tổng số bản sách</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Cần bổ sung</span><span class="stat-icon red">!</span></div><div class="stat-number">7</div><div class="stat-foot"><span class="trend warn">Dưới mức tồn tối thiểu</span></div></article>
+          </div>
+          <div class="toolbar-row">
+            <div class="filter-group" id="bookFilters"><button class="filter-button active" data-filter="all">Tất cả</button><button class="filter-button" data-filter="available">Còn sách</button><button class="filter-button" data-filter="low">Sắp hết</button></div>
+            <label class="search-box"><span>⌕</span><input id="bookSearch" type="search" placeholder="Tìm tên sách, tác giả, mã sách..." aria-label="Tìm đầu sách"></label>
+          </div>
+          <article class="card table-card">
+            <div class="inventory-summary"><span>Đang hiển thị <strong id="visibleBookCount">5</strong> đầu sách</span><span>Tổng bản sách: <strong id="totalCopies">70</strong></span><span>Đang mượn: <strong>54</strong></span></div>
+            <div class="table-scroll"><table><thead><tr><th>Tên sách / Tác giả</th><th>Mã tài liệu</th><th>Thể loại</th><th>Trong kho</th><th>Tối thiểu</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="booksTable"></tbody></table></div>
+          </article>
+          <div class="footer-note">Mộc Thư · Danh mục đầu sách</div>
+        </section>
+
+<section class="page" id="page-library-cards" data-page="library-cards">
+  <div class="page-heading"><div><div class="eyebrow">Hồ sơ thư viện</div><h1>Mở / khóa thẻ thư viện</h1><p class="page-subtitle">Trạng thái thẻ quyết định quyền sử dụng dịch vụ thư viện; thẻ không phải tài khoản đăng nhập.</p></div></div>
+  <div class="card scaffold-note"><strong>Khung chức năng</strong><span>Danh sách và thao tác bên dưới chưa nối với dữ liệu SQLite. Tài khoản đăng nhập được quản lý riêng.</span></div>
+  <div class="toolbar-row"><label class="search-box"><span>⌕</span><input type="search" placeholder="Tìm mã thẻ hoặc tên độc giả..." aria-label="Tìm thẻ thư viện" disabled></label><button class="button primary" type="button" disabled title="Chức năng đang được dựng">＋ Cấp thẻ thư viện</button></div>
+  <article class="card table-card">
+    <div class="table-toolbar"><div><h2 class="card-title">Danh sách thẻ</h2><p class="card-subtitle">Mỗi độc giả có hồ sơ thẻ riêng với mã thẻ và trạng thái sử dụng.</p></div></div>
+    <div class="table-scroll"><table><thead><tr><th>Mã thẻ</th><th>Độc giả</th><th>Ngày cấp</th><th>Ngày hết hạn</th><th>Trạng thái thẻ</th><th>Thao tác</th></tr></thead><tbody>
+      <tr><td><strong>THE-0001</strong></td><td>Nguyễn Minh Anh</td><td>12/04/2025</td><td>12/04/2027</td><td><span class="badge">Đang mở</span></td><td><button class="button small" type="button" disabled>Khóa thẻ</button></td></tr>
+      <tr><td><strong>THE-0002</strong></td><td>Trần Hoàng Nam</td><td>06/03/2025</td><td>06/03/2027</td><td><span class="badge danger">Đã khóa</span></td><td><button class="button small soft" type="button" disabled>Mở thẻ</button></td></tr>
+      <tr><td><strong>THE-0003</strong></td><td>Lê Ngọc Hà</td><td>19/01/2024</td><td>19/01/2026</td><td><span class="badge warning">Hết hạn</span></td><td><button class="button small soft" type="button" disabled>Gia hạn</button></td></tr>
+    </tbody></table></div>
+  </article>
+  <div class="footer-note">Khóa thẻ ảnh hưởng quyền sử dụng dịch vụ thư viện, không khóa tài khoản đăng nhập.</div>
+</section>
+<section class="page" id="page-loans" data-page="loans">
+          <div class="page-heading"><div><div class="eyebrow">Lưu thông tài liệu</div><h1>Quản lý mượn &amp; trả</h1><p class="page-subtitle">Theo dõi phiếu mượn, ngày hẹn trả và trạng thái tài liệu.</p></div><div class="heading-actions"><button class="button" id="loansExport">↧ Xuất danh sách</button><button class="button primary" id="newLoanButton">＋ Tạo phiếu mượn</button></div></div>
+          <div class="stats-grid">
+            <article class="card stat-card"><div class="stat-top"><span>Phiếu đang mượn</span><span class="stat-icon blue">⇄</span></div><div class="stat-number">248</div><div class="stat-foot">Trong giới hạn cho phép</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Trả trong hôm nay</span><span class="stat-icon">↙</span></div><div class="stat-number">18</div><div class="stat-foot">Đã nhận lại 36 bản sách</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Sắp đến hạn</span><span class="stat-icon gold">◷</span></div><div class="stat-number">24</div><div class="stat-foot">Trong 3 ngày tới</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Quá hạn</span><span class="stat-icon red">!</span></div><div class="stat-number">12</div><div class="stat-foot">3 phiếu quá hạn trên 7 ngày</div></article>
+          </div>
+          <div class="toolbar-row"><div class="filter-group"><button class="filter-button active">Tất cả phiếu</button><button class="filter-button">Đang mượn</button><button class="filter-button">Sắp đến hạn</button><button class="filter-button">Quá hạn</button></div><label class="search-box"><span>⌕</span><input id="loanSearch" type="search" placeholder="Tìm độc giả, mã phiếu..."></label></div>
+          <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Mã phiếu</th><th>Độc giả</th><th>Ngày mượn</th><th>Hẹn trả</th><th>Số cuốn</th><th>Tình trạng</th><th>Thao tác</th></tr></thead>
+            <tbody id="loansTable">
+              <tr><td><strong>PM-2025-384</strong></td><td>Nguyễn Minh Anh</td><td>13/11/2025</td><td>27/11/2025</td><td>2 cuốn</td><td><span class="badge">Đang mượn</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
+              <tr><td><strong>PM-2025-383</strong></td><td>Trần Hoàng Nam</td><td>01/11/2025</td><td>15/11/2025</td><td>1 cuốn</td><td><span class="badge warning">Sắp đến hạn</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
+              <tr><td><strong>PM-2025-379</strong></td><td>Lê Ngọc Hà</td><td>24/10/2025</td><td>07/11/2025</td><td>3 cuốn</td><td><span class="badge danger">Quá hạn 6 ngày</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
+              <tr><td><strong>PM-2025-376</strong></td><td>Phạm Gia Bảo</td><td>20/10/2025</td><td>03/11/2025</td><td>2 cuốn</td><td><span class="badge danger">Quá hạn 10 ngày</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
+              <tr><td><strong>PM-2025-375</strong></td><td>Đỗ Thảo Vy</td><td>29/10/2025</td><td>12/11/2025</td><td>1 cuốn</td><td><span class="badge warning">Sắp đến hạn</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
+            </tbody></table></div></article>
+          <div class="footer-note">Mộc Thư · Phiếu mượn và trả tài liệu</div>
+        </section>
+
+<section class="page" id="page-readers" data-page="readers">
+          <div class="page-heading"><div><div class="eyebrow">Bạn đọc</div><h1>Quản lý độc giả</h1><p class="page-subtitle">Thông tin tài khoản, thẻ thư viện và lịch sử hoạt động.</p></div><div class="heading-actions"><button class="button" id="readersExport">↧ Xuất danh sách</button><button class="button primary" id="newReaderButton">＋ Thêm độc giả</button></div></div>
+          <div class="stats-grid">
+            <article class="card stat-card"><div class="stat-top"><span>Tổng độc giả</span><span class="stat-icon">♙</span></div><div class="stat-number">1,248</div><div class="stat-foot">Tất cả trạng thái thẻ</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Đang hoạt động</span><span class="stat-icon blue">✓</span></div><div class="stat-number">1,026</div><div class="stat-foot">Thẻ còn hiệu lực</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Đăng ký mới tháng này</span><span class="stat-icon gold">＋</span></div><div class="stat-number">48</div><div class="stat-foot"><span class="trend">↗ 8,2%</span> so với tháng trước</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Tài khoản cần lưu ý</span><span class="stat-icon red">!</span></div><div class="stat-number">12</div><div class="stat-foot">Có phiếu mượn quá hạn</div></article>
+          </div>
+          <div class="toolbar-row"><div class="filter-group"><button class="filter-button active">Tất cả</button><button class="filter-button">Đang hoạt động</button><button class="filter-button">Thẻ hết hạn</button></div><label class="search-box"><span>⌕</span><input type="search" placeholder="Tìm tên, mã độc giả, email..."></label></div>
+          <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Mã độc giả</th><th>Họ và tên</th><th>Liên hệ</th><th>Ngày tham gia</th><th>Đang mượn</th><th>Trạng thái</th></tr></thead><tbody>
+            <tr><td><strong>DG-00241</strong></td><td>Nguyễn Minh Anh</td><td>minhanh@email.com</td><td>12/04/2024</td><td>2 cuốn</td><td><span class="badge">Hoạt động</span></td></tr>
+            <tr><td><strong>DG-00239</strong></td><td>Trần Hoàng Nam</td><td>hoangnam@email.com</td><td>06/03/2024</td><td>1 cuốn</td><td><span class="badge">Hoạt động</span></td></tr>
+            <tr><td><strong>DG-00235</strong></td><td>Lê Ngọc Hà</td><td>ngocha@email.com</td><td>19/01/2024</td><td>3 cuốn</td><td><span class="badge warning">Có sách quá hạn</span></td></tr>
+            <tr><td><strong>DG-00231</strong></td><td>Phạm Gia Bảo</td><td>giabao@email.com</td><td>22/11/2023</td><td>0 cuốn</td><td><span class="badge">Hoạt động</span></td></tr>
+          </tbody></table></div></article>
+          <div class="footer-note">Mộc Thư · Hồ sơ độc giả</div>
+        </section>
+
+<section class="page" id="page-warehouse" data-page="warehouse">
+          <div class="page-heading" id="warehouse-overview"><div><div class="eyebrow">Nghiệp vụ dành cho thủ thư</div><h1>Kho lưu trữ</h1><p class="page-subtitle">Kiểm soát số lượng, chất lượng tài liệu và luân chuyển kho.</p></div><div class="heading-actions"><button class="button" id="warehouseExport">↧ Xuất tồn kho</button><button class="button primary" id="newReceiptButton">＋ Lập phiếu nhập</button></div></div>
+          <div class="warehouse-banner"><div><strong>◇ &nbsp;Kho đang hoạt động bình thường</strong><p>Cập nhật kiểm kê gần nhất: 10/11/2025 · 2 khu vực lưu trữ · 1 khu vực sách thanh lý</p></div><span class="warehouse-tag">Thủ thư phụ trách</span></div>
+          <div class="stats-grid">
+            <article class="card stat-card"><div class="stat-top"><span>Tổng bản trong kho</span><span class="stat-icon">▥</span></div><div class="stat-number" id="warehouseTotal">4.820</div><div class="stat-foot">Thuộc 1.284 đầu sách</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Sẵn sàng cho mượn</span><span class="stat-icon blue">✓</span></div><div class="stat-number">3.642</div><div class="stat-foot">Đang mượn: 248 bản</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Sách tồn lâu</span><span class="stat-icon gold">◷</span></div><div class="stat-number">86</div><div class="stat-foot">Không phát sinh mượn trong 12 tháng</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Cần nhập bổ sung</span><span class="stat-icon red">!</span></div><div class="stat-number">7</div><div class="stat-foot"><span class="trend warn">Dưới mức tồn tối thiểu</span></div></article>
+          </div>
+          <div class="toolbar-row" id="warehouse-conditions"><div class="filter-group" id="warehouseFilters"><button class="filter-button active" data-wh-filter="all">Tất cả tài liệu</button><button class="filter-button" data-wh-filter="low">Sắp hết</button><button class="filter-button" data-wh-filter="stale">Tồn lâu · thanh lý</button><button class="filter-button" data-wh-filter="audit">Cần kiểm kê</button></div><label class="search-box"><span>⌕</span><input id="warehouseSearch" type="search" placeholder="Tìm sách, vị trí, mã bản sách..."></label></div>
+          <article class="card table-card" id="warehouse-stock">
+            <div class="inventory-summary"><span>Vị trí: <strong>Tất cả khu vực</strong></span><span>Số bản đang mượn: <strong>248</strong></span><span>Bản hỏng/chờ xử lý: <strong>17</strong></span></div>
+            <div class="table-scroll"><table><thead><tr><th>Tài liệu</th><th>Vị trí lưu</th><th>Tổng bản</th><th>Đang mượn</th><th>Sẵn có</th><th>Chất lượng</th><th>Đề xuất</th></tr></thead><tbody id="warehouseTable">
+              <tr><td><div class="book-cell"><span class="book-cover">N</span><span><span class="book-title">Nhà giả kim</span><span class="book-author">VH-00124 · 1 đầu sách</span></span></div></td><td>A-02-14</td><td>25</td><td>18</td><td><strong>7</strong></td><td><span class="badge">Tốt</span></td><td><span class="badge">Ổn định</span></td></tr>
+              <tr><td><div class="book-cell"><span class="book-cover ochre">T</span><span><span class="book-title">Tuổi trẻ đáng giá bao nhiêu</span><span class="book-author">KN-00087 · 1 đầu sách</span></span></div></td><td>B-01-08</td><td>20</td><td>14</td><td><strong>6</strong></td><td><span class="badge">Tốt</span></td><td><span class="badge warning">Cân nhắc nhập</span></td></tr>
+              <tr><td><div class="book-cell"><span class="book-cover rose">Đ</span><span><span class="book-title">Đắc nhân tâm</span><span class="book-author">KN-00031 · 1 đầu sách</span></span></div></td><td>B-03-02</td><td>3</td><td>2</td><td><strong>1</strong></td><td><span class="badge warning">Cũ · 1 bản</span></td><td><span class="badge danger">Cần nhập</span></td></tr>
+              <tr><td><div class="book-cell"><span class="book-cover blue-cover">R</span><span><span class="book-title">Rừng Na Uy</span><span class="book-author">VH-00209 · 1 đầu sách</span></span></div></td><td>A-04-22</td><td>18</td><td>11</td><td><strong>7</strong></td><td><span class="badge">Tốt</span></td><td><span class="badge">Ổn định</span></td></tr>
+              <tr><td><div class="book-cell"><span class="book-cover">S</span><span><span class="book-title">Sống xanh mỗi ngày</span><span class="book-author">MT-00064 · 1 đầu sách</span></span></div></td><td>C-02-01</td><td>4</td><td>0</td><td><strong>4</strong></td><td><span class="badge neutral">Tồn trên 12 tháng</span></td><td><span class="badge warning">Đề xuất thanh lý</span></td></tr>
+            </tbody></table></div>
+          </article>
+          <div class="warehouse-grid">
+            <article class="card" id="warehouse-movements"><div class="card-header"><div><h2 class="card-title">Phiếu nhập / xuất gần đây</h2><p class="card-subtitle">Lịch sử luân chuyển tài liệu trong kho</p></div><button class="text-link" id="receiptsExport">Xuất phiếu →</button></div><div class="table-scroll" style="padding-top:10px"><table><thead><tr><th>Mã phiếu</th><th>Loại phiếu</th><th>Ngày lập</th><th>Đơn vị / Người nhận</th><th>Số bản</th><th>Trạng thái</th></tr></thead><tbody id="receiptsTable">
+              <tr><td><strong>PN-2025-084</strong></td><td><span class="badge">Nhập kho</span></td><td>13/11/2025</td><td>NXB Trẻ</td><td>24</td><td><span class="badge">Đã duyệt</span></td></tr>
+              <tr><td><strong>PX-2025-031</strong></td><td><span class="badge neutral">Xuất mượn</span></td><td>13/11/2025</td><td>Nguyễn Minh Anh</td><td>2</td><td><span class="badge">Hoàn tất</span></td></tr>
+              <tr><td><strong>PX-2025-030</strong></td><td><span class="badge warning">Thanh lý</span></td><td>11/11/2025</td><td>Kho sách cũ</td><td>8</td><td><span class="badge">Đã duyệt</span></td></tr>
+            </tbody></table></div></article>
+            <article class="card" id="warehouse-shelves"><div class="card-header"><div><h2 class="card-title">Phân bổ theo khu vực</h2><p class="card-subtitle">Vị trí và tình hình hiện tại</p></div></div><div class="shelf-list">
+              <div class="shelf-row"><div><div class="shelf-name">Khu A · Văn học</div><div class="shelf-description">Tầng 1 · 42 kệ</div></div><span class="shelf-count">1.862 bản</span></div>
+              <div class="shelf-row"><div><div class="shelf-name">Khu B · Kỹ năng &amp; xã hội</div><div class="shelf-description">Tầng 2 · 31 kệ</div></div><span class="shelf-count">1.534 bản</span></div>
+              <div class="shelf-row"><div><div class="shelf-name">Khu C · Thiếu nhi</div><div class="shelf-description">Tầng 1 · 18 kệ</div></div><span class="shelf-count">1.338 bản</span></div>
+            </div></article>
+          </div>
+          <div class="footer-note">Mộc Thư · Kho lưu trữ do thủ thư quản lý</div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="presentation">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <form id="bookForm">
+        <div class="modal-header"><div><h2 id="modalTitle">Thêm đầu sách</h2><p>Điền thông tin tài liệu để cập nhật danh mục thư viện.</p></div><button class="close-button" type="button" data-close-modal aria-label="Đóng">×</button></div>
+        <div class="modal-body">
+          <div class="field full"><label for="bookName">Tên sách *</label><input id="bookName" name="name" required maxlength="120" placeholder="Ví dụ: Nhà giả kim"></div>
+          <div class="field"><label for="bookAuthor">Tác giả *</label><input id="bookAuthor" name="author" required maxlength="100" placeholder="Tên tác giả"></div>
+          <div class="field"><label for="bookCode">Mã tài liệu *</label><input id="bookCode" name="code" required maxlength="20" placeholder="VH-00124"></div>
+          <div class="field"><label for="bookCategory">Thể loại</label><select id="bookCategory" name="category"><option>Văn học</option><option>Kỹ năng sống</option><option>Khoa học</option><option>Thiếu nhi</option><option>Lịch sử</option><option>Khác</option></select></div>
+          <div class="field"><label for="bookStock">Số lượng trong kho *</label><input id="bookStock" name="stock" type="number" min="0" step="1" value="1" required></div>
+          <div class="field"><label for="bookMinimum">Mức tồn tối thiểu</label><input id="bookMinimum" name="minimum" type="number" min="0" step="1" value="3"></div>
+          <div class="field"><label for="bookLocation">Vị trí lưu trữ</label><input id="bookLocation" name="location" maxlength="20" placeholder="A-02-14"></div>
+          <div class="field full"><label for="bookDescription">Mô tả ngắn</label><textarea id="bookDescription" name="description" maxlength="300" placeholder="Thông tin bổ sung về sách..."></textarea></div>
+        </div>
+        <div class="modal-footer"><button class="button" type="button" data-close-modal>Hủy</button><button class="button primary" type="submit">Lưu đầu sách</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../../dùng-chung/chức%20n%C4%83ng/quy%E1%BB%81n-h%E1%BA%A1n.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/th%C3%A0nh-ph%E1%BA%A7n-d%C3%B9ng-chung.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/d%E1%BB%AF-li%E1%BB%87u-m%E1%BA%ABu.js"></script>
+  <script src="../chức năng/quản-lý-sách.js"></script>
+  <script src="../chức năng/quản-lý-kho.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/b%C3%A1o-c%C3%A1o.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/%C4%91i%E1%BB%81u-h%C6%B0%E1%BB%9Bng.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/kh%E1%BB%9Fi-%C4%91%E1%BB%99ng.js"></script>
+</body>
+</html>

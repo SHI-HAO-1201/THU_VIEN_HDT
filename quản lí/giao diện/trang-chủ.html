@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f7f3">
+  <link rel="stylesheet" href="trang-chu.css">
+  <link rel="stylesheet" href="../../dùng-chung/giao%20di%E1%BB%87n/giao-di%E1%BB%87n.css">
+  <title>Mộc Thư — Quản lý thư viện</title>
+</head>
+<body data-role="admin">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <button class="mobile-menu" id="mobileMenuButton" aria-label="Mở menu">☰</button>
+        <div class="brand-mark">M</div>
+        <div>
+          <div class="brand-name">mộc thư</div>
+          <div class="brand-caption">Không gian tri thức</div>
+        </div>
+      </div>
+      <div class="mode-switch" aria-label="Vai trò hiện tại"><span class="mode-button active">Quản lí</span></div>
+      <div class="top-actions">
+        <button class="button logout-button" id="logoutButton" type="button">Đăng xuất</button>
+        <button class="icon-button" aria-label="Thông báo" id="notificationButton">♧<span class="notification-dot"></span></button>
+        <div class="user-chip">
+          <div class="avatar" id="topAvatar">…</div>
+          <div class="user-details">
+            <div class="user-name" id="topUserName">Đang tải tài khoản…</div>
+            <div class="user-role" id="topUserRole">Quản lí</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-label" id="sidebarLabel">Tổng quan</div>
+        <nav class="nav-list" id="sidebarNav" aria-label="Điều hướng"></nav>
+        <div class="sidebar-bottom">
+          <div class="help-card">
+            <strong>Cần hỗ trợ?</strong>
+            <p>Xem hướng dẫn sử dụng và các mẹo quản lý thư viện.</p>
+            <a href="#" id="helpLink">Trung tâm trợ giúp →</a>
+          </div>
+          <div class="sidebar-user">
+            <div class="avatar">AL</div>
+            <div><div class="user-name" id="sidebarUserName">Đang tải tài khoản…</div><div class="user-role" id="sidebarUserRole">Quản trị hệ thống</div></div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="page active" id="page-dashboard" data-page="dashboard">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow">Thứ Năm, ngày 13 tháng 11</div>
+              <h1>Chào buổi sáng, An <span aria-hidden="true">☀</span></h1>
+              <p class="page-subtitle">Đây là tình hình thư viện của bạn hôm nay.</p>
+            </div>
+            <div class="heading-actions">
+              <button class="button" id="dashboardExport">↧ <span>Xuất báo cáo</span></button>
+              <button class="button primary" data-go="accounts">＋ <span>Tạo tài khoản</span></button>
+            </div>
+          </div>
+
+          <div class="welcome-banner">
+            <div class="welcome-copy">
+              <div class="eyebrow">Bảng điều khiển thư viện</div>
+              <h2>Mỗi cuốn sách mở ra<br>một thế giới mới.</h2>
+              <p>Theo dõi bộ sưu tập, hoạt động mượn trả và những điều đang diễn ra tại thư viện.</p>
+              <button class="button soft" data-go="accounts">Quản lý tài khoản <span>→</span></button>
+            </div>
+            <div class="welcome-meta"><div><strong id="bannerBookCount">1,284</strong><span>đầu sách</span></div><div><strong>96%</strong><span>độc giả hài lòng</span></div></div>
+            <div class="welcome-art" aria-hidden="true">❧</div>
+          </div>
+
+          <div class="stats-grid">
+            <article class="card stat-card">
+              <div class="stat-top"><span>Tổng số đầu sách</span><span class="stat-icon">▤</span></div>
+              <div class="stat-number" id="statTitles">1,284</div>
+              <div class="stat-foot"><span class="trend">↗ 4.8%</span> so với tháng trước</div>
+            </article>
+            <article class="card stat-card">
+              <div class="stat-top"><span>Bản sách đang lưu hành</span><span class="stat-icon blue">⇄</span></div>
+              <div class="stat-number">3,642</div>
+              <div class="stat-foot"><span class="trend">↗ 12.3%</span> so với tháng trước</div>
+            </article>
+            <article class="card stat-card">
+              <div class="stat-top"><span>Đang được mượn</span><span class="stat-icon gold">⌁</span></div>
+              <div class="stat-number">248</div>
+              <div class="stat-foot"><span class="trend warn">18 phiếu</span> cần xử lý hôm nay</div>
+            </article>
+            <article class="card stat-card">
+              <div class="stat-top"><span>Quá hạn trả</span><span class="stat-icon red">◷</span></div>
+              <div class="stat-number">12</div>
+              <div class="stat-foot"><span class="trend warn">Cần nhắc nhở</span> độc giả</div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="card">
+              <div class="card-header">
+                <div><h2 class="card-title">Hoạt động mượn &amp; trả</h2><p class="card-subtitle">Tổng lượt giao dịch trong 7 tháng gần nhất</p></div>
+                <div class="chart-legend"><span class="legend-dot"></span>Lượt mượn</div>
+              </div>
+              <div class="chart-wrap">
+                <svg class="chart" viewBox="0 0 620 215" role="img" aria-label="Biểu đồ lượt mượn sách theo tháng">
+                  <defs><linearGradient id="areaFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#759579" stop-opacity=".2"/><stop offset="100%" stop-color="#759579" stop-opacity="0"/></linearGradient></defs>
+                  <line class="chart-gridline" x1="42" y1="28" x2="604" y2="28"/><line class="chart-gridline" x1="42" y1="72" x2="604" y2="72"/><line class="chart-gridline" x1="42" y1="116" x2="604" y2="116"/><line class="chart-gridline" x1="42" y1="160" x2="604" y2="160"/>
+                  <text class="chart-label" x="5" y="31">400</text><text class="chart-label" x="5" y="75">300</text><text class="chart-label" x="5" y="119">200</text><text class="chart-label" x="5" y="163">100</text>
+                  <path class="chart-area" d="M50 133 C78 122 95 111 130 116 S190 86 220 99 S282 105 310 78 S372 92 400 72 S460 89 490 56 S555 68 594 42 L594 177 L50 177 Z"/>
+                  <path class="chart-line" d="M50 133 C78 122 95 111 130 116 S190 86 220 99 S282 105 310 78 S372 92 400 72 S460 89 490 56 S555 68 594 42"/>
+                  <circle class="chart-point" cx="50" cy="133" r="4"/><circle class="chart-point" cx="130" cy="116" r="4"/><circle class="chart-point" cx="220" cy="99" r="4"/><circle class="chart-point" cx="310" cy="78" r="4"/><circle class="chart-point" cx="400" cy="72" r="4"/><circle class="chart-point" cx="490" cy="56" r="4"/><circle class="chart-point" cx="594" cy="42" r="4"/>
+                  <text class="chart-label" x="39" y="198">T5</text><text class="chart-label" x="119" y="198">T6</text><text class="chart-label" x="209" y="198">T7</text><text class="chart-label" x="299" y="198">T8</text><text class="chart-label" x="389" y="198">T9</text><text class="chart-label" x="479" y="198">T10</text><text class="chart-label" x="580" y="198">T11</text>
+                </svg>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-header"><div><h2 class="card-title">Hoạt động gần đây</h2><p class="card-subtitle">Cập nhật mới nhất trong thư viện</p></div><button class="text-link" data-go="reports">Xem tất cả</button></div>
+              <div class="activity-list">
+                <div class="activity-item"><div class="activity-icon">↗</div><div class="activity-copy"><strong>Nguyễn Minh Anh đã mượn sách</strong><span>Nhà giả kim · 14 ngày</span></div><span class="activity-time">09:42</span></div>
+                <div class="activity-item"><div class="activity-icon gold">＋</div><div class="activity-copy"><strong>Phiếu nhập PN-2025-084</strong><span>24 bản sách · NXB Trẻ</span></div><span class="activity-time">09:10</span></div>
+                <div class="activity-item"><div class="activity-icon blue">↙</div><div class="activity-copy"><strong>Trần Hoàng Nam đã trả sách</strong><span>Tuổi trẻ đáng giá bao nhiêu</span></div><span class="activity-time">08:56</span></div>
+                <div class="activity-item"><div class="activity-icon gold">◷</div><div class="activity-copy"><strong>Nhắc trả sách sắp đến hạn</strong><span>4 phiếu mượn trong 2 ngày</span></div><span class="activity-time">08:30</span></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="content-grid">
+            <article class="card table-card">
+              <div class="table-toolbar"><h2 class="card-title">Đầu sách được mượn nhiều</h2><span class="text-link">Danh mục minh họa</span></div>
+              <div class="table-scroll">
+                <table><thead><tr><th>Tên sách</th><th>Mã sách</th><th>Đang mượn</th><th>Tình trạng</th></tr></thead>
+                  <tbody>
+                    <tr><td><div class="book-cell"><span class="book-cover">N</span><span><span class="book-title">Nhà giả kim</span><span class="book-author">Paulo Coelho</span></span></div></td><td>VH-00124</td><td>18 / 25</td><td><span class="badge">Đang lưu hành</span></td></tr>
+                    <tr><td><div class="book-cell"><span class="book-cover ochre">T</span><span><span class="book-title">Tuổi trẻ đáng giá bao nhiêu</span><span class="book-author">Rosie Nguyễn</span></span></div></td><td>KN-00087</td><td>14 / 20</td><td><span class="badge warning">Sắp hết</span></td></tr>
+                    <tr><td><div class="book-cell"><span class="book-cover blue-cover">R</span><span><span class="book-title">Rừng Na Uy</span><span class="book-author">Haruki Murakami</span></span></div></td><td>VH-00209</td><td>11 / 18</td><td><span class="badge">Đang lưu hành</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+            <article class="card">
+              <div class="table-toolbar"><h2 class="card-title">Tình hình thư viện</h2><span class="badge">Hôm nay</span></div>
+              <div class="quick-list">
+                <div class="quick-item"><span class="quick-item-title">Phiếu mượn đang mở</span><span class="quick-item-value">248</span></div>
+                <div class="quick-item"><span class="quick-item-title">Đã trả hôm nay</span><span class="quick-item-value">36</span></div>
+                <div class="quick-item"><span class="quick-item-title">Độc giả đang hoạt động</span><span class="quick-item-value">1.026</span></div>
+              </div>
+              <div class="stock-alert"><span>◇</span><div><strong>7 đầu sách sắp hết hàng</strong><p>Kiểm tra kho để lên phiếu nhập bổ sung.</p></div></div>
+            </article>
+          </div>
+          <div class="footer-note">Mộc Thư · Hệ thống quản lý thư viện · Dữ liệu minh họa cho giao diện mẫu</div>
+        </section>
+
+<section class="page" id="page-accounts" data-page="accounts">
+  <div class="page-heading"><div><div class="eyebrow">Quản trị hệ thống</div><h1>Tài khoản thủ thư</h1><p class="page-subtitle">Tạo và quản lý tài khoản dùng để đăng nhập của nhân viên thủ thư.</p></div></div>
+  <div class="account-layout">
+    <form class="card account-create" id="userCreateForm">
+      <div class="card-header"><div><h2 class="card-title">Tạo tài khoản thủ thư</h2><p class="card-subtitle">Tài khoản đăng nhập, tách biệt với thẻ thư viện</p></div></div>
+      <div class="account-fields">
+        <label class="field"><span>Họ và tên</span><input name="fullName" required maxlength="100"></label>
+        <label class="field"><span>Tên đăng nhập</span><input name="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]+"></label>
+        <label class="field"><span>Mật khẩu</span><input name="password" type="password" required minlength="10" autocomplete="new-password"></label>
+        <input type="hidden" name="role" value="librarian">
+        <button class="button primary" type="submit">Tạo tài khoản</button>
+      </div>
+    </form>
+    <article class="card table-card account-list">
+      <div class="table-toolbar"><div><h2 class="card-title">Tài khoản thủ thư</h2><p class="card-subtitle">Khóa tài khoản sẽ chặn đăng nhập, không làm thay đổi thẻ thư viện.</p></div><button class="text-link" id="reloadUsers" type="button">Làm mới</button></div>
+      <div class="table-scroll"><table><thead><tr><th>Người dùng</th><th>Tên đăng nhập</th><th>Loại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="accountsTable"><tr><td colspan="5" class="table-empty">Đang tải tài khoản…</td></tr></tbody></table></div>
+    </article>
+  </div>
+</section>
+
+<section class="page" id="page-library-cards" data-page="library-cards">
+  <div class="page-heading"><div><div class="eyebrow">Hồ sơ thư viện</div><h1>Mở / khóa thẻ thư viện</h1><p class="page-subtitle">Trạng thái thẻ quyết định quyền sử dụng dịch vụ thư viện; thẻ không phải tài khoản đăng nhập.</p></div></div>
+  <div class="card scaffold-note"><strong>Khung chức năng</strong><span>Danh sách và thao tác bên dưới chưa nối với dữ liệu SQLite. Tài khoản đăng nhập được quản lý riêng.</span></div>
+  <div class="toolbar-row"><label class="search-box"><span>⌕</span><input type="search" placeholder="Tìm mã thẻ hoặc tên độc giả..." aria-label="Tìm thẻ thư viện" disabled></label><button class="button primary" type="button" disabled title="Chức năng đang được dựng">＋ Cấp thẻ thư viện</button></div>
+  <article class="card table-card">
+    <div class="table-toolbar"><div><h2 class="card-title">Danh sách thẻ</h2><p class="card-subtitle">Mỗi độc giả có hồ sơ thẻ riêng với mã thẻ và trạng thái sử dụng.</p></div></div>
+    <div class="table-scroll"><table><thead><tr><th>Mã thẻ</th><th>Độc giả</th><th>Ngày cấp</th><th>Ngày hết hạn</th><th>Trạng thái thẻ</th><th>Thao tác</th></tr></thead><tbody>
+      <tr><td><strong>THE-0001</strong></td><td>Nguyễn Minh Anh</td><td>12/04/2025</td><td>12/04/2027</td><td><span class="badge">Đang mở</span></td><td><button class="button small" type="button" disabled>Khóa thẻ</button></td></tr>
+      <tr><td><strong>THE-0002</strong></td><td>Trần Hoàng Nam</td><td>06/03/2025</td><td>06/03/2027</td><td><span class="badge danger">Đã khóa</span></td><td><button class="button small soft" type="button" disabled>Mở thẻ</button></td></tr>
+      <tr><td><strong>THE-0003</strong></td><td>Lê Ngọc Hà</td><td>19/01/2024</td><td>19/01/2026</td><td><span class="badge warning">Hết hạn</span></td><td><button class="button small soft" type="button" disabled>Gia hạn</button></td></tr>
+    </tbody></table></div>
+  </article>
+  <div class="footer-note">Khóa thẻ ảnh hưởng quyền sử dụng dịch vụ thư viện, không khóa tài khoản đăng nhập.</div>
+</section>
+<section class="page" id="page-reports" data-page="reports">
+          <div class="page-heading"><div><div class="eyebrow">Số liệu &amp; phân tích</div><h1>Báo cáo thư viện</h1><p class="page-subtitle">Tổng hợp hoạt động mượn trả, số lượng sách và doanh thu tiền phạt.</p></div><div class="heading-actions"><button class="button primary" id="reportsExport">↧ Xuất báo cáo CSV</button></div></div>
+          <div class="toolbar-row"><div class="filter-group"><button class="filter-button active" data-report-period="month">Tháng này</button><button class="filter-button" data-report-period="quarter">Quý này</button><button class="filter-button" data-report-period="year">Năm nay</button></div><select class="select-quiet" aria-label="Chọn năm"><option>2025</option><option>2024</option></select></div>
+          <div class="stats-grid">
+            <article class="card stat-card"><div class="stat-top"><span>Lượt mượn trong kỳ</span><span class="stat-icon blue">⇄</span></div><div class="stat-number">1.486</div><div class="stat-foot"><span class="trend">↗ 12,3%</span> so với kỳ trước</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Sách đã nhập</span><span class="stat-icon">＋</span></div><div class="stat-number">326</div><div class="stat-foot">Từ 8 nhà cung cấp</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Tiền phạt đã thu</span><span class="stat-icon gold">₫</span></div><div class="stat-number">2,45 tr</div><div class="stat-foot">Từ 46 lượt thanh toán</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Tỷ lệ trả đúng hạn</span><span class="stat-icon">✓</span></div><div class="stat-number">94,8%</div><div class="stat-foot"><span class="trend">↗ 2,1%</span> so với kỳ trước</div></article>
+          </div>
+          <div class="dashboard-grid">
+            <article class="card"><div class="card-header"><div><h2 class="card-title">Tổng quan hoạt động</h2><p class="card-subtitle">Lượt mượn sách theo tháng</p></div><span class="badge">2025</span></div><div class="chart-wrap">
+              <svg class="chart" viewBox="0 0 620 215" role="img" aria-label="Biểu đồ tổng quan hoạt động"><defs><linearGradient id="reportFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#759579" stop-opacity=".2"/><stop offset="100%" stop-color="#759579" stop-opacity="0"/></linearGradient></defs>
+                <line class="chart-gridline" x1="42" y1="28" x2="604" y2="28"/><line class="chart-gridline" x1="42" y1="72" x2="604" y2="72"/><line class="chart-gridline" x1="42" y1="116" x2="604" y2="116"/><line class="chart-gridline" x1="42" y1="160" x2="604" y2="160"/>
+                <text class="chart-label" x="5" y="31">400</text><text class="chart-label" x="5" y="75">300</text><text class="chart-label" x="5" y="119">200</text><text class="chart-label" x="5" y="163">100</text>
+                <path d="M50 133 C78 122 95 111 130 116 S190 86 220 99 S282 105 310 78 S372 92 400 72 S460 89 490 56 S555 68 594 42 L594 177 L50 177 Z" fill="url(#reportFill)"/>
+                <path class="chart-line" d="M50 133 C78 122 95 111 130 116 S190 86 220 99 S282 105 310 78 S372 92 400 72 S460 89 490 56 S555 68 594 42"/>
+                <text class="chart-label" x="40" y="198">T5</text><text class="chart-label" x="135" y="198">T6</text><text class="chart-label" x="230" y="198">T7</text><text class="chart-label" x="325" y="198">T8</text><text class="chart-label" x="420" y="198">T9</text><text class="chart-label" x="515" y="198">T10</text><text class="chart-label" x="585" y="198">T11</text>
+              </svg></div></article>
+            <article class="card"><div class="card-header"><div><h2 class="card-title">Cơ cấu tài liệu</h2><p class="card-subtitle">Theo thể loại sách</p></div></div><div class="quick-list">
+              <div class="quick-item"><span class="quick-item-title">Văn học</span><span class="quick-item-value">36% · 1.735</span></div><div class="quick-item"><span class="quick-item-title">Kỹ năng sống</span><span class="quick-item-value">24% · 1.157</span></div><div class="quick-item"><span class="quick-item-title">Khoa học &amp; kỹ thuật</span><span class="quick-item-value">18% · 868</span></div><div class="quick-item"><span class="quick-item-title">Thiếu nhi</span><span class="quick-item-value">14% · 675</span></div><div class="quick-item"><span class="quick-item-title">Khác</span><span class="quick-item-value">8% · 385</span></div>
+            </div></article>
+          </div>
+          <article class="card table-card" style="margin-top:16px"><div class="table-toolbar"><h2 class="card-title">Tổng hợp nhập xuất kho</h2><span class="card-subtitle">Tháng 11 năm 2025</span></div><div class="table-scroll"><table><thead><tr><th>Chỉ tiêu</th><th>Số lượng</th><th>Giá trị ước tính</th><th>Ghi chú</th></tr></thead><tbody><tr><td><strong>Tồn đầu kỳ</strong></td><td>4.494 bản</td><td>—</td><td>Ngày 01/11/2025</td></tr><tr><td><strong>Nhập trong kỳ</strong></td><td>326 bản</td><td>38.600.000 ₫</td><td>8 phiếu nhập</td></tr><tr><td><strong>Xuất cho mượn</strong></td><td>1.486 lượt</td><td>—</td><td>1.102 độc giả</td></tr><tr><td><strong>Tồn cuối kỳ</strong></td><td>4.820 bản</td><td>—</td><td>Kiểm kê gần nhất 10/11</td></tr></tbody></table></div></article>
+          <div class="footer-note">Mộc Thư · Báo cáo dùng số liệu minh họa</div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../../dùng-chung/chức%20n%C4%83ng/quy%E1%BB%81n-h%E1%BA%A1n.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/th%C3%A0nh-ph%E1%BA%A7n-d%C3%B9ng-chung.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/d%E1%BB%AF-li%E1%BB%87u-m%E1%BA%ABu.js"></script>
+  <script src="../chức năng/quản-lý-tài-khoản.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/b%C3%A1o-c%C3%A1o.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/%C4%91i%E1%BB%81u-h%C6%B0%E1%BB%9Bng.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/kh%E1%BB%9Fi-%C4%91%E1%BB%99ng.js"></script>
+</body>
+</html>

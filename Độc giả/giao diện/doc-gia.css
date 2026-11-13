@@ -1,0 +1,81 @@
+.reader-nav { display: flex; gap: 7px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 2px; }
+
+.reader-nav button { flex: 0 0 auto; padding: 8px 12px; border: 1px solid transparent; border-radius: 9px; color: #718078; background: transparent; font-size: 11px; }
+
+.reader-nav button.active { border-color: #dce7dc; color: var(--green-dark); background: #edf4ed; font-weight: 700; }
+
+.reader-hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 263px;
+      overflow: hidden;
+      padding: 38px;
+      border: 1px solid #e5ebe3;
+      border-radius: 19px;
+      background: linear-gradient(115deg, #eaf1e9 0%, #f1f4ec 57%, #f6efe3 100%);
+    }
+
+.reader-hero-copy { position: relative; z-index: 2; max-width: 485px; }
+
+.reader-hero-copy .eyebrow { color: #7c916f; }
+
+.reader-hero h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(27px, 4vw, 39px); font-weight: 500; line-height: 1.12; }
+
+.reader-hero p { max-width: 360px; margin: 12px 0 18px; color: #68766d; font-size: 12px; }
+
+.hero-books { position: absolute; right: 8%; bottom: -16px; display: flex; align-items: flex-end; gap: 9px; transform: rotate(-2deg); }
+
+.hero-book { display: grid; width: 90px; height: 144px; place-items: center; padding: 12px; border-radius: 4px 9px 9px 4px; color: rgba(255,255,255,.95); background: #849781; box-shadow: inset 6px 0 rgba(0,0,0,.11), 0 12px 20px rgba(42,57,45,.13); font-family: Georgia, serif; font-size: 13px; text-align: center; }
+
+.hero-book:nth-child(2) { width: 102px; height: 173px; color: #fffaf0; background: #bb9265; transform: rotate(4deg); }
+
+.hero-book:nth-child(3) { width: 85px; height: 132px; background: #a96f68; transform: rotate(7deg); }
+
+.book-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+
+.reader-book-card { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow); }
+
+.reader-book-cover { display: grid; height: 142px; place-items: center; padding: 13px; color: rgba(255,255,255,.95); background: #829681; font-family: Georgia, serif; font-size: 18px; text-align: center; }
+
+.reader-book-cover.cover-2 { background: #b99064; }
+
+.reader-book-cover.cover-3 { background: #a97773; }
+
+.reader-book-cover.cover-4 { background: #728b99; }
+
+.reader-book-info { padding: 12px; }
+
+.reader-book-info h3 { margin: 0 0 3px; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+
+.reader-book-info p { margin: 0 0 8px; color: var(--muted); font-size: 9px; }
+
+.reader-book-meta { display: flex; align-items: center; justify-content: space-between; }
+
+.reader-book-meta span { color: #a17b43; font-size: 9px; }
+
+.reader-book-meta button { padding: 5px 8px; border: 1px solid #e3ebe3; border-radius: 7px; color: var(--green-dark); background: #f5f8f4; font-size: 9px; font-weight: 700; }
+
+.reader-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 19px; }
+
+.feature-card { display: flex; gap: 11px; padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+
+.feature-card > span { display: grid; width: 31px; height: 31px; flex: 0 0 31px; place-items: center; border-radius: 9px; color: var(--green); background: var(--green-soft); }
+
+.feature-card strong { display: block; font-size: 10px; }
+
+.feature-card p { margin: 3px 0 0; color: var(--muted); font-size: 9px; }
+
+.reader-page-content { min-height: 360px; }
+
+.reader-panel { padding: 22px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+
+.reader-panel h2 { margin: 0 0 6px; font-family: Georgia, serif; font-size: 21px; }
+
+.reader-panel p { color: var(--muted); font-size: 12px; }
+
+.category-pills { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 17px; }
+
+.category-pills span { padding: 8px 12px; border: 1px solid var(--line); border-radius: 22px; color: #5e6f64; background: #fbfcfa; font-size: 10px; }
+
+.notice { margin-top: 15px; padding: 12px 14px; border-left: 3px solid #8da78f; border-radius: 0 9px 9px 0; color: #607066; background: #f2f6f1; font-size: 10px; }
