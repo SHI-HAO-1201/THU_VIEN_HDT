@@ -26,6 +26,7 @@
         '<div class="reader-book-meta"><span>' + (remaining ? 'Còn ' + remaining + ' bản' : 'Đang hết bản') + '</span>' +
         '<button data-borrow' + (remaining ? '' : ' disabled') + '>Đặt trước</button></div></div></article>';
     }).join("");
+    if (global.MocThu.biaSach) global.MocThu.biaSach.enhance(grid);
     filterCatalog();
   }
 

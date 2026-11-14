@@ -540,3 +540,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Bìa sách thật: giữ toàn bộ ảnh và bìa chữ dự phòng khi ảnh lỗi. */
+.stitch-book-cover .book-cover-media,
+.reader-book-cover .book-cover-media {
+  position: absolute;
+  inset: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  border-radius: 4px;
+}
+.has-book-image .book-cover-media { visibility: visible; }
+.has-book-image .stitch-cover-spine { visibility: hidden; }
+.book-cover-image {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 2px 5px 5px 2px;
+  box-shadow: -3px 3px 0 rgba(80,49,23,.12), 0 8px 18px rgba(45,36,25,.18);
+}
+.stitch-cover-badge { z-index: 2; pointer-events: none; }
+.reader-book-cover { position: relative; }
