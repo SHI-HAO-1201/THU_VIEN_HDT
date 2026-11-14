@@ -172,19 +172,15 @@
 <section class="page" id="page-loans" data-page="loans">
           <div class="page-heading"><div><div class="eyebrow">Lưu thông tài liệu</div><h1>Quản lý mượn &amp; trả</h1><p class="page-subtitle">Theo dõi phiếu mượn, ngày hẹn trả và trạng thái tài liệu.</p></div><div class="heading-actions"><button class="button" id="loansExport">↧ Xuất danh sách</button><button class="button primary" id="newLoanButton">＋ Tạo phiếu mượn</button></div></div>
           <div class="stats-grid">
-            <article class="card stat-card"><div class="stat-top"><span>Phiếu đang mượn</span><span class="stat-icon blue">⇄</span></div><div class="stat-number">248</div><div class="stat-foot">Trong giới hạn cho phép</div></article>
-            <article class="card stat-card"><div class="stat-top"><span>Trả trong hôm nay</span><span class="stat-icon">↙</span></div><div class="stat-number">18</div><div class="stat-foot">Đã nhận lại 36 bản sách</div></article>
-            <article class="card stat-card"><div class="stat-top"><span>Sắp đến hạn</span><span class="stat-icon gold">◷</span></div><div class="stat-number">24</div><div class="stat-foot">Trong 3 ngày tới</div></article>
-            <article class="card stat-card"><div class="stat-top"><span>Quá hạn</span><span class="stat-icon red">!</span></div><div class="stat-number">12</div><div class="stat-foot">3 phiếu quá hạn trên 7 ngày</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Phiếu đang mượn</span><span class="stat-icon blue">⇄</span></div><div class="stat-number" id="loanActiveCount">0</div><div class="stat-foot">Trong giới hạn cho phép</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Trả trong hôm nay</span><span class="stat-icon">↙</span></div><div class="stat-number" id="loanReturnedTodayCount">0</div><div class="stat-foot">Phiếu được nhận trả trong ngày</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Sắp đến hạn</span><span class="stat-icon gold">◷</span></div><div class="stat-number" id="loanDueSoonCount">0</div><div class="stat-foot">Trong 3 ngày tới</div></article>
+            <article class="card stat-card"><div class="stat-top"><span>Quá hạn</span><span class="stat-icon red">!</span></div><div class="stat-number" id="loanOverdueCount">0</div><div class="stat-foot">Cần liên hệ độc giả</div></article>
           </div>
           <div class="toolbar-row"><div class="filter-group"><button class="filter-button active">Tất cả phiếu</button><button class="filter-button">Đang mượn</button><button class="filter-button">Sắp đến hạn</button><button class="filter-button">Quá hạn</button></div><label class="search-box"><span>⌕</span><input id="loanSearch" type="search" placeholder="Tìm độc giả, mã phiếu..."></label></div>
           <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Mã phiếu</th><th>Độc giả</th><th>Ngày mượn</th><th>Hẹn trả</th><th>Số cuốn</th><th>Tình trạng</th><th>Thao tác</th></tr></thead>
             <tbody id="loansTable">
-              <tr><td><strong>PM-2025-384</strong></td><td>Nguyễn Minh Anh</td><td>13/11/2025</td><td>27/11/2025</td><td>2 cuốn</td><td><span class="badge">Đang mượn</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
-              <tr><td><strong>PM-2025-383</strong></td><td>Trần Hoàng Nam</td><td>01/11/2025</td><td>15/11/2025</td><td>1 cuốn</td><td><span class="badge warning">Sắp đến hạn</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
-              <tr><td><strong>PM-2025-379</strong></td><td>Lê Ngọc Hà</td><td>24/10/2025</td><td>07/11/2025</td><td>3 cuốn</td><td><span class="badge danger">Quá hạn 6 ngày</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
-              <tr><td><strong>PM-2025-376</strong></td><td>Phạm Gia Bảo</td><td>20/10/2025</td><td>03/11/2025</td><td>2 cuốn</td><td><span class="badge danger">Quá hạn 10 ngày</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
-              <tr><td><strong>PM-2025-375</strong></td><td>Đỗ Thảo Vy</td><td>29/10/2025</td><td>12/11/2025</td><td>1 cuốn</td><td><span class="badge warning">Sắp đến hạn</span></td><td><button class="button small soft" data-return-loan>Nhận trả</button></td></tr>
+              <tr><td class="table-empty" colspan="7">Đang tải phiếu mượn...</td></tr>
             </tbody></table></div></article>
           <div class="footer-note">Mộc Thư · Phiếu mượn và trả tài liệu</div>
         </section>

@@ -77,18 +77,11 @@
   async function taiDanhSach() {
     try {
       var result = await global.MocThu.auth.request("/api/books");
-      if (result && Array.isArray(result.books) && result.books.length) {
-        var apiMap = {};
-        result.books.forEach(function (b) { apiMap[b.code] = b; });
-
-        sach.forEach(function (item) {
-          if (apiMap[item.code]) {
-            Object.assign(item, apiMap[item.code]);
-          }
-        });
+      if (result && Array.isArray(result.books)) {
+        sach.splice.apply(sach, [0, sach.length].concat(result.books));
       }
-    } catch (e) {
-      // Dùng dữ liệu phong phú có sẵn
+    } catch (error) {
+      console.warn("Không thể tải danh mục sách từ máy chủ:", error);
     }
     return sach;
   }
@@ -223,10 +216,12 @@
   async function xoaSach(index) {
     var book = sach[index];
     if (!book || !global.confirm('Xóa "' + book.name + '" khỏi danh mục?')) return;
+    if (!book.id) {
+      thanhPhan.hienThongBao("Đầu sách chưa có mã lưu trong cơ sở dữ liệu.");
+      return;
+    }
     try {
-      if (book.id) {
-        await global.MocThu.auth.request("/api/books/" + book.id, { method: "DELETE" }).catch(function () {});
-      }
+      await global.MocThu.auth.request("/api/books/" + book.id, { method: "DELETE" });
       sach.splice(index, 1);
       veBangSach();
       dongDrawer();
@@ -253,43 +248,66 @@
       quality: viTriDangSua >= 0 ? sach[viTriDangSua].quality : "Tốt"
     };
 
-    if (viTriDangSua >= 0) {
-      Object.assign(sach[viTriDangSua], bookData);
-      thanhPhan.hienThongBao("Đã cập nhật thông tin đầu sách.");
-    } else {
-      sach.unshift(Object.assign({
-        id: Date.now(),
-        year: 2024,
-        isbn: "978-604-00-" + Math.floor(1000 + Math.random() * 9000),
-        price: 120000,
-        preservation: 98,
-        rfid: true
-      }, bookData));
-      thanhPhan.hienThongBao("Đã thêm đầu sách mới vào danh mục.");
+    try {
+      var editingBook = viTriDangSua >= 0 ? sach[viTriDangSua] : null;
+      var result = await global.MocThu.auth.request(
+        editingBook ? "/api/books/" + editingBook.id : "/api/books",
+        {
+          method: editingBook ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookData)
+        }
+      );
+      if (editingBook) {
+        Object.assign(editingBook, result.book);
+      } else {
+        sach.unshift(result.book);
+      }
+      dongBieuMau();
+      veBangSach();
+      thanhPhan.hienThongBao(editingBook ? "Đã cập nhật thông tin đầu sách." : "Đã thêm đầu sách mới vào danh mục.");
+    } catch (error) {
+      thanhPhan.hienThongBao(error.message);
     }
-
-    dongBieuMau();
-    veBangSach();
   }
 
-  function xuLyMuonNhanh() {
+  async function xuLyMuonNhanh() {
     if (cuonSachDangXem === null) return;
     var book = sach[cuonSachDangXem];
-    if (!book) return;
-
-    var avail = Math.max(0, book.stock - (book.borrowed || 0));
-    if (avail <= 0) {
-      alert("Đầu sách này hiện đã hết bản khả dụng trong kho!");
+    if (!book || !book.id) {
+      thanhPhan.hienThongBao("Đầu sách chưa được tải từ cơ sở dữ liệu.");
       return;
     }
 
-    var maDocGia = prompt("Nhập mã độc giả hoặc mã thẻ thư viện (VD: DG-00241):", "DG-00241");
-    if (!maDocGia) return;
+    var avail = Math.max(0, book.stock - (book.borrowed || 0));
+    if (avail <= 0) {
+      thanhPhan.hienThongBao("Đầu sách này hiện đã hết bản khả dụng trong kho.");
+      return;
+    }
 
-    book.borrowed = (book.borrowed || 0) + 1;
-    veBangSach();
-    moDrawer(cuonSachDangXem);
-    thanhPhan.hienThongBao("Đã lập phiếu xuất mượn thành công cho bạn đọc " + maDocGia + " (Hạn trả: 14 ngày).");
+    var readerCode = prompt("Nhập mã độc giả hoặc mã thẻ thư viện:", "");
+    if (!readerCode || !readerCode.trim()) return;
+
+    var button = document.getElementById("drawerQuickBorrowBtn");
+    if (button) button.disabled = true;
+    try {
+      var result = await global.MocThu.auth.request("/api/loans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookId: book.id, readerCode: readerCode.trim() })
+      });
+      Object.assign(book, result.book);
+      veBangSach();
+      moDrawer(cuonSachDangXem);
+      if (global.MocThu.dieuHuong && global.MocThu.dieuHuong.taiPhieuMuon) {
+        await global.MocThu.dieuHuong.taiPhieuMuon();
+      }
+      thanhPhan.hienThongBao("Đã lập phiếu mượn " + result.loan.id + " cho mã độc giả " + result.loan.readerCode + ".");
+    } catch (error) {
+      thanhPhan.hienThongBao(error.message);
+    } finally {
+      if (button) button.disabled = false;
+    }
   }
 
   function khoiTao() {

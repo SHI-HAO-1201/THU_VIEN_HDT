@@ -163,7 +163,7 @@
       }
     }
 
-    if (event.target.closest("#roleSwitchBtn") || event.target.closest("#topUserChip")) {
+    if (mode === "admin" && (event.target.closest("#roleSwitchBtn") || event.target.closest("#topUserChip"))) {
       moModalVaiTro();
       return;
     }
@@ -177,20 +177,16 @@
     if (switchBtn) {
       var targetRole = switchBtn.dataset.switchTo;
       switchBtn.disabled = true;
-      fetch("/api/switch-role", {
+      global.MocThu.auth.request("/api/switch-role", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
         body: JSON.stringify({ role: targetRole })
-      }).then(function (res) {
-        return res.json();
       }).then(function (data) {
-        if (data.home) {
-          global.location.href = data.home;
-        }
-      }).catch(function (err) {
+        if (data.home) global.location.href = data.home;
+        else switchBtn.disabled = false;
+      }).catch(function (error) {
         switchBtn.disabled = false;
-        alert(err.message || "Không thể chuyển vai trò.");
+        thanhPhan.hienThongBao(error.message || "Không thể chuyển vai trò.");
       });
       return;
     }
@@ -235,12 +231,26 @@
       thanhPhan.hienThongBao("Chức năng đặt trước sẽ được kết nối với phiếu đặt trước của độc giả.");
       return;
     }
-    if (event.target.closest("[data-return-loan]")) {
-      if (global.confirm("Xác nhận đã nhận lại các bản sách trong phiếu này?")) {
-        event.target.closest("tr").querySelector("td:nth-child(6)").innerHTML = '<span class="badge">Đã trả</span>';
-        event.target.closest("tr").querySelector("td:last-child").textContent = "Hoàn tất";
-        thanhPhan.hienThongBao("Đã cập nhật trạng thái phiếu mượn.");
-      }
+    var returnLoanButton = event.target.closest("[data-return-loan]");
+    if (returnLoanButton) {
+      var loanId = returnLoanButton.dataset.returnLoan;
+      if (!loanId || !global.confirm("Xác nhận đã nhận trả sách trong phiếu này?")) return;
+      returnLoanButton.disabled = true;
+      global.MocThu.auth.request("/api/loans/" + loanId + "/return", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}"
+      }).then(async function () {
+        if (sach) {
+          await sach.taiDanhSach();
+          sach.veBang();
+        }
+        await taiPhieuMuon();
+        thanhPhan.hienThongBao("Đã nhận trả sách và cập nhật tồn kho.");
+      }).catch(function (error) {
+        returnLoanButton.disabled = false;
+        thanhPhan.hienThongBao(error.message);
+      });
       return;
     }
     if (event.target.closest("#dashboardExport")) {
@@ -257,7 +267,8 @@
       return;
     }
     if (event.target.closest("#newLoanButton")) {
-      thanhPhan.hienThongBao("Khung tạo phiếu mượn sẵn sàng kết nối với dữ liệu độc giả.");
+      moTrang("books");
+      thanhPhan.hienThongBao("Chọn đầu sách rồi lập phiếu mượn từ phần xem chi tiết.");
       return;
     }
     if (event.target.closest("#newReaderButton")) {
@@ -275,6 +286,73 @@
     if (event.target.closest("#helpLink")) {
       event.preventDefault();
       thanhPhan.hienThongBao("Trung tâm hỗ trợ đang được cập nhật.");
+    }
+  }
+
+  async function taiPhieuMuon() {
+    var table = document.getElementById("loansTable");
+    if (!table) return;
+    try {
+      var result = await global.MocThu.auth.request("/api/loans");
+      var loans = result.loans || [];
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var activeCount = 0;
+      var returnedTodayCount = 0;
+      var dueSoonCount = 0;
+      var overdueCount = 0;
+      loans.forEach(function (loan) {
+        if (loan.returnedAt) {
+          var returnedAt = new Date(loan.returnedAt);
+          if (returnedAt.toDateString() === today.toDateString()) returnedTodayCount += 1;
+          return;
+        }
+        activeCount += 1;
+        var dueDay = new Date(loan.dueAt);
+        dueDay.setHours(0, 0, 0, 0);
+        var daysLeft = Math.ceil((dueDay.getTime() - today.getTime()) / 86400000);
+        if (daysLeft < 0) overdueCount += 1;
+        else if (daysLeft <= 3) dueSoonCount += 1;
+      });
+      var statValues = {
+        loanActiveCount: activeCount,
+        loanReturnedTodayCount: returnedTodayCount,
+        loanDueSoonCount: dueSoonCount,
+        loanOverdueCount: overdueCount
+      };
+      Object.keys(statValues).forEach(function (id) {
+        var node = document.getElementById(id);
+        if (node) node.textContent = String(statValues[id]);
+      });
+      if (!loans.length) {
+        table.innerHTML = '<tr><td class="table-empty" colspan="7">Chưa có phiếu mượn nào.</td></tr>';
+        return;
+      }
+      table.innerHTML = loans.map(function (loan) {
+        var due = new Date(loan.dueAt);
+        var borrowed = new Date(loan.borrowedAt);
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var dueDay = new Date(due);
+        dueDay.setHours(0, 0, 0, 0);
+        var daysLeft = Math.ceil((dueDay.getTime() - today.getTime()) / 86400000);
+        var returned = Boolean(loan.returnedAt);
+        var status = returned ? '<span class="badge">Đã trả</span>' :
+          (daysLeft < 0 ? '<span class="badge danger">Quá hạn ' + Math.abs(daysLeft) + ' ngày</span>' :
+            (daysLeft <= 3 ? '<span class="badge warning">Sắp đến hạn</span>' : '<span class="badge">Đang mượn</span>'));
+        var action = returned ? "Đã nhận trả" :
+          '<button class="button small soft" data-return-loan="' + loan.id + '" type="button">Nhận trả</button>';
+        var loanCode = "PM-" + borrowed.getFullYear() + "-" + String(loan.id).padStart(4, "0");
+        return '<tr data-loan-id="' + loan.id + '">' +
+          '<td><strong>' + thanhPhan.escapeHtml(loanCode) + '</strong></td>' +
+          '<td>' + thanhPhan.escapeHtml(loan.readerCode) + '<br><small>' + thanhPhan.escapeHtml(loan.bookName) + '</small></td>' +
+          '<td>' + borrowed.toLocaleDateString("vi-VN") + '</td>' +
+          '<td>' + due.toLocaleDateString("vi-VN") + '</td>' +
+          '<td>1 cuốn</td><td>' + status + '</td><td>' + action + '</td></tr>';
+      }).join("");
+    } catch (error) {
+      table.innerHTML = '<tr><td class="table-empty" colspan="7">Không tải được danh sách phiếu mượn.</td></tr>';
+      thanhPhan.hienThongBao(error.message);
     }
   }
 
@@ -306,6 +384,7 @@
   global.MocThu.dieuHuong = {
     khoiTao: khoiTao,
     veMenu: veMenu,
-    moTrang: moTrang
+    moTrang: moTrang,
+    taiPhieuMuon: taiPhieuMuon
   };
 }(window));
