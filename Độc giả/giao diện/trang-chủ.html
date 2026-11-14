@@ -3,92 +3,396 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f6f7f3">
-  <link rel="stylesheet" href="doc-gia.css">
+  <meta name="theme-color" content="#f8f6f0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../dùng-chung/giao%20di%E1%BB%87n/giao-di%E1%BB%87n.css">
-  <title>Mộc Thư — Quản lý thư viện</title>
+  <link rel="stylesheet" href="doc-gia.css">
+  <title>Mộc Thư — Không gian đọc &amp; Kết nối tri thức</title>
 </head>
 <body data-role="reader">
-  <div class="app-shell">
+  <div class="reader-shell">
+    <!-- Topbar chuẩn Stitch UI -->
     <header class="topbar">
-      <div class="brand">
+      <a href="#home" class="brand" style="text-decoration:none;cursor:pointer;" title="Về trang chủ">
         <button class="mobile-menu" id="mobileMenuButton" aria-label="Mở menu">☰</button>
-        <div class="brand-mark">M</div>
-        <div>
-          <div class="brand-name">mộc thư</div>
-          <div class="brand-caption">Không gian tri thức</div>
-        </div>
-      </div>
-      <div class="mode-switch" aria-label="Vai trò hiện tại"><span class="mode-button active">Độc giả</span></div>
+        <img src="../../dùng-chung/giao%20di%E1%BB%87n/logo-moc-thu.png" alt="Logo Mộc Thư" class="brand-logo-img">
+        <div class="brand-name">Mộc Thư</div>
+      </a>
+
+      <!-- Top Navigation Tabs Độc Giả (Dành riêng cho bạn đọc, nằm gọn trên 1 hàng ngang duy nhất) -->
+      <nav class="top-nav-links" aria-label="Menu đỉnh">
+        <a href="#home" class="top-nav-link active">Trang chủ</a>
+        <a href="#popular" class="top-nav-link">Tuyển tập chọn lọc</a>
+        <a href="#new" class="top-nav-link">Sách mới phát hành</a>
+        <a href="#guide" class="top-nav-link">Hướng dẫn mượn sách</a>
+        <a href="#shelf" class="top-nav-link">Tủ sách của tôi</a>
+      </nav>
+
       <div class="top-actions">
-        <button class="button logout-button" id="logoutButton" type="button">Đăng xuất</button>
-        <button class="icon-button" aria-label="Thông báo" id="notificationButton">♧<span class="notification-dot"></span></button>
-        <div class="user-chip">
-          <div class="avatar" id="topAvatar">…</div>
+        <button class="top-bell-btn" aria-label="Thông báo" id="notificationButton" type="button">🔔<span class="notification-dot"></span></button>
+        <button class="role-switch-btn" type="button" id="roleSwitchBtn" title="Chuyển đổi vai trò">⇄ Chuyển vai trò</button>
+        <div class="user-chip" id="topUserChip">
+          <div class="avatar" id="topAvatar">HY</div>
           <div class="user-details">
-            <div class="user-name" id="topUserName">Đang tải tài khoản…</div>
-            <div class="user-role" id="topUserRole">Độc giả</div>
+            <div class="user-name" id="topUserName">Lê Hoàng Yến</div>
+            <div class="user-role" id="topUserRole">Độc giả thân thiết</div>
           </div>
         </div>
       </div>
     </header>
 
-    <div class="workspace">
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-label" id="sidebarLabel">Tổng quan</div>
-        <nav class="nav-list" id="sidebarNav" aria-label="Điều hướng"></nav>
-        <div class="sidebar-bottom">
-          <div class="help-card">
-            <strong>Cần hỗ trợ?</strong>
-            <p>Xem hướng dẫn sử dụng và các mẹo quản lý thư viện.</p>
-            <a href="#" id="helpLink">Trung tâm trợ giúp →</a>
-          </div>
-          <div class="sidebar-user">
-            <div class="avatar">AL</div>
-            <div><div class="user-name" id="sidebarUserName">Đang tải tài khoản…</div><div class="user-role" id="sidebarUserRole">Độc giả · Thành viên</div></div>
+    <main class="reader-container">
+      <!-- 1. Hero Section -->
+      <section class="reader-hero-stitch" id="home">
+        <div class="reader-badge-pill">🍃 Thư viện mở &amp; Không gian đọc an yên</div>
+        <h1>Mộc Thư — Nơi kết nối tâm hồn cùng trang sách mộc</h1>
+        <p class="subtitle">Lưu giữ hương gỗ mộc ngào ngạt qua từng trang giấy thô xốp. Đắm mình trong tri thức tinh tế và sẻ chia niềm vui đọc sách cùng cộng đồng.</p>
+
+        <!-- Search Box -->
+        <div class="reader-search-wrap">
+          <input type="search" id="userHeroSearch" placeholder="Tìm kiếm tựa sách, tên tác giả, chủ đề, mã sách (ISBN)..." aria-label="Tìm sách">
+          <button type="button" onclick="alert('Đang tìm kiếm...')">Tìm ngay →</button>
+        </div>
+
+        <div class="reader-quick-tags">
+          <span>Gợi ý:</span>
+          <a class="reader-quick-tag">Sách mới phát hành</a>
+          <a class="reader-quick-tag">Kỷ luật tự thân</a>
+          <a class="reader-quick-tag">Tâm lý học</a>
+          <a class="reader-quick-tag">Trẻ nhỏ</a>
+          <a class="reader-quick-tag">Triết học phương Đông</a>
+        </div>
+      </section>
+
+      <!-- 2. Promotional Banner -->
+      <section class="reader-promo-banner">
+        <div class="reader-promo-content">
+          <span class="reader-promo-badge">★ Đặc quyền độc giả Mộc Thư</span>
+          <h2 class="reader-promo-title">Tuần lễ Sách Gỗ &amp; Không gian Văn hóa Đọc Mộc Thư</h2>
+          <p class="reader-promo-desc">Tặng ngay 01 tháng mượn sách miễn phí không giới hạn cho toàn bộ bạn đọc đăng ký cấp mới thẻ mượn điện tử hoặc thẻ gỗ thủ công trong tuần này!</p>
+          <div class="reader-promo-actions">
+            <button class="promo-btn-gold" type="button" onclick="alert('Đã gửi yêu cầu đăng ký nhận thẻ thành viên miễn phí!')">Đăng ký nhận thẻ miễn phí</button>
+            <a class="promo-link-white">Tìm hiểu chi tiết chương trình &gt;</a>
           </div>
         </div>
-      </aside>
+        <div class="reader-promo-art">📖</div>
+      </section>
 
-      <main class="main">
-        <section class="page active" id="page-reader-home" data-page="reader-home">
-          <nav class="reader-nav" aria-label="Menu độc giả"><button class="active" data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav>
-          <div class="reader-page-content">
-            <div class="reader-hero"><div class="reader-hero-copy"><div class="eyebrow">Một góc nhỏ dành cho bạn</div><h2>Tìm cuốn sách<br>chạm đến bạn.</h2><p>Khám phá hàng ngàn đầu sách và để mỗi trang giấy đưa bạn đến một hành trình mới.</p><button class="button primary" data-reader-page="reader-catalog">Khám phá sách <span>→</span></button></div><div class="hero-books" aria-hidden="true"><div class="hero-book">Những ngày thơ ấu</div><div class="hero-book">Đi tìm lẽ sống</div><div class="hero-book">Gió qua mùa hạ</div></div></div>
-            <div class="section-heading"><div><h2>Được yêu thích tuần này</h2><p>Những cuốn sách độc giả đang chuyền tay nhau</p></div><button class="text-link" data-reader-page="reader-catalog">Xem tất cả →</button></div>
-            <div class="book-grid">
-              <article class="reader-book-card"><div class="reader-book-cover">Nhà giả kim</div><div class="reader-book-info"><h3>Nhà giả kim</h3><p>Paulo Coelho · Văn học</p><div class="reader-book-meta"><span>★★★★★</span><button data-borrow>Đặt mượn</button></div></div></article>
-              <article class="reader-book-card"><div class="reader-book-cover cover-2">Đi tìm lẽ sống</div><div class="reader-book-info"><h3>Đi tìm lẽ sống</h3><p>Viktor E. Frankl · Kỹ năng</p><div class="reader-book-meta"><span>★★★★★</span><button data-borrow>Đặt mượn</button></div></div></article>
-              <article class="reader-book-card"><div class="reader-book-cover cover-3">Rừng Na Uy</div><div class="reader-book-info"><h3>Rừng Na Uy</h3><p>Haruki Murakami · Văn học</p><div class="reader-book-meta"><span>★★★★☆</span><button data-borrow>Đặt mượn</button></div></div></article>
-              <article class="reader-book-card"><div class="reader-book-cover cover-4">Tuổi trẻ đáng giá bao nhiêu</div><div class="reader-book-info"><h3>Tuổi trẻ đáng giá bao nhiêu</h3><p>Rosie Nguyễn · Kỹ năng</p><div class="reader-book-meta"><span>★★★★★</span><button data-borrow>Đặt mượn</button></div></div></article>
-            </div>
-            <div class="reader-features"><article class="feature-card"><span>⌕</span><div><strong>Tra cứu dễ dàng</strong><p>Tìm sách theo tên, tác giả và thể loại yêu thích.</p></div></article><article class="feature-card"><span>◷</span><div><strong>Giữ chỗ trực tuyến</strong><p>Đặt trước cuốn sách bạn muốn đọc tiếp theo.</p></div></article><article class="feature-card"><span>♡</span><div><strong>Không gian cho mọi người</strong><p>Đọc, học hỏi và kết nối cùng cộng đồng.</p></div></article></div>
+      <!-- 3. Sách Nổi Bật Gợi Ý Hôm Nay -->
+      <section class="reader-section" id="popular">
+        <div class="reader-section-header">
+          <div>
+            <div class="reader-section-kicker">TUYỂN TẬP CHỌN LỌC</div>
+            <h2 class="reader-section-title">Sách nổi bật gợi ý hôm nay</h2>
           </div>
-          <div class="footer-note">Mộc Thư · Góc đọc dành cho bạn</div>
-        </section>
+          <div class="reader-tabs-pill">
+            <button class="reader-tab-pill active" type="button">Nhiều người mượn nhất</button>
+            <button class="reader-tab-pill" type="button">Đánh giá cao</button>
+            <button class="reader-tab-pill" type="button">Thủ thư khuyên đọc</button>
+          </div>
+        </div>
 
-<section class="page" id="page-reader-catalog" data-page="reader-catalog">
-          <nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button class="active" data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav>
-          <div class="reader-page-content"><div class="section-heading" style="margin-top:5px"><div><div class="eyebrow">Danh mục sách</div><h2>Những câu chuyện đang chờ bạn</h2><p>Tìm kiếm trong bộ sưu tập của thư viện.</p></div></div>
-            <div class="toolbar-row"><div class="filter-group"><button class="filter-button active">Tất cả</button><button class="filter-button">Văn học</button><button class="filter-button">Kỹ năng</button><button class="filter-button">Thiếu nhi</button></div><label class="search-box"><span>⌕</span><input id="readerSearch" type="search" placeholder="Tìm theo tên sách, tác giả..."></label></div>
-            <div class="book-grid" id="readerCatalogGrid">
-              <article class="reader-book-card"><div class="reader-book-cover">Nhà giả kim</div><div class="reader-book-info"><h3>Nhà giả kim</h3><p>Paulo Coelho · Văn học</p><div class="reader-book-meta"><span>Còn 7 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
-              <article class="reader-book-card"><div class="reader-book-cover cover-2">Đi tìm lẽ sống</div><div class="reader-book-info"><h3>Đi tìm lẽ sống</h3><p>Viktor E. Frankl · Kỹ năng</p><div class="reader-book-meta"><span>Còn 5 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
-              <article class="reader-book-card"><div class="reader-book-cover cover-3">Rừng Na Uy</div><div class="reader-book-info"><h3>Rừng Na Uy</h3><p>Haruki Murakami · Văn học</p><div class="reader-book-meta"><span>Còn 7 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
-              <article class="reader-book-card"><div class="reader-book-cover cover-4">Tuổi trẻ đáng giá bao nhiêu</div><div class="reader-book-info"><h3>Tuổi trẻ đáng giá bao nhiêu</h3><p>Rosie Nguyễn · Kỹ năng</p><div class="reader-book-meta"><span>Còn 6 bản</span><button data-borrow>Đặt mượn</button></div></div></article>
-            </div></div>
-          <div class="footer-note">Mộc Thư · Danh mục sách dành cho độc giả</div>
-        </section>
+        <div class="reader-cards-grid">
+          <!-- Card 1 -->
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <span class="stitch-cover-badge">★ Đánh dấu nổi bật • Mộc Thư</span>
+              <div class="stitch-cover-spine">
+                <span>Muôn Kiếp<br>Nhân Sinh</span>
+              </div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Muôn Kiếp Nhân Sinh (Tập 1)</h3>
+              <div class="stitch-book-author">Tác giả: GS. John Vũ - Nguyên Phong</div>
+              <div class="stitch-book-rating">
+                <span>★★★★★</span>
+                <strong>5.0</strong>
+                <span style="color:var(--muted);">(42 lượt)</span>
+              </div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Muôn Kiếp Nhân Sinh vào danh sách giữ chỗ!')">Mượn sách</button>
+                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+              </div>
+            </div>
+          </article>
 
-<section class="page" id="page-reader-new" data-page="reader-new"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button class="active" data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Mới trên kệ</div><h2>Những trang sách vừa cập bến</h2><p>Các đầu sách mới được cập nhật trong tháng này — lựa chọn hoàn hảo cho hành trình đọc tiếp theo.</p><div class="notice">Tháng 11 có 24 đầu sách mới đã được bổ sung vào bộ sưu tập.</div><div class="category-pills"><span>Ngày mai của những ngày mai</span><span>Thế giới rộng lớn, lòng người chật hẹp</span><span>Vũ trụ trong vỏ hạt dẻ</span><span>Chuyện con mèo dạy hải âu bay</span><span>Hiểu về trái tim</span></div></div><div class="section-heading"><div><h2>Gợi ý dành cho bạn</h2><p>Thêm lựa chọn mới trong bộ sưu tập</p></div><button class="text-link" data-reader-page="reader-catalog">Xem tất cả →</button></div><div class="book-grid"><article class="reader-book-card"><div class="reader-book-cover">Vũ trụ trong vỏ hạt dẻ</div><div class="reader-book-info"><h3>Vũ trụ trong vỏ hạt dẻ</h3><p>Stephen Hawking · Khoa học</p><div class="reader-book-meta"><span>Mới cập nhật</span><button data-borrow>Đặt mượn</button></div></div></article><article class="reader-book-card"><div class="reader-book-cover cover-2">Chuyện con mèo dạy hải âu bay</div><div class="reader-book-info"><h3>Chuyện con mèo dạy hải âu bay</h3><p>Luis Sepúlveda · Thiếu nhi</p><div class="reader-book-meta"><span>Mới cập nhật</span><button data-borrow>Đặt mượn</button></div></div></article></div></div></section>
+          <!-- Card 2 -->
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <span class="stitch-cover-badge" style="background:#eef4f8;color:#2c5a78;">Dành cho bạn</span>
+              <div class="stitch-cover-spine" style="background:#3d634d;">
+                <span>Khéo Ăn<br>Khéo Nói</span>
+              </div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Khéo Ăn Khéo Nói Sẽ Có Được Thiên Hạ</h3>
+              <div class="stitch-book-author">Tác giả: Trác Nhã</div>
+              <div class="stitch-book-rating">
+                <span>★★★★★</span>
+                <strong>4.8</strong>
+                <span style="color:var(--muted);">(38 lượt)</span>
+              </div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Khéo Ăn Khéo Nói vào danh sách giữ chỗ!')">Mượn sách</button>
+                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+              </div>
+            </div>
+          </article>
 
-<section class="page" id="page-reader-categories" data-page="reader-categories"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button class="active" data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Khám phá theo chủ đề</div><h2>Một thể loại, ngàn thế giới</h2><p>Chọn chủ đề bạn yêu thích và tìm thấy những cuốn sách phù hợp với mình.</p><div class="category-pills"><span>Văn học Việt Nam · 324 sách</span><span>Văn học nước ngoài · 418 sách</span><span>Kỹ năng sống · 216 sách</span><span>Khoa học · 154 sách</span><span>Lịch sử · 96 sách</span><span>Thiếu nhi · 182 sách</span><span>Nghệ thuật · 72 sách</span><span>Tâm lý học · 88 sách</span></div></div></div></section>
+          <!-- Card 3 -->
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <span class="stitch-cover-badge">★ Đánh dấu nổi bật • Mộc Thư</span>
+              <div class="stitch-cover-spine" style="background:#9c6f44;">
+                <span>Hoàng Tử<br>Bé</span>
+              </div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Hoàng Tử Bé (Bản in Gỗ thủ công)</h3>
+              <div class="stitch-book-author">Tác giả: Antoine de Saint-Exupéry</div>
+              <div class="stitch-book-rating">
+                <span>★★★★★</span>
+                <strong>4.9</strong>
+                <span style="color:var(--muted);">(76 lượt)</span>
+              </div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Hoàng Tử Bé vào danh sách giữ chỗ!')">Mượn sách</button>
+                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+              </div>
+            </div>
+          </article>
 
-<section class="page" id="page-reader-services" data-page="reader-services"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button class="active" data-reader-page="reader-services">Dịch vụ</button><button data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Tiện ích thư viện</div><h2>Để việc đọc dễ dàng hơn</h2><p>Những dịch vụ hỗ trợ bạn khám phá, mượn và chia sẻ tri thức mỗi ngày.</p><div class="reader-features"><article class="feature-card"><span>♧</span><div><strong>Mượn và gia hạn</strong><p>Mượn tối đa 5 cuốn trong 14 ngày, gia hạn khi sách chưa có người đặt.</p></div></article><article class="feature-card"><span>⌕</span><div><strong>Tra cứu tài liệu</strong><p>Tìm kiếm sách và kiểm tra tình trạng sẵn có trước khi ghé thăm.</p></div></article><article class="feature-card"><span>♡</span><div><strong>Không gian đọc</strong><p>Không gian yên tĩnh và thân thiện cho mọi lứa tuổi.</p></div></article></div><div class="notice">Độc giả cần có thẻ thư viện hợp lệ để mượn sách. Vui lòng liên hệ quầy thủ thư nếu cần hỗ trợ.</div></div></div></section>
+          <!-- Card 4 -->
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <span class="stitch-cover-badge" style="background:#fdf3e7;color:#b7762c;">Giới hạn độc quyền</span>
+              <div class="stitch-cover-spine" style="background:#557e93;">
+                <span>Sống Đơn<br>Giản</span>
+              </div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Sống Đơn Giản Cho Mình Thanh Thản</h3>
+              <div class="stitch-book-author">Tác giả: Shunmyo Masuno</div>
+              <div class="stitch-book-rating">
+                <span>★★★★★</span>
+                <strong>4.7</strong>
+                <span style="color:var(--muted);">(51 lượt)</span>
+              </div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Sống Đơn Giản vào danh sách giữ chỗ!')">Mượn sách</button>
+                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
 
-<section class="page" id="page-reader-about" data-page="reader-about"><nav class="reader-nav" aria-label="Menu độc giả"><button data-reader-page="reader-home">Trang chủ</button><button data-reader-page="reader-catalog">Sản phẩm</button><button data-reader-page="reader-new">Sách mới</button><button data-reader-page="reader-categories">Thể loại</button><button data-reader-page="reader-services">Dịch vụ</button><button class="active" data-reader-page="reader-about">Giới thiệu</button></nav><div class="reader-page-content"><div class="reader-panel"><div class="eyebrow">Về Mộc Thư</div><h2>Nơi những câu chuyện gặp nhau</h2><p>Mộc Thư là không gian đọc và học tập dành cho cộng đồng — nơi mỗi người có thể tự do khám phá tri thức, chia sẻ niềm yêu sách và tìm thấy cảm hứng trong những trang giấy.</p><div class="category-pills"><span>1.284 đầu sách</span><span>1.026 độc giả hoạt động</span><span>Không gian mở mỗi ngày</span></div><div class="notice">Giờ mở cửa: Thứ Hai — Thứ Bảy, 08:00–20:00 · Địa chỉ: 12 Đường Sách, Quận 1.</div></div></div></section>
-      </main>
-    </div>
+      <!-- 4. Sách Mới Lên Kệ Tuần Này -->
+      <section class="reader-section" id="new">
+        <div class="reader-section-header">
+          <div>
+            <div class="reader-section-kicker">CẬP NHẬT MỖI THỨ HAI</div>
+            <h2 class="reader-section-title">Sách mới lên kệ tuần này</h2>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="button small soft" type="button">←</button>
+            <button class="button small soft" type="button">→</button>
+          </div>
+        </div>
+
+        <div class="reader-cards-grid">
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <div class="stitch-cover-spine" style="background:#6e4727;">Cây Cam</div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Cây Cam Ngọt Của Tôi</h3>
+              <div class="stitch-book-author">José Mauro de Vasconcelos</div>
+              <div style="font-size:11px;color:#2e663e;font-weight:600;margin-bottom:12px;">Sẵn có 11 cuốn</div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button">Mượn sách</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <div class="stitch-cover-spine" style="background:#855c36;">Đắc Nhân Tâm</div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Đắc Nhân Tâm (Bản Bìa Da Khắc Gỗ)</h3>
+              <div class="stitch-book-author">Dale Carnegie</div>
+              <div style="font-size:11px;color:#2e663e;font-weight:600;margin-bottom:12px;">Sẵn có 8 cuốn</div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button">Mượn sách</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <div class="stitch-cover-spine" style="background:#3d634d;">Hiểu Trái Tim</div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Hiểu Về Trái Tim</h3>
+              <div class="stitch-book-author">Thầy Minh Niệm</div>
+              <div style="font-size:11px;color:#2e663e;font-weight:600;margin-bottom:12px;">Sẵn có 14 cuốn</div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button">Mượn sách</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="stitch-book-card">
+            <div class="stitch-book-cover">
+              <div class="stitch-cover-spine" style="background:#79669e;">Khởi Lạnh</div>
+            </div>
+            <div class="stitch-book-body">
+              <h3 class="stitch-book-name">Trong Tay Khởi Lạnh</h3>
+              <div class="stitch-book-author">Nguyễn Ngọc Tư</div>
+              <div style="font-size:11px;color:#2e663e;font-weight:600;margin-bottom:12px;">Sẵn có 6 cuốn</div>
+              <div class="stitch-book-actions">
+                <button class="stitch-borrow-btn" type="button">Mượn sách</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- 5. 3 Bước Mượn Sách Đơn Giản Tại Mộc Thư -->
+      <section class="guide-3steps-section" id="guide">
+        <div class="reader-badge-pill" style="margin-bottom:10px;">TIỆN ÍCH &amp; DỄ DÀNG CHO NGƯỜI MỚI</div>
+        <h2 style="font-family:var(--font-serif);font-size:24px;font-weight:700;margin:0 0 8px;color:var(--ink);">3 Bước mượn sách đơn giản tại Mộc Thư</h2>
+        <p style="max-width:620px;margin:0 auto;color:var(--muted);font-size:13px;">Dù bạn là các bạn nhỏ lần đầu làm quen với thư viện hay độc giả cao niên, quy trình tại Mộc Thư luôn tối giản, trực quan và ấm áp.</p>
+
+        <div class="guide-3steps-grid">
+          <!-- Bước 1 -->
+          <div class="guide-step-card">
+            <div>
+              <div class="guide-step-num">BƯỚC 01</div>
+              <h3 class="guide-step-title">Tìm sách &amp; Kiểm tra kệ</h3>
+              <p class="guide-step-desc">Nhập tên cuốn sách bạn thích vào ô tìm kiếm hoặc dùng bộ lọc chuyên mục. Hệ thống sẽ hiển thị vị trí tầng 3 và kệ gỗ chính xác và số bản in đang sẵn sàng.</p>
+            </div>
+            <div class="guide-step-foot">
+              <span>🔍</span> Hỗ trợ tra cứu qua mã ISBN
+            </div>
+          </div>
+
+          <!-- Bước 2 -->
+          <div class="guide-step-card">
+            <div>
+              <div class="guide-step-num">BƯỚC 02</div>
+              <h3 class="guide-step-title">Đặt chỗ hoặc Quét thẻ tại quầy</h3>
+              <p class="guide-step-desc">Nhấn nút 'Mượn sách' để hệ thống giữ sách trong 24 giờ, hoặc đến trực tiếp thư quán. Thủ thư Mộc Thư sẽ quét nhanh mã thẻ thành viên của bạn.</p>
+            </div>
+            <div class="guide-step-foot">
+              <span>⚡</span> Chỉ mất 2-3 giây để hoàn tất
+            </div>
+          </div>
+
+          <!-- Bước 3 -->
+          <div class="guide-step-card">
+            <div>
+              <div class="guide-step-num">BƯỚC 03</div>
+              <h3 class="guide-step-title">Thưởng thức &amp; Trả linh hoạt 14 ngày</h3>
+              <p class="guide-step-desc">Tận hưởng niềm vui đọc sách thảnh thơi tại nhà hoặc góc đọc của thư quán. Bạn có thể gia hạn trực tuyến chỉ với 1 chạm trước ngày hẹn trả.</p>
+            </div>
+            <div class="guide-step-foot">
+              <span>⏱️</span> Gia hạn tối đa 2 lần tiện lợi
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Testimonial Quote Banner -->
+      <section class="reader-testimonial-banner">
+        <div>
+          <p class="reader-test-quote">"Góc đọc ở Mộc Thư rất tĩnh và thơm mùi gỗ. Cả sới và các cháu đều tìm được những cuốn sách ưng ý mà không bao giờ gặp khó khăn khi thao tác mượn."</p>
+          <div class="reader-test-author">Bác Lương Đình Trực (68 tuổi) — Độc giả thân thiết từ năm 2021</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-shrink:0;">
+          <button class="button primary" type="button" style="background:var(--wood);border-color:var(--wood);">Trở thành Độc giả Mộc Thư</button>
+          <button class="button soft" type="button">Tải ứng dụng đọc sách</button>
+        </div>
+      </section>
+
+      <!-- 7. Tủ Sách Của Tôi (Personal Shelf) -->
+      <section class="reader-section" id="shelf" style="padding-top:20px;">
+        <div class="reader-section-header">
+          <div>
+            <div class="reader-section-tag">GÓC ĐỌC CÁ NHÂN</div>
+            <h2>Tủ sách của tôi &amp; Ấn phẩm đang mượn</h2>
+          </div>
+          <span style="font-size:12px;color:var(--muted);">Đang mượn: <strong style="color:var(--wood-dark);">2 bản</strong> · Đã lưu: <strong style="color:var(--wood-dark);">1 cuốn</strong></span>
+        </div>
+
+        <div class="stitch-cards-row">
+          <article class="stitch-book-card" style="border:1.5px solid #d4c5b3;">
+            <div class="stitch-book-cover">
+              <div class="stitch-cover-spine" style="background:#8b6b47;">Cây Cam</div>
+            </div>
+            <div class="stitch-book-body">
+              <span class="badge" style="background:#eef6f0;color:#2e663e;margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">Đang mượn</span>
+              <h3 class="stitch-book-name">Cây Cam Ngọt Của Tôi</h3>
+              <div class="stitch-book-author">José Mauro de Vasconcelos</div>
+              <div style="font-size:11px;color:#c93b2b;font-weight:600;margin-bottom:12px;">Hạn trả: 22/11/2026 (Còn 8 ngày)</div>
+              <div class="stitch-book-actions">
+                <button class="button small soft" type="button" onclick="alert('Đã gửi yêu cầu gia hạn thêm 7 ngày!')">Gia hạn sách</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="stitch-book-card" style="border:1.5px solid #d4c5b3;">
+            <div class="stitch-book-cover">
+              <div class="stitch-cover-spine" style="background:#5a6d58;">Nhà Giả Kim</div>
+            </div>
+            <div class="stitch-book-body">
+              <span class="badge" style="background:#eef6f0;color:#2e663e;margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">Đang mượn</span>
+              <h3 class="stitch-book-name">Nhà Giả Kim</h3>
+              <div class="stitch-book-author">Paulo Coelho</div>
+              <div style="font-size:11px;color:#2e663e;font-weight:600;margin-bottom:12px;">Hạn trả: 28/11/2026 (Còn 14 ngày)</div>
+              <div class="stitch-book-actions">
+                <button class="button small soft" type="button" onclick="alert('Đã gửi yêu cầu gia hạn thêm 7 ngày!')">Gia hạn sách</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="stitch-book-card" style="border:1.5px dashed #d4c5b3;background:#faf8f5;">
+            <div class="stitch-book-cover">
+              <div class="stitch-cover-spine" style="background:#a6836f;">Đắc Nhân Tâm</div>
+            </div>
+            <div class="stitch-book-body">
+              <span class="badge" style="background:#f5efe6;color:var(--wood-dark);margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">Đã lưu vào danh sách</span>
+              <h3 class="stitch-book-name">Đắc Nhân Tâm</h3>
+              <div class="stitch-book-author">Dale Carnegie</div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Lưu ngày: Hôm qua</div>
+              <div class="stitch-book-actions">
+                <button class="button small primary" type="button" style="background:var(--wood);border-color:var(--wood);" onclick="alert('Đã đăng ký giữ sách tại quầy!')">Mượn ngay</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="reader-footer">
+      <div class="reader-footer-inner">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img src="../../dùng-chung/giao%20di%E1%BB%87n/logo-moc-thu.png" alt="Logo Mộc Thư" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
+          <strong>Mộc Thư</strong>
+          <span>— Không gian an yên &amp; lan tỏa tri thức</span>
+        </div>
+        <div class="reader-footer-links">
+          <a href="#">Nội quy thư quán</a>
+          <a href="#">Chính sách bảo tồn</a>
+          <a href="#">Đăng ký thủ thư</a>
+        </div>
+        <div>© 2024 Thư viện &amp; Không gian Đọc Mộc Thư. Một tác phẩm dành trọn cho tri thức.</div>
+      </div>
+    </footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -96,9 +400,9 @@
   <script src="../../dùng-chung/chức%20n%C4%83ng/quy%E1%BB%81n-h%E1%BA%A1n.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/th%C3%A0nh-ph%E1%BA%A7n-d%C3%B9ng-chung.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/d%E1%BB%AF-li%E1%BB%87u-m%E1%BA%ABu.js"></script>
+  <script src="../../dùng-chung/chức năng/bìa-sách.js"></script>
   <script src="../chức năng/độc-giả.js"></script>
-  <script src="../../dùng-chung/chức%20n%C4%83ng/b%C3%A1o-c%C3%A1o.js"></script>
-  <script src="../../dùng-chung/chức%20n%C4%83ng/%C4%91i%E1%BB%81u-h%C6%B0%E1%BB%9Bng.js"></script>
-  <script src="../../dùng-chung/chức%20n%C4%83ng/kh%E1%BB%9Fi-%C4%91%E1%BB%99ng.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/điều-hướng.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/khởi-động.js"></script>
 </body>
 </html>

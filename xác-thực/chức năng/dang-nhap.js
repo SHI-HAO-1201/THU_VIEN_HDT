@@ -46,6 +46,7 @@
 
   sendForm(loginForm, "/api/login");
   sendForm(setupForm, "/api/setup");
+
   readerSignupForm.addEventListener("submit", function (event) {
     event.preventDefault();
     errorBox.hidden = false;

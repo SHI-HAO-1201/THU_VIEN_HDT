@@ -1,81 +1,567 @@
-.reader-nav { display: flex; gap: 7px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 2px; }
+/* Mộc Thư - Cổng Độc Giả (Chuẩn Stitch UI Screen 5) */
 
-.reader-nav button { flex: 0 0 auto; padding: 8px 12px; border: 1px solid transparent; border-radius: 9px; color: #718078; background: transparent; font-size: 11px; }
+.reader-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-.reader-nav button.active { border-color: #dce7dc; color: var(--green-dark); background: #edf4ed; font-weight: 700; }
+/* Reader Topbar Nav - Căn chỉnh chuẩn, không bị cắt hay ẩn chữ */
+.reader-shell .topbar {
+  padding: 0 24px;
+}
 
-.reader-hero {
-      position: relative;
-      display: flex;
-      align-items: center;
-      min-height: 263px;
-      overflow: hidden;
-      padding: 38px;
-      border: 1px solid #e5ebe3;
-      border-radius: 19px;
-      background: linear-gradient(115deg, #eaf1e9 0%, #f1f4ec 57%, #f6efe3 100%);
-    }
+.reader-shell .top-nav-links {
+  flex: 0 0 auto;
+  overflow: visible;
+  gap: 8px;
+}
 
-.reader-hero-copy { position: relative; z-index: 2; max-width: 485px; }
+.reader-shell .top-nav-link {
+  font-size: 12px;
+  padding: 0 11px;
+  white-space: nowrap;
+}
 
-.reader-hero-copy .eyebrow { color: #7c916f; }
+.reader-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  width: 100%;
+}
 
-.reader-hero h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(27px, 4vw, 39px); font-weight: 500; line-height: 1.12; }
+/* Hero Section */
+.reader-hero-stitch {
+  background: linear-gradient(180deg, #fbf9f4 0%, #f4ede2 100%);
+  border: 1px solid #ebd9c8;
+  border-radius: 20px;
+  padding: 44px 30px;
+  text-align: center;
+  margin-bottom: 24px;
+}
 
-.reader-hero p { max-width: 360px; margin: 12px 0 18px; color: #68766d; font-size: 12px; }
+.reader-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eaf1ea;
+  color: #366d48;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
 
-.hero-books { position: absolute; right: 8%; bottom: -16px; display: flex; align-items: flex-end; gap: 9px; transform: rotate(-2deg); }
+.reader-hero-stitch h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 3.5vw, 36px);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 10px;
+  letter-spacing: -0.5px;
+}
 
-.hero-book { display: grid; width: 90px; height: 144px; place-items: center; padding: 12px; border-radius: 4px 9px 9px 4px; color: rgba(255,255,255,.95); background: #849781; box-shadow: inset 6px 0 rgba(0,0,0,.11), 0 12px 20px rgba(42,57,45,.13); font-family: Georgia, serif; font-size: 13px; text-align: center; }
+.reader-hero-stitch p.subtitle {
+  max-width: 680px;
+  margin: 0 auto 24px;
+  color: #6d756d;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
 
-.hero-book:nth-child(2) { width: 102px; height: 173px; color: #fffaf0; background: #bb9265; transform: rotate(4deg); }
+.reader-search-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  background: #fff;
+  border: 1px solid #d9cdbd;
+  border-radius: 30px;
+  padding: 4px 6px 4px 18px;
+  box-shadow: 0 8px 24px rgba(45, 36, 25, .08);
+}
 
-.hero-book:nth-child(3) { width: 85px; height: 132px; background: #a96f68; transform: rotate(7deg); }
+.reader-search-wrap input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+}
 
-.book-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.reader-search-wrap button {
+  background: var(--wood);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background .15s;
+}
 
-.reader-book-card { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow); }
+.reader-search-wrap button:hover {
+  background: var(--wood-hover);
+}
 
-.reader-book-cover { display: grid; height: 142px; place-items: center; padding: 13px; color: rgba(255,255,255,.95); background: #829681; font-family: Georgia, serif; font-size: 18px; text-align: center; }
+.reader-quick-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--muted);
+}
 
-.reader-book-cover.cover-2 { background: #b99064; }
+.reader-quick-tag {
+  background: #fff;
+  border: 1px solid #e5dbcf;
+  padding: 4px 12px;
+  border-radius: 14px;
+  color: var(--wood-dark);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all .15s;
+}
 
-.reader-book-cover.cover-3 { background: #a97773; }
+.reader-quick-tag:hover {
+  background: var(--wood-soft);
+  border-color: var(--wood-line);
+}
 
-.reader-book-cover.cover-4 { background: #728b99; }
+/* Promotional Card: Tuần lễ Sách Gỗ */
+.reader-promo-banner {
+  background: linear-gradient(135deg, #2c4436 0%, #1f3327 100%);
+  border-radius: 18px;
+  padding: 34px 38px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 34px;
+  box-shadow: 0 14px 35px rgba(28, 48, 36, .18);
+  position: relative;
+  overflow: hidden;
+}
 
-.reader-book-info { padding: 12px; }
+.reader-promo-content {
+  max-width: 600px;
+  position: relative;
+  z-index: 2;
+}
 
-.reader-book-info h3 { margin: 0 0 3px; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.reader-promo-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, .15);
+  color: #a8dfb5;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
 
-.reader-book-info p { margin: 0 0 8px; color: var(--muted); font-size: 9px; }
+.reader-promo-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #fff;
+}
 
-.reader-book-meta { display: flex; align-items: center; justify-content: space-between; }
+.reader-promo-desc {
+  font-size: 13px;
+  color: #c9dbcd;
+  line-height: 1.55;
+  margin: 0 0 20px;
+}
 
-.reader-book-meta span { color: #a17b43; font-size: 9px; }
+.reader-promo-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
 
-.reader-book-meta button { padding: 5px 8px; border: 1px solid #e3ebe3; border-radius: 7px; color: var(--green-dark); background: #f5f8f4; font-size: 9px; font-weight: 700; }
+.promo-btn-gold {
+  background: #c48039;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(196, 128, 57, .3);
+}
 
-.reader-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 19px; }
+.promo-link-white {
+  color: #fff;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
 
-.feature-card { display: flex; gap: 11px; padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+.reader-promo-art {
+  position: relative;
+  z-index: 1;
+  font-size: 72px;
+  opacity: .8;
+}
 
-.feature-card > span { display: grid; width: 31px; height: 31px; flex: 0 0 31px; place-items: center; border-radius: 9px; color: var(--green); background: var(--green-soft); }
+/* Book Sections */
+.reader-section {
+  margin-bottom: 36px;
+}
 
-.feature-card strong { display: block; font-size: 10px; }
+.reader-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 14px;
+}
 
-.feature-card p { margin: 3px 0 0; color: var(--muted); font-size: 9px; }
+.reader-section-kicker {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--wood);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 
-.reader-page-content { min-height: 360px; }
+.reader-section-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 4px 0 0;
+}
 
-.reader-panel { padding: 22px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+.reader-tabs-pill {
+  display: inline-flex;
+  gap: 4px;
+  background: #ede6dc;
+  padding: 3px;
+  border-radius: 20px;
+}
 
-.reader-panel h2 { margin: 0 0 6px; font-family: Georgia, serif; font-size: 21px; }
+.reader-tab-pill {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
 
-.reader-panel p { color: var(--muted); font-size: 12px; }
+.reader-tab-pill.active {
+  background: #fff;
+  color: var(--wood-dark);
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+}
 
-.category-pills { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 17px; }
+/* Featured Book Cards Grid */
+.reader-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
 
-.category-pills span { padding: 8px 12px; border: 1px solid var(--line); border-radius: 22px; color: #5e6f64; background: #fbfcfa; font-size: 10px; }
+.stitch-book-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
 
-.notice { margin-top: 15px; padding: 12px 14px; border-left: 3px solid #8da78f; border-radius: 0 9px 9px 0; color: #607066; background: #f2f6f1; font-size: 10px; }
+.stitch-book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(45, 36, 25, .1);
+}
+
+.stitch-book-cover {
+  height: 180px;
+  background: #f7f4ed;
+  display: grid;
+  place-items: center;
+  position: relative;
+  padding: 16px;
+  border-bottom: 1px solid var(--line-subtle);
+}
+
+.stitch-cover-spine {
+  width: 90px;
+  height: 130px;
+  border-radius: 4px 8px 8px 4px;
+  background: var(--wood);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 11.5px;
+  font-weight: 700;
+  box-shadow: inset 4px 0 rgba(0,0,0,.2), 0 8px 18px rgba(0,0,0,.15);
+}
+
+.stitch-cover-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #eaf4ed;
+  color: #2e663e;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.stitch-book-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.stitch-book-name {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.stitch-book-author {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.stitch-book-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #c48039;
+  margin-bottom: 14px;
+}
+
+.stitch-book-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.stitch-borrow-btn {
+  flex: 1;
+  background: var(--wood);
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.stitch-borrow-btn:hover {
+  background: var(--wood-hover);
+}
+
+.stitch-detail-btn {
+  background: #f5f1eb;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 3 Bước mượn sách đơn giản */
+.guide-3steps-section {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 36px 32px;
+  margin-bottom: 36px;
+  text-align: center;
+}
+
+.guide-3steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 26px;
+  text-align: left;
+}
+
+.guide-step-card {
+  background: #faf8f5;
+  border: 1px solid #ebd9c8;
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.guide-step-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--wood);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.guide-step-title {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.guide-step-desc {
+  font-size: 12px;
+  color: #6d756d;
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+
+.guide-step-foot {
+  font-size: 10.5px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px dashed #dec3a7;
+  padding-top: 10px;
+}
+
+/* Testimonial Banner */
+.reader-testimonial-banner {
+  background: #f3f6f3;
+  border: 1px solid #d4dfd6;
+  border-radius: 16px;
+  padding: 24px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.reader-test-quote {
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-style: italic;
+  color: #2e4a38;
+  line-height: 1.6;
+  margin: 0 0 6px;
+}
+
+.reader-test-author {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Footer */
+.reader-footer {
+  background: #faf8f5;
+  border-top: 1px solid var(--line);
+  padding: 30px 20px;
+  margin-top: auto;
+}
+
+.reader-footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.reader-footer-links {
+  display: flex;
+  gap: 18px;
+}
+
+.reader-footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.reader-footer-links a:hover {
+  color: var(--wood-dark);
+}
+
+@media (max-width: 1000px) {
+  .reader-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .guide-3steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .reader-promo-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .reader-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Bìa sách thật: giữ toàn bộ ảnh và bìa chữ dự phòng khi ảnh lỗi. */
+.stitch-book-cover .book-cover-media,
+.reader-book-cover .book-cover-media {
+  position: absolute;
+  inset: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  border-radius: 4px;
+}
+.has-book-image .book-cover-media { visibility: visible; }
+.has-book-image .stitch-cover-spine { visibility: hidden; }
+.book-cover-image {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 2px 5px 5px 2px;
+  box-shadow: -3px 3px 0 rgba(80,49,23,.12), 0 8px 18px rgba(45,36,25,.18);
+}
+.stitch-cover-badge { z-index: 2; pointer-events: none; }
+.reader-book-cover { position: relative; }

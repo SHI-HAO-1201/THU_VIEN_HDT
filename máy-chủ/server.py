@@ -83,9 +83,19 @@ def initialize_db() -> None:
                 minimum INTEGER NOT NULL DEFAULT 0 CHECK (minimum >= 0),
                 location TEXT NOT NULL DEFAULT '',
                 quality TEXT NOT NULL DEFAULT 'Tốt',
+                summary TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS loans (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE RESTRICT,
+                reader_code TEXT NOT NULL,
+                borrowed_at TEXT NOT NULL,
+                due_at TEXT NOT NULL,
+                returned_at TEXT
+            );
+            CREATE INDEX IF NOT EXISTS ix_loans_open ON loans(returned_at, due_at);
             CREATE TABLE IF NOT EXISTS audit_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -95,6 +105,10 @@ def initialize_db() -> None:
             );
             """
         )
+        book_columns = {row["name"] for row in db.execute("PRAGMA table_info(books)")}
+        if "summary" not in book_columns:
+            db.execute("ALTER TABLE books ADD COLUMN summary TEXT NOT NULL DEFAULT ''")
+
         if db.execute("SELECT COUNT(*) FROM books").fetchone()[0] == 0:
             now = utc_now()
             db.executemany(
@@ -103,6 +117,24 @@ def initialize_db() -> None:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 [(*book, now, now) for book in SEED_BOOKS],
             )
+
+        legacy_accounts = (("admin", "admin"), ("thuthu", "librarian"), ("docgia", "reader"))
+        for username, expected_role in legacy_accounts:
+            row = db.execute("SELECT * FROM users WHERE username = ? COLLATE NOCASE", (username,)).fetchone()
+            if not row or row["role"] != expected_role or row["status"] != "active":
+                continue
+            try:
+                salt = bytes.fromhex(row["password_salt"])
+                expected_hash = bytes.fromhex(row["password_hash"])
+            except ValueError:
+                continue
+            if hmac.compare_digest(password_digest("123", salt), expected_hash):
+                db.execute(
+                    "UPDATE users SET username = ?, status = 'disabled' WHERE id = ?",
+                    (f"legacy-disabled-{row['id']}-{username}", row["id"]),
+                )
+                db.execute("DELETE FROM sessions WHERE user_id = ?", (row["id"],))
+                log_action(db, None, "legacy_demo_account_disabled", username)
 
 
 def utc_now() -> str:
@@ -224,7 +256,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/setup/status":
             with connect_db() as db:
-                exists = db.execute("SELECT 1 FROM users WHERE role = 'admin' LIMIT 1").fetchone() is not None
+                exists = db.execute("SELECT 1 FROM users WHERE role = 'admin' AND status = 'active' LIMIT 1").fetchone() is not None
             self.send_json(200, {"needsSetup": not exists})
             return
         if path == "/api/session":
@@ -246,6 +278,25 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 rows = db.execute("SELECT * FROM books ORDER BY id DESC").fetchall()
             self.send_json(200, {"books": [dict(row) for row in rows]})
             return
+        if path == "/api/loans":
+            if not self.require_user({"librarian"}):
+                return
+            with connect_db() as db:
+                rows = db.execute(
+                    """SELECT l.*, b.name AS book_name
+                       FROM loans l JOIN books b ON b.id = l.book_id
+                       ORDER BY l.id DESC"""
+                ).fetchall()
+            self.send_json(200, {"loans": [{
+                "id": row["id"],
+                "bookId": row["book_id"],
+                "bookName": row["book_name"],
+                "readerCode": row["reader_code"],
+                "borrowedAt": row["borrowed_at"],
+                "dueAt": row["due_at"],
+                "returnedAt": row["returned_at"],
+            } for row in rows]})
+            return
         if path.startswith("/api/"):
             self.send_json(404, {"error": "Không tìm thấy API."})
             return
@@ -258,6 +309,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 self.send_header("Location", self.redirect_target(LOGIN_PAGE))
                 self.end_headers()
                 return
+            # Phân tách vai trò rõ ràng, độc lập: mỗi vai trò làm việc trong đúng không gian được phân quyền
             if user["role"] != expected_role:
                 self.send_response(302)
                 self.send_header("Location", self.redirect_target(ROLE_HOME[user["role"]]))
@@ -290,7 +342,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             try:
                 with connect_db() as db:
                     db.execute("BEGIN IMMEDIATE")
-                    if db.execute("SELECT 1 FROM users WHERE role = 'admin' LIMIT 1").fetchone():
+                    if db.execute("SELECT 1 FROM users WHERE role = 'admin' AND status = 'active' LIMIT 1").fetchone():
                         self.send_json(409, {"error": "Tài khoản quản trị đã được thiết lập."})
                         return
                     cursor = db.execute(
@@ -356,6 +408,113 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             self.wfile.write(body)
             return
 
+        if path == "/api/switch-role":
+            actor = self.require_user({"admin"})
+            if not actor:
+                return
+            target_role = str(data.get("role", "")).strip().lower()
+            if target_role not in ROLE_HOME:
+                self.send_json(400, {"error": "Vai trò không hợp lệ."})
+                return
+            with connect_db() as db:
+                user = db.execute("SELECT * FROM users WHERE role = ? AND status = 'active' ORDER BY id ASC LIMIT 1", (target_role,)).fetchone()
+                if not user:
+                    self.send_json(404, {"error": f"Không tìm thấy tài khoản hoạt động cho vai trò {target_role}."})
+                    return
+                token = secrets.token_urlsafe(32)
+                now = utc_now()
+                expires = (datetime.now(timezone.utc) + timedelta(hours=SESSION_HOURS)).isoformat(timespec="seconds")
+                db.execute(
+                    "INSERT INTO sessions (token_hash, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)",
+                    (hashlib.sha256(token.encode()).hexdigest(), user["id"], expires, now),
+                )
+                log_action(db, actor["id"], "switch_role", f"{user['username']}:{target_role}")
+            body = json.dumps({"ok": True, "home": ROLE_HOME[target_role], "user": safe_user(user)}, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.set_session_cookie(token, SESSION_HOURS * 3600)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        if path == "/api/loans":
+            actor = self.require_user({"librarian"})
+            if not actor:
+                return
+            reader_code = str(data.get("readerCode", "")).strip()
+            try:
+                book_id = int(data.get("bookId", 0))
+            except (ValueError, TypeError):
+                book_id = 0
+            if not reader_code or len(reader_code) > 50 or book_id < 1:
+                self.send_json(400, {"error": "Nhập mã độc giả hợp lệ và chọn một đầu sách."})
+                return
+            with connect_db() as db:
+                db.execute("BEGIN IMMEDIATE")
+                book = db.execute("SELECT * FROM books WHERE id = ?", (book_id,)).fetchone()
+                if not book:
+                    self.send_json(404, {"error": "Không tìm thấy đầu sách."})
+                    return
+                if book["stock"] <= book["borrowed"]:
+                    self.send_json(409, {"error": "Đầu sách này hiện đã hết bản khả dụng trong kho."})
+                    return
+                borrowed_at = datetime.now(timezone.utc)
+                due_at = borrowed_at + timedelta(days=14)
+                cursor = db.execute(
+                    "INSERT INTO loans (book_id, reader_code, borrowed_at, due_at) VALUES (?, ?, ?, ?)",
+                    (book_id, reader_code, borrowed_at.isoformat(timespec="seconds"), due_at.isoformat(timespec="seconds")),
+                )
+                db.execute(
+                    "UPDATE books SET borrowed = borrowed + 1, updated_at = ? WHERE id = ?",
+                    (utc_now(), book_id),
+                )
+                updated_book = db.execute("SELECT * FROM books WHERE id = ?", (book_id,)).fetchone()
+                log_action(db, actor["id"], "loan_created", f"{cursor.lastrowid}:{reader_code}:{book['code']}")
+                loan_id = cursor.lastrowid
+            self.send_json(201, {
+                "loan": {
+                    "id": loan_id,
+                    "bookId": book_id,
+                    "bookName": book["name"],
+                    "readerCode": reader_code,
+                    "borrowedAt": borrowed_at.isoformat(timespec="seconds"),
+                    "dueAt": due_at.isoformat(timespec="seconds"),
+                    "returnedAt": None,
+                },
+                "book": dict(updated_book),
+            })
+            return
+
+        return_match = re.fullmatch(r"/api/loans/(\d+)/return", path)
+        if return_match:
+            actor = self.require_user({"librarian"})
+            if not actor:
+                return
+            loan_id = int(return_match.group(1))
+            now = utc_now()
+            with connect_db() as db:
+                db.execute("BEGIN IMMEDIATE")
+                loan = db.execute(
+                    "SELECT l.*, b.code FROM loans l JOIN books b ON b.id = l.book_id WHERE l.id = ?",
+                    (loan_id,),
+                ).fetchone()
+                if not loan:
+                    self.send_json(404, {"error": "Không tìm thấy phiếu mượn."})
+                    return
+                if loan["returned_at"]:
+                    self.send_json(409, {"error": "Phiếu mượn này đã được nhận trả."})
+                    return
+                db.execute("UPDATE loans SET returned_at = ? WHERE id = ?", (now, loan_id))
+                db.execute(
+                    "UPDATE books SET borrowed = MAX(0, borrowed - 1), updated_at = ? WHERE id = ?",
+                    (now, loan["book_id"]),
+                )
+                log_action(db, actor["id"], "loan_returned", f"{loan_id}:{loan['code']}")
+            self.send_json(200, {"ok": True, "returnedAt": now})
+            return
+
         if path == "/api/logout":
             cookie = self.headers.get("Cookie", "")
             token = next((part.strip().split("=", 1)[1] for part in cookie.split(";") if part.strip().startswith("moc_thu_session=")), "")
@@ -409,8 +568,9 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 now = utc_now()
                 with connect_db() as db:
                     cursor = db.execute(
-                        """INSERT INTO books (name, author, code, category, stock, borrowed, minimum, location, quality, created_at, updated_at)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        """INSERT INTO books
+                           (name, author, code, category, stock, borrowed, minimum, location, quality, summary, created_at, updated_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                         (*book, now, now),
                     )
                     row = db.execute("SELECT * FROM books WHERE id = ?", (cursor.lastrowid,)).fetchone()
@@ -439,7 +599,8 @@ class LibraryHandler(SimpleHTTPRequestHandler):
         if borrowed > stock:
             raise ValueError("Số bản đang mượn không thể vượt số bản trong kho.")
         return (name, author, code, str(data.get("category", "Khác")), stock, borrowed, minimum,
-                str(data.get("location", "")).strip(), str(data.get("quality", "Tốt")))
+                str(data.get("location", "")).strip(), str(data.get("quality", "Tốt")),
+                str(data.get("summary", "")).strip()[:300])
 
     def do_PUT(self):
         path = self.path_only()
@@ -498,8 +659,13 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             book_id = int(match.group(1))
             try:
                 with connect_db() as db:
-                    db.execute("UPDATE books SET name=?, author=?, code=?, category=?, stock=?, borrowed=?, minimum=?, location=?, quality=?, updated_at=? WHERE id=?",
-                               (*book, utc_now(), book_id))
+                    db.execute(
+                        """UPDATE books
+                           SET name=?, author=?, code=?, category=?, stock=?, borrowed=?, minimum=?, location=?,
+                               quality=?, summary=?, updated_at=?
+                           WHERE id=?""",
+                        (*book, utc_now(), book_id),
+                    )
                     row = db.execute("SELECT * FROM books WHERE id = ?", (book_id,)).fetchone()
                     if not row:
                         self.send_json(404, {"error": "Không tìm thấy tài liệu."})
@@ -526,7 +692,11 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             if not row:
                 self.send_json(404, {"error": "Không tìm thấy tài liệu."})
                 return
-            db.execute("DELETE FROM books WHERE id = ?", (book_id,))
+            try:
+                db.execute("DELETE FROM books WHERE id = ?", (book_id,))
+            except sqlite3.IntegrityError:
+                self.send_json(409, {"error": "Không thể xóa sách đã có lịch sử mượn."})
+                return
             log_action(db, actor["id"], "book_deleted", row["code"])
         self.send_json(200, {"ok": True})
 

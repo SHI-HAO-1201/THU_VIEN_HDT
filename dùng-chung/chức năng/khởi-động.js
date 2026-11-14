@@ -13,5 +13,8 @@
       try { await app.quanLySach.taiDanhSach(); app.quanLySach.veBang(); }
       catch (error) { app.thanhPhan.hienThongBao(error.message); }
     }
+    if (app.dieuHuong && document.getElementById("loansTable")) {
+      await app.dieuHuong.taiPhieuMuon();
+    }
   }());
 }(window));

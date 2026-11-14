@@ -18,6 +18,21 @@
     try {
       var result = await request("/api/session");
       var user = result.user;
+      var pageRole = document.body.dataset.role;
+      var roleSwitchButton = document.getElementById("roleSwitchBtn");
+      if (roleSwitchButton) {
+        roleSwitchButton.hidden = user.role !== "admin";
+        roleSwitchButton.style.display = user.role === "admin" ? "" : "none";
+      }
+      var homes = {
+        admin: "/qu%E1%BA%A3n%20l%C3%AD/giao%20di%E1%BB%87n/trang-ch%E1%BB%A7.html",
+        librarian: "/th%E1%BB%A7%20th%C6%B0/giao%20di%E1%BB%87n/trang-ch%E1%BB%A7.html",
+        reader: "/%C4%90%E1%BB%99c%20gi%E1%BA%A3/giao%20di%E1%BB%87n/trang-ch%E1%BB%A7.html"
+      };
+      if (pageRole && user.role !== pageRole && homes[user.role]) {
+        global.location.replace(homes[user.role]);
+        return;
+      }
       var name = document.getElementById("topUserName");
       var role = document.getElementById("topUserRole");
       var avatar = document.getElementById("topAvatar");
