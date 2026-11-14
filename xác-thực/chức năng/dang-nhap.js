@@ -46,6 +46,17 @@
 
   sendForm(loginForm, "/api/login");
   sendForm(setupForm, "/api/setup");
+
+  document.addEventListener("click", function (event) {
+    var chip = event.target.closest("[data-demo-user]");
+    if (chip && loginForm) {
+      var username = chip.dataset.demoUser;
+      loginForm.querySelector("input[name=username]").value = username;
+      loginForm.querySelector("input[name=password]").value = "123";
+      var submitBtn = loginForm.querySelector("button[type=submit]");
+      if (submitBtn) submitBtn.click();
+    }
+  });
   readerSignupForm.addEventListener("submit", function (event) {
     event.preventDefault();
     errorBox.hidden = false;
