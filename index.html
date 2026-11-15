@@ -16,14 +16,24 @@
 <body>
   <header class="top shell">
     <a class="brand" href="/"><img src="d%C3%B9ng-chung/giao%20di%E1%BB%87n/logo-moc-thu.png" alt=""><span>MỘC THƯ<small>THƯ VIỆN CỦA NHỮNG Ý TƯỞNG</small></span></a>
-    <nav class="topnav" aria-label="Điều hướng"><a href="#gioi-thieu">Giới thiệu</a><a href="#khong-gian">Không gian đọc</a><a href="x%C3%A1c-th%E1%BB%B1c/giao%20di%E1%BB%87n/chon-vai-tro.html">Đăng nhập&nbsp; ↗</a></nav>
+    <nav class="topnav" aria-label="Điều hướng"><a href="#gioi-thieu">Giới thiệu</a><a href="#catalog">Tra cứu sách</a><a href="#khong-gian">Không gian đọc</a><a href="x%C3%A1c-th%E1%BB%B1c/giao%20di%E1%BB%87n/dang-nhap.html?role=reader">Đăng nhập&nbsp; ↗</a></nav>
   </header>
   <main class="shell">
     <section class="hero" id="gioi-thieu">
       <div><div class="eyebrow">MỘT GÓC NHỎ ĐỂ LỚN LÊN</div><h1>Mở một cuốn sách.<br><em>Mở một thế giới.</em></h1><p>Mộc Thư là nơi những câu chuyện tìm thấy người đọc của mình. Khám phá bộ sưu tập, tìm cảm hứng mới và bắt đầu hành trình tri thức theo cách của bạn.</p><div class="actions"><a class="btn primary" href="x%C3%A1c-th%E1%BB%B1c/giao%20di%E1%BB%87n/chon-vai-tro.html">Bước vào thư viện&nbsp; ↗</a><a class="btn quiet" href="#khong-gian">Khám phá Mộc Thư</a></div></div>
       <div class="visual" id="khong-gian" aria-label="Minh họa những cuốn sách trong thư viện"><div class="sun"></div><div class="arch"></div><div class="book"><span>NHỮNG<br>TRANG SÁCH<br>ĐANG CHỜ<br>BẠN</span></div><div class="book2">MỘC<br>THƯ</div><div class="note"><strong>Chậm lại một chút.</strong>Mỗi trang sách là một cuộc gặp gỡ.</div></div>
     </section>
+    <section id="catalog" style="border-top:1px solid var(--line);padding:48px 0 56px">
+      <div class="eyebrow">TRA CỨU CÔNG KHAI</div><h2 style="font:600 38px 'Playfair Display',serif;margin:12px 0">Danh mục sách</h2>
+      <p style="color:#70766e;line-height:1.7">Tìm tên sách, tác giả hoặc thể loại. Đăng nhập độc giả để xem thông tin chi tiết và gửi yêu cầu đặt sách.</p>
+      <input id="publicBookSearch" type="search" placeholder="Tìm sách hoặc tác giả…" aria-label="Tìm sách" style="width:min(100%,520px);padding:13px;border:1px solid #c8c7b9;border-radius:5px;font-size:15px">
+      <input id="publicAuthorSearch" type="search" placeholder="Tác giả" aria-label="Lọc theo tác giả" style="width:min(100%,220px);margin-left:8px;padding:13px;border:1px solid #c8c7b9;border-radius:5px;font-size:15px">
+      <select id="publicCategoryFilter" aria-label="Lọc theo thể loại" style="width:min(100%,220px);margin-left:8px;padding:13px;border:1px solid #c8c7b9;border-radius:5px;font-size:15px"><option value="">Mọi thể loại</option><option>Văn học</option><option>Kỹ năng sống</option><option>Khoa học</option><option>Thiếu nhi</option><option>Lịch sử</option><option>Khác</option></select>
+      <label style="display:inline-flex;align-items:center;gap:6px;margin-left:8px;color:#70766e;font-size:13px"><input id="publicAvailableOnly" type="checkbox"> Chỉ sách còn</label>
+      <div id="publicBookCatalog" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:24px"><p>Đang tải danh mục…</p></div>
+    </section>
     <footer class="below"><strong>Đọc để nhìn thế giới bằng một đôi mắt khác.</strong><span class="quote">“Sách là chiếc chìa khóa mở những căn phòng bí mật trong tâm hồn.”</span></footer>
   </main>
+  <script src="d%C3%B9ng-chung/ch%E1%BB%A9c%20n%C4%83ng/trang-ch%E1%BB%A7-c%C3%B4ng-khai.js"></script>
 </body>
 </html>

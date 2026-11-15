@@ -40,6 +40,7 @@
             <div class="user-role" id="topUserRole">Độc giả thân thiết</div>
           </div>
         </div>
+        <button class="button small soft" id="logoutButton" type="button">Đăng xuất</button>
       </div>
     </header>
 
@@ -53,16 +54,16 @@
         <!-- Search Box -->
         <div class="reader-search-wrap">
           <input type="search" id="userHeroSearch" placeholder="Tìm kiếm tựa sách, tên tác giả, chủ đề, mã sách (ISBN)..." aria-label="Tìm sách">
-          <button type="button" onclick="alert('Đang tìm kiếm...')">Tìm ngay →</button>
+          <button id="userHeroSearchButton" type="button">Tìm ngay →</button>
         </div>
 
         <div class="reader-quick-tags">
           <span>Gợi ý:</span>
-          <a class="reader-quick-tag">Sách mới phát hành</a>
-          <a class="reader-quick-tag">Kỷ luật tự thân</a>
-          <a class="reader-quick-tag">Tâm lý học</a>
-          <a class="reader-quick-tag">Trẻ nhỏ</a>
-          <a class="reader-quick-tag">Triết học phương Đông</a>
+          <a class="reader-quick-tag" href="#new">Sách mới phát hành</a>
+          <a class="reader-quick-tag" href="#popular">Kỷ luật tự thân</a>
+          <a class="reader-quick-tag" href="#popular">Tâm lý học</a>
+          <a class="reader-quick-tag" href="#popular">Trẻ nhỏ</a>
+          <a class="reader-quick-tag" href="#popular">Triết học phương Đông</a>
         </div>
       </section>
 
@@ -112,8 +113,8 @@
                 <span style="color:var(--muted);">(42 lượt)</span>
               </div>
               <div class="stitch-book-actions">
-                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Muôn Kiếp Nhân Sinh vào danh sách giữ chỗ!')">Mượn sách</button>
-                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+                <button class="stitch-borrow-btn" type="button" data-reader-reserve>Mượn sách</button>
+                <button class="stitch-detail-btn" type="button" data-reader-detail>Chi tiết</button>
               </div>
             </div>
           </article>
@@ -135,8 +136,8 @@
                 <span style="color:var(--muted);">(38 lượt)</span>
               </div>
               <div class="stitch-book-actions">
-                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Khéo Ăn Khéo Nói vào danh sách giữ chỗ!')">Mượn sách</button>
-                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+                <button class="stitch-borrow-btn" type="button" data-reader-reserve>Mượn sách</button>
+                <button class="stitch-detail-btn" type="button" data-reader-detail>Chi tiết</button>
               </div>
             </div>
           </article>
@@ -158,8 +159,8 @@
                 <span style="color:var(--muted);">(76 lượt)</span>
               </div>
               <div class="stitch-book-actions">
-                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Hoàng Tử Bé vào danh sách giữ chỗ!')">Mượn sách</button>
-                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+                <button class="stitch-borrow-btn" type="button" data-reader-reserve>Mượn sách</button>
+                <button class="stitch-detail-btn" type="button" data-reader-detail>Chi tiết</button>
               </div>
             </div>
           </article>
@@ -181,12 +182,20 @@
                 <span style="color:var(--muted);">(51 lượt)</span>
               </div>
               <div class="stitch-book-actions">
-                <button class="stitch-borrow-btn" type="button" onclick="alert('Đã thêm Sống Đơn Giản vào danh sách giữ chỗ!')">Mượn sách</button>
-                <button class="stitch-detail-btn" type="button">Chi tiết</button>
+                <button class="stitch-borrow-btn" type="button" data-reader-reserve>Mượn sách</button>
+                <button class="stitch-detail-btn" type="button" data-reader-detail>Chi tiết</button>
               </div>
             </div>
           </article>
         </div>
+      </section>
+
+      <section class="reader-section" id="reader-catalog">
+        <div class="reader-section-header">
+          <div><div class="reader-section-kicker">DANH MỤC THƯ VIỆN</div><h2 class="reader-section-title">Tra cứu sách trong kho</h2></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><label class="search-box"><span>⌕</span><input type="search" id="readerSearch" placeholder="Tìm sách, tác giả, thể loại..."></label><select id="readerCategoryFilter" aria-label="Lọc thể loại"><option value="">Mọi thể loại</option><option>Văn học</option><option>Kỹ năng sống</option><option>Khoa học</option><option>Thiếu nhi</option><option>Lịch sử</option><option>Khác</option></select><label style="font-size:12px;display:flex;align-items:center;gap:5px"><input id="readerAvailableOnly" type="checkbox"> Chỉ sách còn</label></div>
+        </div>
+        <div class="reader-cards-grid" id="readerCatalogGrid"><p>Đang tải danh mục…</p></div>
       </section>
 
       <!-- 4. Sách Mới Lên Kệ Tuần Này -->
@@ -325,8 +334,15 @@
             <div class="reader-section-tag">GÓC ĐỌC CÁ NHÂN</div>
             <h2>Tủ sách của tôi &amp; Ấn phẩm đang mượn</h2>
           </div>
-          <span style="font-size:12px;color:var(--muted);">Đang mượn: <strong style="color:var(--wood-dark);">2 bản</strong> · Đã lưu: <strong style="color:var(--wood-dark);">1 cuốn</strong></span>
+          <span style="font-size:12px;color:var(--muted);">Đang mượn: <strong id="readerLoanCount" style="color:var(--wood-dark);">0</strong> · Đặt chỗ: <strong id="readerReservationCount" style="color:var(--wood-dark);">0</strong></span>
         </div>
+
+        <form id="readerProfileForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:16px;margin:0 0 18px;background:#fffefa;border:1px solid #e2d8ca;border-radius:8px">
+          <label>Họ và tên<input name="fullName" required maxlength="100"></label>
+          <label>Email<input name="email" type="email" required maxlength="255"></label>
+          <button class="button small primary" type="submit">Cập nhật hồ sơ</button>
+        </form>
+        <div id="readerHistoryList" style="display:grid;gap:10px;margin-bottom:20px"><p>Đang tải lịch sử mượn và đặt chỗ…</p></div>
 
         <div class="stitch-cards-row">
           <article class="stitch-book-card" style="border:1.5px solid #d4c5b3;">

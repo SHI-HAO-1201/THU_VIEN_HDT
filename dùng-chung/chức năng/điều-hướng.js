@@ -14,6 +14,7 @@
   function veMenu() {
     var nav = document.getElementById("sidebarNav");
     var label = document.getElementById("sidebarLabel");
+    if (!nav || !label) return;
     var entries = mode === "reader" ? duLieu.menuDocGia : (mode === "librarian" ? duLieu.menuThuThu : duLieu.menuQuanTri);
     label.textContent = mode === "reader" ? "Khám phá" : (mode === "librarian" ? "Nghiệp vụ thư viện" : "Quản trị hệ thống");
     nav.innerHTML = entries.map(function (item) {
@@ -150,6 +151,19 @@
     var go = event.target.closest("[data-go]");
     if (go) {
       var targetId = go.dataset.go;
+      if (mode === "reader") {
+        var readerSections = {
+          "reader-home": "home", "reader-catalog": "reader-catalog", "reader-new": "new",
+          "reader-categories": "popular", "reader-services": "guide", "reader-about": "shelf"
+        };
+        var readerSection = document.getElementById(readerSections[targetId] || "");
+        if (readerSection) {
+          event.preventDefault();
+          readerSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          document.querySelectorAll("#sidebarNav [data-go]").forEach(function (item) { item.classList.toggle("active", item === go); });
+          return;
+        }
+      }
       if (document.getElementById("page-" + targetId)) {
         if (go.dataset.section && mode === "librarian") {
           activeWarehouseSection = go.dataset.section;
@@ -235,18 +249,38 @@
     if (returnLoanButton) {
       var loanId = returnLoanButton.dataset.returnLoan;
       if (!loanId || !global.confirm("Xác nhận đã nhận trả sách trong phiếu này?")) return;
+      var condition = global.prompt("Tình trạng tài liệu: nhập 1 nếu bình thường, 2 nếu hư hỏng, 3 nếu mất.", "1");
+      if (condition === null) return;
+      if (!["1", "2", "3"].includes(condition.trim())) {
+        thanhPhan.hienThongBao("Vui lòng chọn 1, 2 hoặc 3.");
+        return;
+      }
+      var compensation = 0;
+      if (condition.trim() !== "1") {
+        var amount = global.prompt("Nhập số tiền bồi thường (đồng). Nhập 0 nếu chưa xác định.", "0");
+        if (amount === null) return;
+        compensation = Number(amount);
+        if (!Number.isSafeInteger(compensation) || compensation < 0) {
+          thanhPhan.hienThongBao("Số tiền bồi thường không hợp lệ.");
+          return;
+        }
+        if (compensation === 0) {
+          thanhPhan.hienThongBao("Cần ghi nhận giá trị bồi thường trước khi kết thúc phiếu.");
+          return;
+        }
+      }
       returnLoanButton.disabled = true;
       global.MocThu.auth.request("/api/loans/" + loanId + "/return", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: "{}"
-      }).then(async function () {
+        body: JSON.stringify({ damaged: condition.trim() === "2", lost: condition.trim() === "3", compensationAmount: compensation })
+      }).then(async function (result) {
         if (sach) {
           await sach.taiDanhSach();
           sach.veBang();
         }
         await taiPhieuMuon();
-        thanhPhan.hienThongBao("Đã nhận trả sách và cập nhật tồn kho.");
+        thanhPhan.hienThongBao(result.totalDue ? "Đã nhận trả. Ghi nhận tiền phạt/bồi thường " + result.totalDue.toLocaleString("vi-VN") + "đ và khóa thẻ đến khi xử lý." : "Đã nhận trả sách và cập nhật tồn kho.");
       }).catch(function (error) {
         returnLoanButton.disabled = false;
         thanhPhan.hienThongBao(error.message);
@@ -269,10 +303,6 @@
     if (event.target.closest("#newLoanButton")) {
       moTrang("books");
       thanhPhan.hienThongBao("Chọn đầu sách rồi lập phiếu mượn từ phần xem chi tiết.");
-      return;
-    }
-    if (event.target.closest("#newReaderButton")) {
-      thanhPhan.hienThongBao("Khung thêm độc giả sẵn sàng kết nối với hồ sơ thẻ.");
       return;
     }
     if (event.target.closest("#newReceiptButton")) {
@@ -367,7 +397,12 @@
     });
     var mobileMenu = document.getElementById("mobileMenuButton");
     if (mobileMenu) mobileMenu.addEventListener("click", function () {
-      document.getElementById("sidebar").classList.toggle("mobile-open");
+      var sidebar = document.getElementById("sidebar");
+      if (sidebar) sidebar.classList.toggle("mobile-open");
+      else {
+        var readerNav = document.querySelector(".top-nav-links");
+        if (readerNav) readerNav.classList.toggle("mobile-open");
+      }
     });
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {

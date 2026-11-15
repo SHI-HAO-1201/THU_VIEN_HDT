@@ -39,6 +39,13 @@
 .auth-error { margin: 0 0 15px; padding: 11px 13px; border: 1px solid #f0d5d1; background: #f8eae8; color: #9a4a43; font-size: 13px; line-height: 1.5; }
 .auth-error[hidden] { display: none; }
 .auth-error.success { border-color: #d8e5d4; background: #edf3e9; color: #426847; }
+.demo-login { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--auth-line); }
+.demo-login[hidden] { display: none; }
+.demo-login > p { margin: 0 0 10px; color: #7b8279; font-size: 12px; text-align: center; }
+.demo-login-buttons { display: grid; gap: 8px; }
+.demo-login-button { min-height: 40px; padding: 8px 12px; border: 1px solid #d8dfd4; background: #f8faf5; color: #345540; font: 700 13px var(--auth-serif); cursor: pointer; }
+.demo-login-button:hover { border-color: #82947d; background: #edf2e9; }
+.demo-login-button:disabled { opacity: .6; cursor: wait; }
 
 .role-select-card { padding: 38px 42px 54px; }
 .role-select-card .auth-brandline { display: flex; width: max-content; margin: 0 auto 28px; }

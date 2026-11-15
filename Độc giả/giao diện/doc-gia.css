@@ -541,6 +541,27 @@
   }
 }
 
+@media (max-width: 800px) {
+  .reader-shell .top-nav-links.mobile-open {
+    position: absolute;
+    z-index: 20;
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 12px;
+    background: #fffefa;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 10px 28px #202b2520;
+  }
+}
+
+#readerProfileForm label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 700; }
+#readerProfileForm input { min-width: 0; padding: 9px 10px; border: 1px solid #ded5c8; border-radius: 5px; font: inherit; }
+#shelf .stitch-cards-row { display: none; }
+
 /* Bìa sách thật: giữ toàn bộ ảnh và bìa chữ dự phòng khi ảnh lỗi. */
 .stitch-book-cover .book-cover-media,
 .reader-book-cover .book-cover-media {
