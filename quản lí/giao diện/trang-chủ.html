@@ -31,6 +31,7 @@
             <div class="user-role" id="topUserRole">Quản trị viên</div>
           </div>
         </div>
+        <button class="button small soft" id="logoutButton" type="button">Đăng xuất</button>
       </div>
     </header>
 
@@ -93,10 +94,10 @@
 
             <article class="admin-stat-card">
               <div class="admin-stat-top">
-                <span class="admin-stat-label">Lượt mượn trong ngày</span>
+                <span class="admin-stat-label">Lượt mượn đang mở</span>
                 <div class="admin-stat-icon green">📇</div>
               </div>
-              <div class="admin-stat-value">324 <span class="unit">lượt</span></div>
+              <div class="admin-stat-value" id="statOpenLoans">0 <span class="unit">lượt</span></div>
               <div class="admin-stat-foot">
                 <span><span class="bullet-green">●</span> 48 trả lại</span>
                 <span><span class="bullet-red">●</span> 12 trễ hạn</span>
@@ -105,10 +106,10 @@
 
             <article class="admin-stat-card">
               <div class="admin-stat-top">
-                <span class="admin-stat-label">Doanh thu &amp; Phí dịch vụ</span>
+                <span class="admin-stat-label">Tiền phạt chưa thanh toán</span>
                 <div class="admin-stat-icon amber">💰</div>
               </div>
-              <div class="admin-stat-value">28.450.000 <span class="unit">đ</span></div>
+              <div class="admin-stat-value" id="statUnpaidFines">0 <span class="unit">đ</span></div>
               <div class="admin-stat-foot">
                 <span>Làm thẻ, mượn đặc biệt &amp; phạt...</span>
               </div>
@@ -119,7 +120,7 @@
                 <span class="admin-stat-label">Cảnh báo kho cần nhập</span>
                 <div class="admin-stat-icon red">⚠️</div>
               </div>
-              <div class="admin-stat-value">08 <span class="unit">đầu sách</span></div>
+              <div class="admin-stat-value" id="statLowStock">0 <span class="unit">đầu sách</span></div>
               <div class="admin-stat-foot">
                 <span style="color:#c44d42;">◇ Sắp hết tồn kho an toàn (&lt;3 cuốn)</span>
               </div>
@@ -436,8 +437,8 @@
               <p class="page-subtitle" style="font-size:12px;color:var(--muted);margin:0;">Tổng hợp dữ liệu luân chuyển sách, nguồn thu hội viên và hiệu suất phục vụ độc giả định kỳ tại Thư quán Mộc Thư.</p>
             </div>
             <div class="heading-actions">
-              <button class="button" id="reportsExportExcel" type="button">↧ Xuất Excel (.xlsx)</button>
-              <button class="button" id="reportsExportPdf" type="button">↧ Xuất PDF (.pdf)</button>
+              <button class="button" id="reportsExportExcel" type="button">↧ Tải bảng tính (.csv)</button>
+              <button class="button" id="reportsExportPdf" type="button">↧ In / lưu PDF</button>
               <button class="button primary" onclick="window.print()" type="button" style="background:var(--wood);border-color:var(--wood);">🖨 In báo cáo</button>
             </div>
           </div>
@@ -476,10 +477,10 @@
           <div class="admin-stats-grid">
             <article class="admin-stat-card">
               <div class="admin-stat-top">
-                <span class="admin-stat-label">TỔNG DOANH THU HOẠT ĐỘNG</span>
+                <span class="admin-stat-label">TIỀN PHẠT / BỒI THƯỜNG GHI NHẬN THÁNG</span>
                 <div class="admin-stat-icon amber">₫</div>
               </div>
-              <div class="admin-stat-value">142.600.000 <span class="unit">đ</span></div>
+              <div class="admin-stat-value" id="reportFinesMonth">0 <span class="unit">đ</span></div>
               <div class="admin-stat-foot">
                 <span class="trend-up">↗ +12.4%</span> so với kỳ trước
               </div>
@@ -487,10 +488,10 @@
 
             <article class="admin-stat-card">
               <div class="admin-stat-top">
-                <span class="admin-stat-label">LƯỢT ĐỘC GIẢ MƯỢN SÁCH</span>
+                <span class="admin-stat-label">LƯỢT MƯỢN THÁNG NÀY</span>
                 <div class="admin-stat-icon green">👥</div>
               </div>
-              <div class="admin-stat-value">4.820 <span class="unit">lượt</span></div>
+              <div class="admin-stat-value" id="reportLoansMonth">0 <span class="unit">lượt</span></div>
               <div class="admin-stat-foot">
                 <span>+340 lượt trung bình 155 lượt/ngày</span>
               </div>
@@ -498,10 +499,10 @@
 
             <article class="admin-stat-card">
               <div class="admin-stat-top">
-                <span class="admin-stat-label">HỆ SỐ LUÂN CHUYỂN KHO</span>
+                <span class="admin-stat-label">TỶ LỆ BẢN ĐANG MƯỢN</span>
                 <div class="admin-stat-icon purple">⇄</div>
               </div>
-              <div class="admin-stat-value">68.5 <span class="unit">%</span></div>
+              <div class="admin-stat-value" id="reportResourceRatio">0 <span class="unit">%</span></div>
               <div class="admin-stat-foot">
                 <span>Tồn kho an toàn: 31.5% • <strong style="color:#2e663e;">Tốt</strong></span>
               </div>
@@ -512,11 +513,16 @@
                 <span class="admin-stat-label">TỶ LỆ TRẢ ĐÚNG KỲ HẠN</span>
                 <div class="admin-stat-icon red">⏱️</div>
               </div>
-              <div class="admin-stat-value">94.2 <span class="unit">%</span></div>
+              <div class="admin-stat-value" id="reportOnTimeRatio">0 <span class="unit">%</span></div>
               <div class="admin-stat-foot">
                 <span style="color:#c44d42;">5.8% quá hạn • 280 cuốn trễ hạn</span>
               </div>
             </article>
+          </div>
+
+          <div class="admin-two-col" style="margin-top:16px">
+            <article class="admin-card"><div class="admin-card-head"><div><h2>Tài nguyên theo thể loại</h2><p>Số đầu sách, số bản và số bản đang mượn trong cơ sở dữ liệu.</p></div></div><div class="table-scroll"><table><thead><tr><th>Thể loại</th><th>Đầu sách</th><th>Tổng bản</th><th>Đang mượn</th></tr></thead><tbody id="reportCategories"><tr><td colspan="4" class="table-empty">Đang tải thống kê…</td></tr></tbody></table></div></article>
+            <article class="admin-card"><div class="admin-card-head"><div><h2>Sách lưu hành nhiều</h2><p>Sắp xếp theo số lượt ghi nhận trong lịch sử mượn.</p></div></div><div class="table-scroll"><table><thead><tr><th>Đầu sách</th><th>Mã sách</th><th>Lượt mượn</th></tr></thead><tbody id="reportTopBooks"><tr><td colspan="3" class="table-empty">Đang tải thống kê…</td></tr></tbody></table></div></article>
           </div>
 
           <!-- 2 Cột Biểu đồ Cơ cấu doanh thu & Mật độ giờ -->
@@ -816,8 +822,8 @@
             <form class="card account-create" id="userCreateForm">
               <div class="card-header">
                 <div>
-                  <h2 class="card-title">Tạo tài khoản thủ thư</h2>
-                  <p class="card-subtitle">Cấp mới tài khoản truy cập nghiệp vụ</p>
+                  <h2 class="card-title">Tạo tài khoản nhân sự</h2>
+                  <p class="card-subtitle">Chỉ quản trị viên được cấp tài khoản quản trị hoặc thủ thư.</p>
                 </div>
               </div>
               <div class="account-fields">
@@ -837,8 +843,8 @@
                   <span>Mật khẩu khởi tạo</span>
                   <input name="password" type="password" required minlength="10" autocomplete="new-password" placeholder="Tối thiểu 10 ký tự">
                 </label>
-                <input type="hidden" name="role" value="librarian">
-                <button class="button primary" type="submit">＋ Tạo tài khoản thủ thư</button>
+                <label class="field"><span>Vai trò</span><select name="role" required><option value="librarian">Thủ thư</option><option value="admin">Quản trị viên</option></select></label>
+                <button class="button primary" type="submit">＋ Tạo tài khoản</button>
               </div>
             </form>
             <article class="card table-card account-list">
@@ -855,7 +861,7 @@
                     <tr>
                       <th>Họ và tên</th>
                       <th>Tên đăng nhập</th>
-                      <th>Chức danh</th>
+                      <th>Email / Vai trò</th>
                       <th>Trạng thái</th>
                       <th>Thao tác</th>
                     </tr>
@@ -872,16 +878,28 @@
         <!-- ================= PAGE 4: THẺ THƯ VIỆN ================= -->
         <section class="page" id="page-library-cards" data-page="library-cards">
           <div class="page-heading"><div><div class="eyebrow">Hồ sơ thư viện</div><h1>Mở / khóa thẻ thư viện</h1><p class="page-subtitle">Trạng thái thẻ quyết định quyền sử dụng dịch vụ mượn sách tại thư quán.</p></div></div>
-          <div class="toolbar-row"><label class="search-box"><span>⌕</span><input type="search" placeholder="Tìm mã thẻ hoặc tên độc giả..." aria-label="Tìm thẻ thư viện"></label><button class="button primary" type="button">＋ Cấp thẻ thư viện mới</button></div>
+          <div class="toolbar-row"><label class="search-box"><span>⌕</span><input id="cardSearch" type="search" placeholder="Tìm mã thẻ hoặc tên độc giả..." aria-label="Tìm thẻ thư viện"></label><button class="button" id="reloadCards" type="button">↻ Làm mới danh sách</button></div>
           <article class="card table-card">
             <div class="table-toolbar"><div><h2 class="card-title">Danh sách thẻ bạn đọc</h2><p class="card-subtitle">Mỗi độc giả có hồ sơ thẻ riêng với mã thẻ RFID và trạng thái sử dụng.</p></div></div>
-            <div class="table-scroll"><table><thead><tr><th>Mã thẻ</th><th>Độc giả</th><th>Ngày cấp</th><th>Ngày hết hạn</th><th>Trạng thái thẻ</th><th>Thao tác</th></tr></thead><tbody>
-              <tr><td><strong>THE-0001</strong></td><td>Nguyễn Minh Anh</td><td>12/04/2023</td><td>12/04/2025</td><td><span class="badge">Đang mở</span></td><td><button class="button small" type="button">Khóa thẻ</button></td></tr>
-              <tr><td><strong>THE-0002</strong></td><td>Trần Hoàng Nam</td><td>06/03/2023</td><td>06/03/2025</td><td><span class="badge danger">Đã khóa</span></td><td><button class="button small soft" type="button">Mở thẻ</button></td></tr>
-              <tr><td><strong>THE-0003</strong></td><td>Lê Ngọc Hà</td><td>19/01/2022</td><td>19/01/2024</td><td><span class="badge warning">Hết hạn</span></td><td><button class="button small soft" type="button">Gia hạn</button></td></tr>
-              <tr><td><strong>THE-0004</strong></td><td>Đỗ Bích Phương</td><td>15/08/2023</td><td>15/08/2025</td><td><span class="badge">Đang mở</span></td><td><button class="button small" type="button">Khóa thẻ</button></td></tr>
-            </tbody></table></div>
+            <div class="table-scroll"><table><thead><tr><th>Mã thẻ</th><th>Độc giả</th><th>Email</th><th>Ngày cấp</th><th>Ngày hết hạn</th><th>Trạng thái thẻ</th><th>Thao tác</th></tr></thead><tbody id="cardsTable"><tr><td colspan="7" class="table-empty">Đang tải thẻ…</td></tr></tbody></table></div>
           </article>
+        </section>
+
+        <section class="page" id="page-audit" data-page="audit">
+          <div class="page-heading"><div><div class="eyebrow">Quản trị hệ thống</div><h1>Nhật ký hoạt động</h1><p class="page-subtitle">Tra cứu các lần đăng nhập và thao tác quản trị, thư viện.</p></div></div>
+          <div class="toolbar-row"><label class="search-box"><span>⌕</span><input id="auditSearch" type="search" placeholder="Tìm tài khoản, thao tác hoặc nội dung..."></label><button class="button" id="reloadAudit" type="button">↻ Làm mới</button></div>
+          <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Thời điểm</th><th>Tài khoản</th><th>Thao tác</th><th>Chi tiết</th></tr></thead><tbody id="auditTable"><tr><td colspan="4" class="table-empty">Đang tải nhật ký…</td></tr></tbody></table></div></article>
+        </section>
+
+        <section class="page" id="page-backups" data-page="backups">
+          <div class="page-heading"><div><div class="eyebrow">An toàn dữ liệu</div><h1>Sao lưu và khôi phục</h1><p class="page-subtitle">Tạo bản sao SQLite, thiết lập sao lưu tự động và khôi phục từ bản lưu đã chọn.</p></div><button class="button primary" id="createBackup" type="button">＋ Sao lưu ngay</button></div>
+          <form class="card account-create" id="backupSettingsForm" style="padding:18px;margin-bottom:16px">
+            <label class="field"><span>Chu kỳ tự động (ngày)</span><input name="intervalDays" type="number" min="1" max="90" required></label>
+            <label style="display:flex;gap:8px;align-items:center;margin:12px 0"><input name="enabled" type="checkbox"> Bật sao lưu tự động</label>
+            <button class="button" type="submit">Lưu lịch sao lưu</button>
+            <p class="card-subtitle" id="backupLastRun"></p>
+          </form>
+          <article class="card table-card"><div class="table-toolbar"><h2 class="card-title">Các bản sao lưu</h2><button class="text-link" id="reloadBackups" type="button">↻ Làm mới</button></div><div class="table-scroll"><table><thead><tr><th>Tên bản sao</th><th>Ngày tạo</th><th>Kích thước</th><th>Thao tác</th></tr></thead><tbody id="backupsTable"><tr><td colspan="4" class="table-empty">Đang tải bản sao…</td></tr></tbody></table></div></article>
         </section>
       </main>
     </div>
@@ -893,6 +911,8 @@
   <script src="../../dùng-chung/chức%20n%C4%83ng/th%C3%A0nh-ph%E1%BA%A7n-d%C3%B9ng-chung.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/d%E1%BB%AF-li%E1%BB%87u-m%E1%BA%ABu.js"></script>
   <script src="../chức năng/quản-lý-tài-khoản.js"></script>
+  <script src="../chức năng/quản-lý-hệ-thống.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/qu%E1%BA%A3n-l%C3%BD-th%E1%BA%BB.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/b%C3%A1o-c%C3%A1o.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/điều-hướng.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/khởi-động.js"></script>

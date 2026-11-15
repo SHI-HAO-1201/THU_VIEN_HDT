@@ -30,6 +30,7 @@
             <div class="user-role" id="topUserRole">Thủ thư</div>
           </div>
         </div>
+        <button class="button small soft" id="logoutButton" type="button">Đăng xuất</button>
       </div>
     </header>
 
@@ -156,16 +157,11 @@
         </section>
 
 <section class="page" id="page-library-cards" data-page="library-cards">
-  <div class="page-heading"><div><div class="eyebrow">Hồ sơ thư viện</div><h1>Mở / khóa thẻ thư viện</h1><p class="page-subtitle">Trạng thái thẻ quyết định quyền sử dụng dịch vụ thư viện; thẻ không phải tài khoản đăng nhập.</p></div></div>
-  <div class="card scaffold-note"><strong>Khung chức năng</strong><span>Danh sách và thao tác bên dưới chưa nối với dữ liệu SQLite. Tài khoản đăng nhập được quản lý riêng.</span></div>
-  <div class="toolbar-row"><label class="search-box"><span>⌕</span><input type="search" placeholder="Tìm mã thẻ hoặc tên độc giả..." aria-label="Tìm thẻ thư viện" disabled></label><button class="button primary" type="button" disabled title="Chức năng đang được dựng">＋ Cấp thẻ thư viện</button></div>
+  <div class="page-heading"><div><div class="eyebrow">Hồ sơ thư viện</div><h1>Mở / khóa thẻ thư viện</h1><p class="page-subtitle">Thủ thư cấp thẻ khi tạo tài khoản độc giả; tại đây có thể tra cứu và cập nhật trạng thái.</p></div></div>
+  <div class="toolbar-row"><label class="search-box"><span>⌕</span><input id="cardSearch" type="search" placeholder="Tìm mã thẻ hoặc tên độc giả..." aria-label="Tìm thẻ thư viện"></label><button class="button" id="reloadCards" type="button">↻ Làm mới</button></div>
   <article class="card table-card">
-    <div class="table-toolbar"><div><h2 class="card-title">Danh sách thẻ</h2><p class="card-subtitle">Mỗi độc giả có hồ sơ thẻ riêng với mã thẻ và trạng thái sử dụng.</p></div></div>
-    <div class="table-scroll"><table><thead><tr><th>Mã thẻ</th><th>Độc giả</th><th>Ngày cấp</th><th>Ngày hết hạn</th><th>Trạng thái thẻ</th><th>Thao tác</th></tr></thead><tbody>
-      <tr><td><strong>THE-0001</strong></td><td>Nguyễn Minh Anh</td><td>12/04/2025</td><td>12/04/2027</td><td><span class="badge">Đang mở</span></td><td><button class="button small" type="button" disabled>Khóa thẻ</button></td></tr>
-      <tr><td><strong>THE-0002</strong></td><td>Trần Hoàng Nam</td><td>06/03/2025</td><td>06/03/2027</td><td><span class="badge danger">Đã khóa</span></td><td><button class="button small soft" type="button" disabled>Mở thẻ</button></td></tr>
-      <tr><td><strong>THE-0003</strong></td><td>Lê Ngọc Hà</td><td>19/01/2024</td><td>19/01/2026</td><td><span class="badge warning">Hết hạn</span></td><td><button class="button small soft" type="button" disabled>Gia hạn</button></td></tr>
-    </tbody></table></div>
+    <div class="table-toolbar"><div><h2 class="card-title">Danh sách thẻ</h2><p class="card-subtitle">Thẻ gắn với tài khoản độc giả và được lưu trong cơ sở dữ liệu.</p></div></div>
+    <div class="table-scroll"><table><thead><tr><th>Mã thẻ</th><th>Độc giả</th><th>Email</th><th>Ngày cấp</th><th>Ngày hết hạn</th><th>Trạng thái thẻ</th><th>Thao tác</th></tr></thead><tbody id="cardsTable"><tr><td colspan="7" class="table-empty">Đang tải thẻ…</td></tr></tbody></table></div>
   </article>
   <div class="footer-note">Khóa thẻ ảnh hưởng quyền sử dụng dịch vụ thư viện, không khóa tài khoản đăng nhập.</div>
 </section>
@@ -193,15 +189,36 @@
             <article class="card stat-card"><div class="stat-top"><span>Đăng ký mới tháng này</span><span class="stat-icon gold">＋</span></div><div class="stat-number">48</div><div class="stat-foot"><span class="trend">↗ 8,2%</span> so với tháng trước</div></article>
             <article class="card stat-card"><div class="stat-top"><span>Tài khoản cần lưu ý</span><span class="stat-icon red">!</span></div><div class="stat-number">12</div><div class="stat-foot">Có phiếu mượn quá hạn</div></article>
           </div>
-          <div class="toolbar-row"><div class="filter-group"><button class="filter-button active">Tất cả</button><button class="filter-button">Đang hoạt động</button><button class="filter-button">Thẻ hết hạn</button></div><label class="search-box"><span>⌕</span><input type="search" placeholder="Tìm tên, mã độc giả, email..."></label></div>
-          <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Mã độc giả</th><th>Họ và tên</th><th>Liên hệ</th><th>Ngày tham gia</th><th>Đang mượn</th><th>Trạng thái</th></tr></thead><tbody>
-            <tr><td><strong>DG-00241</strong></td><td>Nguyễn Minh Anh</td><td>minhanh@email.com</td><td>12/04/2024</td><td>2 cuốn</td><td><span class="badge">Hoạt động</span></td></tr>
-            <tr><td><strong>DG-00239</strong></td><td>Trần Hoàng Nam</td><td>hoangnam@email.com</td><td>06/03/2024</td><td>1 cuốn</td><td><span class="badge">Hoạt động</span></td></tr>
-            <tr><td><strong>DG-00235</strong></td><td>Lê Ngọc Hà</td><td>ngocha@email.com</td><td>19/01/2024</td><td>3 cuốn</td><td><span class="badge warning">Có sách quá hạn</span></td></tr>
-            <tr><td><strong>DG-00231</strong></td><td>Phạm Gia Bảo</td><td>giabao@email.com</td><td>22/11/2023</td><td>0 cuốn</td><td><span class="badge">Hoạt động</span></td></tr>
-          </tbody></table></div></article>
+          <form class="card account-create" id="readerCreateForm" hidden style="margin-bottom:16px;padding:18px;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+            <label class="field"><span>Họ và tên</span><input name="fullName" required maxlength="100"></label>
+            <label class="field"><span>Email</span><input name="email" type="email" required maxlength="255"></label>
+            <label class="field"><span>Tên đăng nhập</span><input name="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]+"></label>
+            <label class="field"><span>Mật khẩu khởi tạo</span><input name="password" type="password" required minlength="10"></label>
+            <button class="button primary" type="submit">Tạo tài khoản và cấp thẻ</button>
+          </form>
+          <div class="toolbar-row"><div class="filter-group"><button class="filter-button active" type="button">Tất cả</button></div><label class="search-box"><span>⌕</span><input type="search" id="readerAccountSearch" placeholder="Tìm tên, mã độc giả, email..."></label></div>
+          <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Mã thẻ</th><th>Họ và tên</th><th>Liên hệ</th><th>Đang mượn</th><th>Hạn thẻ</th><th>Tình trạng</th><th>Thao tác</th></tr></thead><tbody id="readersTable"><tr><td colspan="7" class="table-empty">Đang tải độc giả…</td></tr></tbody></table></div></article>
           <div class="footer-note">Mộc Thư · Hồ sơ độc giả</div>
         </section>
+
+<section class="page" id="page-suppliers" data-page="suppliers">
+  <div class="page-heading"><div><div class="eyebrow">Đầu mối cung ứng</div><h1>Quản lý nhà cung cấp</h1><p class="page-subtitle">Thêm, tra cứu, cập nhật hoặc ngừng sử dụng nhà cung cấp.</p></div><button class="button primary" id="toggleSupplierForm" type="button">＋ Thêm nhà cung cấp</button></div>
+  <form class="card account-create" id="supplierForm" hidden style="padding:18px;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
+    <label class="field"><span>Tên đơn vị *</span><input name="name" required maxlength="150"></label>
+    <label class="field"><span>Người liên hệ</span><input name="contactName" maxlength="100"></label>
+    <label class="field"><span>Email</span><input name="email" type="email" maxlength="255"></label>
+    <label class="field"><span>Điện thoại</span><input name="phone" maxlength="40"></label>
+    <label class="field"><span>Địa chỉ</span><input name="address" maxlength="255"></label>
+    <button class="button primary" type="submit">Lưu nhà cung cấp</button>
+  </form>
+  <div class="toolbar-row"><label class="search-box"><span>⌕</span><input id="supplierSearch" type="search" placeholder="Tìm tên, người liên hệ, email..."></label><button class="button" id="reloadSuppliers" type="button">↻ Làm mới</button></div>
+  <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Nhà cung cấp</th><th>Người liên hệ</th><th>Email</th><th>Điện thoại</th><th>Địa chỉ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="suppliersTable"><tr><td colspan="7" class="table-empty">Đang tải nhà cung cấp…</td></tr></tbody></table></div></article>
+</section>
+
+<section class="page" id="page-fines" data-page="fines">
+  <div class="page-heading"><div><div class="eyebrow">Nghiệp vụ mượn trả</div><h1>Vi phạm, phạt và bồi thường</h1><p class="page-subtitle">Phí trễ hạn 2.000đ/ngày; lưu nghĩa vụ bồi thường và trạng thái thanh toán.</p></div><button class="button" id="reloadFines" type="button">↻ Làm mới</button></div>
+  <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Độc giả</th><th>Sách / Mã thẻ</th><th>Lý do</th><th>Số tiền</th><th>Trạng thái</th><th>Ngày ghi nhận</th><th>Thao tác</th></tr></thead><tbody id="finesTable"><tr><td colspan="7" class="table-empty">Đang tải khoản phạt…</td></tr></tbody></table></div></article>
+</section>
 
 <section class="page" id="page-warehouse" data-page="warehouse">
           <div class="page-heading" id="warehouse-overview" style="margin-bottom:20px;">
@@ -269,11 +286,31 @@
           </div>
 
           <!-- Warehouse Tabs -->
-          <div class="wh-tabs">
+          <div class="wh-tabs" id="warehouse-movements">
             <button class="wh-tab active" type="button">Kiểm kê số lượng &amp; Chất lượng</button>
             <button class="wh-tab" type="button">Quản lý Phiếu Nhập Kho</button>
             <button class="wh-tab" type="button">Quản lý Phiếu Xuất Kho</button>
           </div>
+
+          <form class="card account-create" id="receiptForm" hidden style="padding:18px;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
+            <h2 style="grid-column:1/-1">Lập phiếu nhập kho</h2>
+            <label class="field"><span>Nhà cung cấp</span><select name="supplierId" id="receiptSupplier" required></select></label>
+            <label class="field"><span>Đầu sách</span><select name="bookId" id="receiptBook" required></select></label>
+            <label class="field"><span>Số lượng</span><input name="quantity" type="number" min="1" max="10000" value="1" required></label>
+            <label class="field"><span>Đơn giá (đ)</span><input name="unitCost" type="number" min="0" value="0" required></label>
+            <label class="field" style="grid-column:1/-1"><span>Ghi chú</span><input name="note" maxlength="500"></label>
+            <button class="button primary" type="submit">Lưu phiếu nhập và tạo mã vạch</button>
+          </form>
+          <form class="card account-create" id="exportForm" hidden style="padding:18px;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
+            <h2 style="grid-column:1/-1">Lập phiếu xuất / thanh lý</h2>
+            <label class="field"><span>Bản sao</span><select name="copyId" id="exportCopy" required></select></label>
+            <label class="field"><span>Loại xuất</span><select name="action"><option value="damaged">Hư hỏng</option><option value="retired">Thanh lý / mất</option></select></label>
+            <label class="field" style="grid-column:1/-1"><span>Lý do</span><input name="reason" required maxlength="300"></label>
+            <button class="button primary" type="submit">Lưu phiếu xuất</button>
+          </form>
+          <article class="card table-card" id="receipt-list" style="margin-bottom:16px"><div class="table-toolbar"><h2 class="card-title">Phiếu nhập gần đây</h2><button class="text-link" id="reloadReceipts" type="button">↻ Tải phiếu</button></div><div class="table-scroll"><table><thead><tr><th>Mã phiếu</th><th>Nhà cung cấp</th><th>Ngày nhập</th><th>Số bản</th><th>Tổng tiền</th><th>Người lập</th></tr></thead><tbody id="receiptsTable"><tr><td colspan="6" class="table-empty">Đang tải phiếu nhập…</td></tr></tbody></table></div></article>
+          <article class="card table-card" id="export-list" style="margin-bottom:16px"><div class="table-toolbar"><h2 class="card-title">Phiếu xuất và thanh lý gần đây</h2><button class="text-link" id="reloadExports" type="button">↻ Tải phiếu</button></div><div class="table-scroll"><table><thead><tr><th>Mã phiếu</th><th>Ngày xuất</th><th>Số bản</th><th>Lý do</th><th>Người lập</th></tr></thead><tbody id="exportsTable"><tr><td colspan="5" class="table-empty">Đang tải phiếu xuất…</td></tr></tbody></table></div></article>
+          <article class="card table-card" id="copy-inventory" style="margin-bottom:16px"><div class="table-toolbar"><h2 class="card-title">Bản sao và mã vạch</h2><label class="search-box"><span>⌕</span><input id="copySearch" type="search" placeholder="Lọc mã vạch, tên sách, vị trí..."></label></div><div class="table-scroll"><table><thead><tr><th>Mã vạch</th><th>Sách</th><th>Vị trí</th><th>Tình trạng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="copiesTable"><tr><td colspan="6" class="table-empty">Đang tải bản sao…</td></tr></tbody></table></div></article>
 
           <!-- Toolbar lọc & tìm kiếm -->
           <div class="toolbar-row" style="margin-bottom:16px;">
@@ -502,7 +539,7 @@
           </div>
 
           <!-- Bản Đồ Bố Trí Dãy Kệ Kho Trung Tâm -->
-          <article class="shelf-map-card">
+          <article class="shelf-map-card" id="warehouse-shelves">
             <div class="admin-card-head">
               <div>
                 <h2>Bản Đồ Bố Trí Dãy Kệ Kho Trung Tâm</h2>
@@ -660,7 +697,10 @@
   <script src="../../dùng-chung/chức%20n%C4%83ng/b%C3%ACa-s%C3%A1ch.js"></script>
   <script src="../chức năng/quản-lý-sách.js"></script>
   <script src="../chức năng/quản-lý-kho.js"></script>
+  <script src="../chức năng/quản-lý-độc-giả.js"></script>
+  <script src="../chức năng/quản-lý-nghiệp-vụ.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/b%C3%A1o-c%C3%A1o.js"></script>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/qu%E1%BA%A3n-l%C3%BD-th%E1%BA%BB.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/%C4%91i%E1%BB%81u-h%C6%B0%E1%BB%9Bng.js"></script>
   <script src="../../dùng-chung/chức%20n%C4%83ng/kh%E1%BB%9Fi-%C4%91%E1%BB%99ng.js"></script>
 </body>

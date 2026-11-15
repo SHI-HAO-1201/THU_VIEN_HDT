@@ -7,6 +7,10 @@
     if (app.quanLyKho && document.getElementById("warehouseSearch")) app.quanLyKho.khoiTao();
     if (app.docGia) { try { await app.docGia.khoiTao(); } catch (error) { app.thanhPhan.hienThongBao(error.message); } }
     if (app.quanLyTaiKhoan) app.quanLyTaiKhoan.khoiTao();
+    if (app.quanLyHeThong) app.quanLyHeThong.khoiTao();
+    if (app.quanLyDocGia) app.quanLyDocGia.khoiTao();
+    if (app.quanLyThe) app.quanLyThe.khoiTao();
+    if (app.quanLyNghiepVu) app.quanLyNghiepVu.khoiTao();
     app.dieuHuong.khoiTao();
     app.dieuHuong.veMenu();
     if (app.quanLySach && document.getElementById("booksTable")) {

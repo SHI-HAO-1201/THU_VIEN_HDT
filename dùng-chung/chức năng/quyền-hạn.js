@@ -21,8 +21,8 @@
       var pageRole = document.body.dataset.role;
       var roleSwitchButton = document.getElementById("roleSwitchBtn");
       if (roleSwitchButton) {
-        roleSwitchButton.hidden = user.role !== "admin";
-        roleSwitchButton.style.display = user.role === "admin" ? "" : "none";
+        roleSwitchButton.hidden = true;
+        roleSwitchButton.style.display = "none";
       }
       var homes = {
         admin: "/qu%E1%BA%A3n%20l%C3%AD/giao%20di%E1%BB%87n/trang-ch%E1%BB%A7.html",

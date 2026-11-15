@@ -389,6 +389,21 @@
     });
 
     var drawerHistoryBtn = document.getElementById("drawerHistoryBtn");
+    if (drawerHistoryBtn) drawerHistoryBtn.addEventListener("click", async function () {
+      if (cuonSachDangXem == null || !sach[cuonSachDangXem]) return;
+      drawerHistoryBtn.disabled = true;
+      try {
+        var result = await global.MocThu.auth.request("/api/books/" + sach[cuonSachDangXem].id + "/history");
+        var history = result.loans.length ? result.loans.map(function (loan) {
+          return (loan.reader_name || loan.reader_code) + " · " + new Date(loan.borrowed_at).toLocaleDateString("vi-VN") + " · " +
+            (loan.returned_at ? "Đã trả" : "Hạn " + new Date(loan.due_at).toLocaleDateString("vi-VN"));
+        }).join("\n") : "Chưa có lịch sử mượn.";
+        global.alert(history);
+      } catch (error) { thanhPhan.hienThongBao(error.message); }
+      finally { drawerHistoryBtn.disabled = false; }
+    });
+
+    var drawerHistoryBtn = document.getElementById("drawerHistoryBtn");
     if (drawerHistoryBtn) drawerHistoryBtn.addEventListener("click", function () {
       thanhPhan.hienThongBao("Tài liệu có 14 lượt mượn trong tháng này, tỷ lệ trả đúng hạn 96%.");
     });

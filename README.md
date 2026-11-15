@@ -8,9 +8,9 @@
 python "máy-chủ/server.py"
 ```
 
-Mở <http://127.0.0.1:8000>. Lần đầu, hệ thống yêu cầu tạo tài khoản quản trị viên. Sau đó, quản trị viên tạo và khóa/mở khóa tài khoản đăng nhập của thủ thư tại **Tài khoản thủ thư**.
+Mở <http://127.0.0.1:8000>. Trang chủ và danh mục cơ bản được xem công khai. Hệ thống tự tạo ba tài khoản demo khi khởi động; tại trang đăng nhập, chọn nút theo vai trò để vào thẳng trang độc giả, thủ thư hoặc quản trị. Tài khoản demo dùng mật khẩu `Demo@12345`. Quản trị viên có thể tạo tài khoản quản trị khác và thủ thư tại **Tài khoản nhân sự**.
 
-Khách chưa đăng nhập sẽ thấy trang giới thiệu Mộc Thư. Chọn **Bước vào thư viện** để chọn Độc giả, Quản trị viên hoặc Thủ thư rồi đăng nhập. Độc giả tự đăng ký được; tài khoản quản trị/thủ thư do hệ thống cấp. Quên mật khẩu cần email đã lưu trong hồ sơ; hồ sơ cũ chưa có email có thể chỉ nhập tên đăng nhập. Server cục bộ in mã một lần (15 phút) ra cửa sổ terminal; đây là cách khôi phục dành cho bản chạy nội bộ chưa cấu hình dịch vụ email.
+Đặt sách và xem chi tiết cần đăng nhập. Đăng nhập bằng email hoặc tên đăng nhập; hệ thống tự chuyển đến trang theo vai trò đã cấp cho tài khoản. Tài khoản độc giả và thẻ thư viện được thủ thư cấp cùng lúc tại **Quản lý độc giả**. Quên mật khẩu cần email đã lưu trong hồ sơ; server cục bộ in mã một lần (15 phút) ra cửa sổ terminal vì bản chạy nội bộ chưa cấu hình dịch vụ email.
 
 SQLite tự khởi tạo tại `data/thu_vien.sqlite3`. Mật khẩu được băm bằng PBKDF2-HMAC-SHA256; phiên đăng nhập được lưu dạng mã băm. Máy chủ chỉ lắng nghe trên `127.0.0.1`.
 
@@ -28,19 +28,19 @@ index.html    điểm vào ứng dụng
 
 ## Quyền hiện tại
 
-- **Quản trị viên:** dashboard, báo cáo, tạo và khóa/mở khóa tài khoản đăng nhập của thủ thư; có khung quản lý thẻ thư viện.
-- **Thủ thư:** xem, thêm, sửa, xóa danh mục sách, quản lý kho và có khung quản lý thẻ thư viện.
-- **Độc giả:** xem danh mục sách; trang đăng nhập có khung đăng ký tài khoản độc giả.
+- **Quản trị viên:** dashboard, báo cáo, tạo tài khoản quản trị/thủ thư và quản lý trạng thái tài khoản nhân sự, tra cứu và mở/khóa thẻ.
+- **Thủ thư:** quản lý sách, kho, mượn trả; tạo tài khoản độc giả kèm thẻ thư viện và quản lý trạng thái thẻ.
+- **Độc giả:** tra cứu, đặt sách bằng thẻ còn hiệu lực và xem thông tin sách sau khi đăng nhập.
 
-Trang chủ công khai dẫn vào màn chọn vai trò. Trang đăng nhập chỉ nhận tài khoản đúng vai trò đã chọn; server cũng kiểm tra vai trò đó. Ảnh bìa dùng ảnh bìa trực tuyến đã ghép theo tên sách hoặc tra theo tên sách qua Open Library; nếu nguồn ảnh không có bản phù hợp, danh mục vẫn hiện chữ cái đầu làm ảnh dự phòng.
+Trang chủ công khai có thể tìm danh mục sách. Màn chọn vai trò chỉ là lối vào đăng nhập; vai trò thật luôn lấy từ hồ sơ tài khoản trên máy chủ. Ảnh bìa dùng ảnh bìa trực tuyến đã ghép theo tên sách hoặc tra theo tên sách qua Open Library; nếu nguồn ảnh không có bản phù hợp, danh mục vẫn hiện chữ cái đầu làm ảnh dự phòng.
 
-Máy chủ kiểm tra quyền cho cả trang theo vai trò và API. Tài khoản bị khóa sẽ mất hiệu lực phiên đăng nhập. Tài khoản không được tạo sẵn; lần chạy đầu tiên yêu cầu tạo quản trị viên. Chỉ quản trị viên đăng nhập mới có thể chuyển sang tài khoản hoạt động đầu tiên của vai trò khác để xem thử; để quay lại quản trị, hãy đăng xuất rồi đăng nhập lại.
+Máy chủ kiểm tra quyền cho cả trang theo vai trò và API. Tài khoản bị khóa sẽ mất hiệu lực phiên đăng nhập. Không còn bước bắt buộc tạo quản trị viên ở lần chạy đầu; endpoint thiết lập quản trị ban đầu đã bị vô hiệu hóa. Phiên đăng nhập không thể chuyển sang vai trò/tài khoản khác.
 
 ## Tài khoản đăng nhập và thẻ thư viện
 
 Đây là hai loại hồ sơ riêng:
 
-- **Tài khoản đăng nhập** gồm tên đăng nhập, mật khẩu và vai trò; dùng để xác thực và phân quyền vào hệ thống. Quản trị viên quản lý tài khoản thủ thư.
+- **Tài khoản đăng nhập** gồm tên đăng nhập, email, mật khẩu và vai trò; dùng để xác thực và phân quyền vào hệ thống. Quản trị viên tạo tài khoản quản trị/thủ thư; thủ thư tạo tài khoản độc giả.
 - **Thẻ thư viện** là hồ sơ do thư viện cấp cho độc giả, có mã thẻ, ngày cấp/hết hạn và trạng thái sử dụng dịch vụ. Thủ thư và quản trị viên có khung giao diện mở/khóa thẻ.
 
-Các khung thẻ thư viện và đăng ký tài khoản độc giả hiện mới là giao diện mẫu; thao tác chưa lưu vào SQLite. Tài khoản, danh mục sách, mô tả sách và phiếu mượn nhanh được lưu trong SQLite. Phiếu mượn nhanh ghi mã độc giả do thủ thư nhập, tự đặt hạn trả 14 ngày và cập nhật số lượng đang mượn; màn hình nhận trả cập nhật phiếu và tồn kho. Các chức năng cấp thẻ, nhập kho, đặt trước, tiền phạt và báo cáo chi tiết vẫn dùng dữ liệu minh họa. Khi nâng cấp cơ sở dữ liệu có các tài khoản mẫu cũ admin, thuthu, docgia dùng mật khẩu 123, máy chủ sẽ vô hiệu hóa các tài khoản đó nếu mật khẩu chưa được đổi.
+Tài khoản, thẻ độc giả, yêu cầu đặt sách, danh mục và phiếu mượn được lưu trong SQLite. Phiếu mượn do thủ thư lập có hạn trả 14 ngày; màn hình nhận trả cập nhật phiếu và tồn kho. Một số báo cáo và nội dung dashboard vẫn là dữ liệu minh họa. Khi nâng cấp cơ sở dữ liệu có các tài khoản mẫu cũ admin, thuthu, docgia dùng mật khẩu 123, máy chủ sẽ vô hiệu hóa các tài khoản đó nếu mật khẩu chưa được đổi.

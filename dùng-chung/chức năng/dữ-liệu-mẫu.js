@@ -7,12 +7,16 @@
       { id: "dashboard", label: "Dashboard tổng quan", icon: "▦" },
       { id: "accounts", label: "Tài khoản thủ thư", icon: "♙" },
       { id: "library-cards", label: "Thẻ thư viện", icon: "▣" },
-      { id: "reports", label: "Thống kê & báo cáo", icon: "▥" }
+      { id: "reports", label: "Thống kê & báo cáo", icon: "▥" },
+      { id: "audit", label: "Nhật ký hệ thống", icon: "≡" },
+      { id: "backups", label: "Sao lưu & khôi phục", icon: "⤓" }
     ],
     menuThuThu: [
       { id: "books", label: "Quản lý tài liệu", icon: "▤" },
       { id: "loans", label: "Mượn & trả", icon: "⇄", count: "18" },
       { id: "readers", label: "Độc giả & thẻ", icon: "♙" },
+      { id: "suppliers", label: "Nhà cung cấp", icon: "▣" },
+      { id: "fines", label: "Vi phạm & tiền phạt", icon: "!" },
       { id: "library-cards", label: "Mở / khóa thẻ thư viện", icon: "▣" },
       { id: "warehouse", section: "warehouse-overview", label: "Nhập kho & tồn kho", icon: "▦" },
       { id: "warehouse", section: "warehouse-movements", label: "Phiếu nhập", icon: "⇄" },
