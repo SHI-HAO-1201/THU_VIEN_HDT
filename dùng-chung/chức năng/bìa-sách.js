@@ -7,6 +7,7 @@
     { title: "Sống Đơn Giản", image: "https://nxbcongthuong.vn/uploads/shops/2025/sdg-1-to.jpg", source: "https://nxbcongthuong.vn/shops/Sach-khoa-hoc/song-don-gian-cho-minh-thanh-than.html" },
     { title: "Cây Cam Ngọt Của Tôi", image: "https://cdn1.fahasa.com/media/catalog/product/i/m/image_217480.jpg", source: "https://www.fahasa.com/cay-cam-ngot-cua-toi.html" },
     { title: "Đắc Nhân Tâm", image: "https://cdn1.fahasa.com/media/catalog/product/i/m/image_143976.jpg", source: "https://www.fahasa.com/dac-nhan-tam-185500.html" },
+    { title: "Rừng Na Uy", image: "https://cdn1.fahasa.com/media/catalog/product/8/9/8935235245815.jpg", source: "https://www.fahasa.com/rung-na-uy-an-ban-dac-biet-20-nam-thanh-lap-bia-cung.html" },
     { title: "Hiểu Về Trái Tim", image: "https://cdn1.fahasa.com/media/catalog/product/z/4/z4118763446785_cf4bc22d353b065bbb37e686de1f9207.jpg", source: "https://www.fahasa.com/hieu-ve-trai-tim.html" },
     { title: "Nhà Giả Kim", image: "https://cdn1.fahasa.com/media/catalog/product/i/m/image_195509_1_36793.jpg", source: "https://www.fahasa.com/nha-gia-kim.html" }
   ];

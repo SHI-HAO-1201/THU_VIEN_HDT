@@ -59,6 +59,7 @@ def initialize_db() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL COLLATE NOCASE UNIQUE,
                 full_name TEXT NOT NULL,
+                email TEXT NOT NULL DEFAULT '',
                 role TEXT NOT NULL CHECK (role IN ('admin', 'librarian', 'reader')),
                 password_salt TEXT NOT NULL,
                 password_hash TEXT NOT NULL,
@@ -72,6 +73,12 @@ def initialize_db() -> None:
                 created_at TEXT NOT NULL
             );
             CREATE INDEX IF NOT EXISTS ix_sessions_expiry ON sessions(expires_at);
+            CREATE TABLE IF NOT EXISTS password_resets (
+                token_hash TEXT PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                expires_at TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS books (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -108,6 +115,9 @@ def initialize_db() -> None:
         book_columns = {row["name"] for row in db.execute("PRAGMA table_info(books)")}
         if "summary" not in book_columns:
             db.execute("ALTER TABLE books ADD COLUMN summary TEXT NOT NULL DEFAULT ''")
+        user_columns = {row["name"] for row in db.execute("PRAGMA table_info(users)")}
+        if "email" not in user_columns:
+            db.execute("ALTER TABLE users ADD COLUMN email TEXT NOT NULL DEFAULT ''")
 
         if db.execute("SELECT COUNT(*) FROM books").fetchone()[0] == 0:
             now = utc_now()
@@ -249,10 +259,12 @@ class LibraryHandler(SimpleHTTPRequestHandler):
         path = self.path_only()
         if path in ("/", "/index.html"):
             user = self.current_user()
-            self.send_response(302)
-            target = ROLE_HOME[user["role"]] if user else LOGIN_PAGE
-            self.send_header("Location", self.redirect_target(target))
-            self.end_headers()
+            if user:
+                self.send_response(302)
+                self.send_header("Location", self.redirect_target(ROLE_HOME[user["role"]]))
+                self.end_headers()
+            else:
+                super().do_GET()
             return
         if path == "/api/setup/status":
             with connect_db() as db:
@@ -332,9 +344,10 @@ class LibraryHandler(SimpleHTTPRequestHandler):
         if path == "/api/setup":
             full_name = str(data.get("fullName", "")).strip()
             username = str(data.get("username", "")).strip()
+            email = str(data.get("email", "")).strip().lower()
             password = str(data.get("password", ""))
-            if not full_name or not re.fullmatch(r"[A-Za-z0-9._-]{3,32}", username) or len(password) < 12:
-                self.send_json(400, {"error": "Nhập họ tên, tên đăng nhập 3–32 ký tự và mật khẩu tối thiểu 12 ký tự."})
+            if not full_name or not re.fullmatch(r"[A-Za-z0-9._-]{3,32}", username) or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or len(password) < 12:
+                self.send_json(400, {"error": "Nhập họ tên, email hợp lệ, tên đăng nhập 3–32 ký tự và mật khẩu tối thiểu 12 ký tự."})
                 return
             token = secrets.token_urlsafe(32)
             salt = secrets.token_bytes(16)
@@ -346,9 +359,9 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                         self.send_json(409, {"error": "Tài khoản quản trị đã được thiết lập."})
                         return
                     cursor = db.execute(
-                        """INSERT INTO users (username, full_name, role, password_salt, password_hash, created_at)
-                           VALUES (?, ?, 'admin', ?, ?, ?)""",
-                        (username, full_name, salt.hex(), password_digest(password, salt).hex(), now),
+                        """INSERT INTO users (username, full_name, email, role, password_salt, password_hash, created_at)
+                           VALUES (?, ?, ?, 'admin', ?, ?, ?)""",
+                        (username, full_name, email, salt.hex(), password_digest(password, salt).hex(), now),
                     )
                     user_id = cursor.lastrowid
                     db.execute(
@@ -374,6 +387,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
         if path == "/api/login":
             username = str(data.get("username", "")).strip()
             password = str(data.get("password", ""))
+            requested_role = str(data.get("role", "")).strip()
             with connect_db() as db:
                 user = db.execute("SELECT * FROM users WHERE username = ? COLLATE NOCASE", (username,)).fetchone()
                 valid = False
@@ -384,7 +398,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                         valid = hmac.compare_digest(password_digest(password, salt), expected)
                     except ValueError:
                         valid = False
-                if not user or user["status"] != "active" or not valid:
+                if not user or user["status"] != "active" or not valid or (requested_role and user["role"] != requested_role):
                     log_action(db, user["id"] if user else None, "login_failed", username)
                     self.send_json(401, {"error": "Tên đăng nhập hoặc mật khẩu không đúng."})
                     return
@@ -406,6 +420,68 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(body)
+            return
+
+        if path == "/api/signup":
+            full_name = str(data.get("fullName", "")).strip()
+            username = str(data.get("username", "")).strip()
+            email = str(data.get("email", "")).strip().lower()
+            password = str(data.get("password", ""))
+            if not full_name or not re.fullmatch(r"[A-Za-z0-9._-]{3,32}", username) or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or len(password) < 10:
+                self.send_json(400, {"error": "Vui lòng nhập đủ thông tin hợp lệ; mật khẩu cần ít nhất 10 ký tự."})
+                return
+            salt = secrets.token_bytes(16)
+            try:
+                with connect_db() as db:
+                    cursor = db.execute(
+                        "INSERT INTO users (username, full_name, email, role, password_salt, password_hash, created_at) VALUES (?, ?, ?, 'reader', ?, ?, ?)",
+                        (username, full_name, email, salt.hex(), password_digest(password, salt).hex(), utc_now()),
+                    )
+                    row = db.execute("SELECT * FROM users WHERE id = ?", (cursor.lastrowid,)).fetchone()
+                    log_action(db, row["id"], "reader_signup", username)
+                self.send_json(201, {"user": safe_user(row)})
+            except sqlite3.IntegrityError:
+                self.send_json(409, {"error": "Tên đăng nhập đã tồn tại."})
+            return
+
+        if path == "/api/password-reset/request":
+            username = str(data.get("username", "")).strip()
+            email = str(data.get("email", "")).strip().lower()
+            with connect_db() as db:
+                user = db.execute("SELECT id, username, email FROM users WHERE username = ? COLLATE NOCASE AND status = 'active'", (username,)).fetchone()
+                if user and user["email"] and user["email"].casefold() != email.casefold():
+                    user = None
+                if user:
+                    token = secrets.token_urlsafe(32)
+                    now = datetime.now(timezone.utc)
+                    db.execute("DELETE FROM password_resets WHERE expires_at <= ?", (now.isoformat(timespec="seconds"),))
+                    db.execute("DELETE FROM password_resets WHERE user_id = ?", (user["id"],))
+                    db.execute("INSERT INTO password_resets (token_hash, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)",
+                               (hashlib.sha256(token.encode()).hexdigest(), user["id"], (now + timedelta(minutes=15)).isoformat(timespec="seconds"), utc_now()))
+                    print(f"[Khôi phục mật khẩu] Tài khoản {user['username']}; mã dùng một lần (15 phút): {token}")
+            self.send_json(200, {"ok": True, "message": "Nếu thông tin khớp, mã khôi phục đã được in trong cửa sổ máy chủ (hiệu lực 15 phút)."})
+            return
+
+        if path == "/api/password-reset/confirm":
+            token = str(data.get("token", "")).strip()
+            password = str(data.get("password", ""))
+            if len(password) < 10:
+                self.send_json(400, {"error": "Mật khẩu mới cần ít nhất 10 ký tự."})
+                return
+            token_hash = hashlib.sha256(token.encode()).hexdigest()
+            now = utc_now()
+            with connect_db() as db:
+                db.execute("BEGIN IMMEDIATE")
+                reset = db.execute("SELECT user_id FROM password_resets WHERE token_hash = ? AND expires_at > ?", (token_hash, now)).fetchone()
+                if not reset:
+                    self.send_json(400, {"error": "Mã khôi phục không hợp lệ hoặc đã hết hạn."})
+                    return
+                salt = secrets.token_bytes(16)
+                db.execute("UPDATE users SET password_salt = ?, password_hash = ? WHERE id = ?", (salt.hex(), password_digest(password, salt).hex(), reset["user_id"]))
+                db.execute("DELETE FROM password_resets WHERE user_id = ?", (reset["user_id"],))
+                db.execute("DELETE FROM sessions WHERE user_id = ?", (reset["user_id"],))
+                log_action(db, reset["user_id"], "password_reset", "")
+            self.send_json(200, {"ok": True})
             return
 
         if path == "/api/switch-role":
@@ -539,18 +615,19 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 return
             full_name = str(data.get("fullName", "")).strip()
             username = str(data.get("username", "")).strip()
+            email = str(data.get("email", "")).strip().lower()
             password = str(data.get("password", ""))
             role = str(data.get("role", ""))
-            if not full_name or not re.fullmatch(r"[A-Za-z0-9._-]{3,32}", username) or len(password) < 10 or role not in ROLE_HOME:
-                self.send_json(400, {"error": "Thông tin chưa hợp lệ; mật khẩu cần tối thiểu 10 ký tự."})
+            if not full_name or not re.fullmatch(r"[A-Za-z0-9._-]{3,32}", username) or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or len(password) < 10 or role not in ROLE_HOME:
+                self.send_json(400, {"error": "Nhập đủ thông tin hợp lệ; mật khẩu cần tối thiểu 10 ký tự."})
                 return
             salt = secrets.token_bytes(16)
             try:
                 with connect_db() as db:
                     cursor = db.execute(
-                        """INSERT INTO users (username, full_name, role, password_salt, password_hash, created_at)
-                           VALUES (?, ?, ?, ?, ?, ?)""",
-                        (username, full_name, role, salt.hex(), password_digest(password, salt).hex(), utc_now()),
+                        """INSERT INTO users (username, full_name, email, role, password_salt, password_hash, created_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                        (username, full_name, email, role, salt.hex(), password_digest(password, salt).hex(), utc_now()),
                     )
                     row = db.execute("SELECT * FROM users WHERE id = ?", (cursor.lastrowid,)).fetchone()
                     log_action(db, actor["id"], "user_created", f"{username}:{role}")
