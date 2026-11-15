@@ -23,86 +23,6 @@
     }).join("");
   }
 
-  function dongModalVaiTro() {
-    var modal = document.getElementById("roleSwitchModal");
-    if (modal) {
-      modal.hidden = true;
-      modal.style.display = "none";
-    }
-  }
-
-  function moModalVaiTro() {
-    var modal = damBaoModalVaiTro();
-    modal.hidden = false;
-    modal.style.display = "flex";
-  }
-
-  function damBaoModalVaiTro() {
-    var modal = document.getElementById("roleSwitchModal");
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "roleSwitchModal";
-      modal.className = "role-modal-overlay";
-      modal.hidden = true;
-      modal.style.display = "none";
-      modal.innerHTML = [
-        '<div class="role-modal-card">',
-        '  <div class="role-modal-header">',
-        '    <h3>Chuyển đổi vai trò làm việc</h3>',
-        '    <button class="role-modal-close" id="closeRoleModalBtn" type="button" aria-label="Đóng">✕</button>',
-        '  </div>',
-        '  <p class="role-modal-sub">Mỗi vai trò làm việc trong một không gian chuyên biệt độc lập. Chọn vai trò để chuyển sang phiên làm việc tương ứng:</p>',
-        '  <div class="role-options">',
-        '    <button class="role-option-card' + (mode === 'admin' ? ' current' : '') + '" type="button" data-switch-to="admin">',
-        '      <span class="role-option-icon">👑</span>',
-        '      <div class="role-option-info">',
-        '        <strong>Quản trị viên (Admin)</strong>',
-        '        <span>Bảng điều khiển KPI, báo cáo doanh thu & quản lý nhân sự</span>',
-        '      </div>',
-        '      <span class="role-option-badge">' + (mode === 'admin' ? 'Đang chọn' : 'Chuyển →') + '</span>',
-        '    </button>',
-        '    <button class="role-option-card' + (mode === 'librarian' ? ' current' : '') + '" type="button" data-switch-to="librarian">',
-        '      <span class="role-option-icon">📚</span>',
-        '      <div class="role-option-info">',
-        '        <strong>Thủ thư (Librarian)</strong>',
-        '        <span>Quản lý 1.250 đầu sách, kho & kiểm kê, mượn trả ấn phẩm</span>',
-        '      </div>',
-        '      <span class="role-option-badge">' + (mode === 'librarian' ? 'Đang chọn' : 'Chuyển →') + '</span>',
-        '    </button>',
-        '    <button class="role-option-card' + (mode === 'reader' ? ' current' : '') + '" type="button" data-switch-to="reader">',
-        '      <span class="role-option-icon">🌿</span>',
-        '      <div class="role-option-info">',
-        '        <strong>Độc giả (Reader)</strong>',
-        '        <span>Khám phá bộ sưu tập, tra cứu & tủ sách cá nhân</span>',
-        '      </div>',
-        '      <span class="role-option-badge">' + (mode === 'reader' ? 'Đang chọn' : 'Chuyển →') + '</span>',
-        '    </button>',
-        '  </div>',
-        '  <div class="role-modal-foot">',
-        '    <button class="danger-text-btn" id="logoutBtn" type="button">⎋ Đăng xuất khỏi hệ thống</button>',
-        '  </div>',
-        '</div>'
-      ].join("");
-      document.body.appendChild(modal);
-
-      var closeBtn = modal.querySelector("#closeRoleModalBtn");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          dongModalVaiTro();
-        });
-      }
-
-      modal.addEventListener("click", function (e) {
-        if (e.target === modal) {
-          dongModalVaiTro();
-        }
-      });
-    }
-    return modal;
-  }
-
   function moTrang(pageId) {
     var target = document.getElementById("page-" + pageId);
     if (!target) return;
@@ -110,100 +30,25 @@
     document.querySelectorAll(".page").forEach(function (page) {
       page.classList.toggle("active", page === target);
     });
-    document.querySelectorAll("[data-go]").forEach(function (el) {
-      if (!el.dataset.section) {
-        el.classList.toggle("active", el.dataset.go === pageId);
-      }
-    });
-    var sidebar = document.getElementById("sidebar");
-    if (sidebar) sidebar.classList.remove("mobile-open");
+    veMenu();
+    document.getElementById("sidebar").classList.remove("mobile-open");
     global.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function xuLyDieuHuong(event) {
-    var brandLink = event.target.closest("a.brand[href^='#']");
-    if (brandLink) {
-      event.preventDefault();
-      var targetId = brandLink.getAttribute("href").replace(/^#/, "");
-      var targetEl = document.getElementById(targetId);
-      if (targetEl) targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      document.querySelectorAll(".top-nav-links a").forEach(function (a, i) {
-        a.classList.toggle("active", i === 0);
-      });
-      return;
-    }
-
-    var readerNav = event.target.closest(".top-nav-links a[href^='#']");
-    if (readerNav && mode === "reader") {
-      event.preventDefault();
-      var navTargetId = readerNav.getAttribute("href").replace(/^#/, "");
-      var navTargetEl = document.getElementById(navTargetId);
-      if (navTargetEl) {
-        document.querySelectorAll(".top-nav-links a").forEach(function (a) {
-          a.classList.toggle("active", a === readerNav);
-        });
-        navTargetEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      return;
-    }
-
     var go = event.target.closest("[data-go]");
     if (go) {
-      var targetId = go.dataset.go;
-      if (document.getElementById("page-" + targetId)) {
-        if (go.dataset.section && mode === "librarian") {
-          activeWarehouseSection = go.dataset.section;
-          moTrang(targetId);
-          var sec = document.getElementById(go.dataset.section);
-          if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-          return;
-        }
-        moTrang(targetId);
+      if (!document.getElementById("page-" + go.dataset.go) && mode === "admin" && ["books", "loans", "readers", "warehouse"].indexOf(go.dataset.go) !== -1) {
+        global.location.href = "../../thủ thư/giao diện/trang-chủ.html#page-" + go.dataset.go;
         return;
       }
-    }
-
-    if (event.target.closest("#roleSwitchBtn") || event.target.closest("#topUserChip")) {
-      moModalVaiTro();
-      return;
-    }
-
-    if (event.target.closest("#closeRoleModalBtn") || event.target.id === "roleSwitchModal") {
-      dongModalVaiTro();
-      return;
-    }
-
-    var switchBtn = event.target.closest("[data-switch-to]");
-    if (switchBtn) {
-      var targetRole = switchBtn.dataset.switchTo;
-      switchBtn.disabled = true;
-      fetch("/api/switch-role", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ role: targetRole })
-      }).then(function (res) {
-        return res.json();
-      }).then(function (data) {
-        if (data.home) {
-          global.location.href = data.home;
-        }
-      }).catch(function (err) {
-        switchBtn.disabled = false;
-        alert(err.message || "Không thể chuyển vai trò.");
-      });
-      return;
-    }
-
-    if (event.target.closest("#logoutBtn")) {
-      fetch("/api/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: "{}"
-      }).finally(function () {
-        global.location.href = "/x%C3%A1c-th%E1%BB%B1c/giao%20di%E1%BB%87n/dang-nhap.html";
-      });
+      if (go.dataset.section && mode === "librarian") {
+        activeWarehouseSection = go.dataset.section;
+        document.getElementById(go.dataset.section).scrollIntoView({ behavior: "smooth", block: "start" });
+        veMenu();
+        return;
+      }
+      moTrang(go.dataset.go);
       return;
     }
 
@@ -292,11 +137,7 @@
       document.getElementById("sidebar").classList.toggle("mobile-open");
     });
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        dongModalVaiTro();
-        if (sach && sach.dongDrawer) sach.dongDrawer();
-        if (sach && sach.dongBieuMau) sach.dongBieuMau();
-      }
+      if (event.key === "Escape" && sach) sach.dongBieuMau();
     });
     var requestedPage = global.location.hash.replace(/^#page-/, "");
     if (requestedPage && document.getElementById("page-" + requestedPage)) moTrang(requestedPage);

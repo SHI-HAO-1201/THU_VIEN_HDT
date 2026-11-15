@@ -1,8 +1,8 @@
 .auth-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: radial-gradient(circle at top left, #e9f0e8, transparent 42%), var(--paper); }
 .auth-card { width: min(100%, 430px); padding: 34px; }
-.auth-brand { color: var(--wood-dark); font-family: var(--font-serif); font-size: 24px; font-weight: 700; text-decoration: none; }
+.auth-brand { color: var(--green-dark); font-family: Georgia, serif; font-size: 24px; font-weight: 700; text-decoration: none; }
 .auth-kicker { margin: 24px 0 5px; color: #8b998d; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; }
-.auth-card h1 { margin: 0; font-family: var(--font-serif); font-size: 29px; font-weight: 600; }
+.auth-card h1 { margin: 0; font-family: Georgia, serif; font-size: 29px; font-weight: 600; }
 .auth-intro { margin: 7px 0 20px; color: var(--muted); font-size: 12px; }
 .auth-form { display: grid; gap: 14px; }
 .auth-form[hidden] { display: none; }

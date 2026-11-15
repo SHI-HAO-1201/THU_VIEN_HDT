@@ -103,21 +103,6 @@ def initialize_db() -> None:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 [(*book, now, now) for book in SEED_BOOKS],
             )
-        now = utc_now()
-        default_accounts = [
-            ("admin", "Nguyễn Mai Anh (Quản trị viên)", "admin", "123"),
-            ("thuthu", "Trần Văn Mộc (Thủ thư)", "librarian", "123"),
-            ("docgia", "Lê Hoàng Yến (Độc giả)", "reader", "123"),
-        ]
-        for u_name, f_name, u_role, u_pwd in default_accounts:
-            if not db.execute("SELECT 1 FROM users WHERE username = ? COLLATE NOCASE", (u_name,)).fetchone():
-                u_salt = secrets.token_bytes(16)
-                u_hash = password_digest(u_pwd, u_salt).hex()
-                db.execute(
-                    """INSERT INTO users (username, full_name, role, password_salt, password_hash, created_at)
-                       VALUES (?, ?, ?, ?, ?, ?)""",
-                    (u_name, f_name, u_role, u_salt.hex(), u_hash, now)
-                )
 
 
 def utc_now() -> str:
@@ -273,7 +258,6 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 self.send_header("Location", self.redirect_target(LOGIN_PAGE))
                 self.end_headers()
                 return
-            # Phân tách vai trò rõ ràng, độc lập: mỗi vai trò làm việc trong đúng không gian được phân quyền
             if user["role"] != expected_role:
                 self.send_response(302)
                 self.send_header("Location", self.redirect_target(ROLE_HOME[user["role"]]))
@@ -363,34 +347,6 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 log_action(db, user["id"], "login", "")
                 role = user["role"]
             body = json.dumps({"home": ROLE_HOME[role]}, ensure_ascii=False).encode("utf-8")
-            self.send_response(200)
-            self.set_session_cookie(token, SESSION_HOURS * 3600)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.send_header("Cache-Control", "no-store")
-            self.end_headers()
-            self.wfile.write(body)
-            return
-
-        if path == "/api/switch-role":
-            target_role = str(data.get("role", "")).strip().lower()
-            if target_role not in ROLE_HOME:
-                self.send_json(400, {"error": "Vai trò không hợp lệ."})
-                return
-            with connect_db() as db:
-                user = db.execute("SELECT * FROM users WHERE role = ? AND status = 'active' ORDER BY id ASC LIMIT 1", (target_role,)).fetchone()
-                if not user:
-                    self.send_json(404, {"error": f"Không tìm thấy tài khoản hoạt động cho vai trò {target_role}."})
-                    return
-                token = secrets.token_urlsafe(32)
-                now = utc_now()
-                expires = (datetime.now(timezone.utc) + timedelta(hours=SESSION_HOURS)).isoformat(timespec="seconds")
-                db.execute(
-                    "INSERT INTO sessions (token_hash, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)",
-                    (hashlib.sha256(token.encode()).hexdigest(), user["id"], expires, now),
-                )
-                log_action(db, user["id"], "switch_role", target_role)
-            body = json.dumps({"ok": True, "home": ROLE_HOME[target_role], "user": safe_user(user)}, ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self.set_session_cookie(token, SESSION_HOURS * 3600)
             self.send_header("Content-Type", "application/json; charset=utf-8")
