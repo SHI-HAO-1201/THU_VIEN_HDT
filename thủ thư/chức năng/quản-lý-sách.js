@@ -23,6 +23,34 @@
     return "tag-literature";
   }
 
+  function layAnhBia(book) {
+    var entries = global.MocThu.biaSach && global.MocThu.biaSach.covers || [];
+    var normalized = String(book.name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase();
+    var match = entries.find(function (entry) {
+      var title = String(entry.title).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase();
+      return normalized.indexOf(title) === 0 || title.indexOf(normalized) === 0;
+    });
+    if (match) return match.image;
+    return "https://covers.openlibrary.org/b/title/" + encodeURIComponent(book.name || "book") + "-M.jpg?default=false";
+  }
+
+  function ganAnhBia(container, book) {
+    if (!container || !book) return;
+    var image = document.createElement("img");
+    image.className = "catalog-cover-image";
+    image.alt = "Bìa sách " + book.name;
+    image.loading = "lazy";
+    image.referrerPolicy = "no-referrer";
+    image.src = layAnhBia(book);
+    image.addEventListener("error", function () {
+      image.remove();
+      container.classList.add("cover-fallback");
+      if (!container.textContent.trim()) container.textContent = String(book.name || "?").charAt(0);
+    });
+    image.addEventListener("load", function () { container.classList.add("has-cover"); });
+    container.appendChild(image);
+  }
+
   function moDrawer(index) {
     var book = sach[index];
     if (!book) return;
@@ -44,6 +72,8 @@
       cover.textContent = book.name.charAt(0);
       var colors = ["var(--wood)", "#bd864e", "#ba6d62", "#557e93", "#3d634d"];
       cover.style.background = colors[index % colors.length];
+      cover.replaceChildren();
+      ganAnhBia(cover, book);
     }
     if (badge) {
       badge.textContent = book.category || "Văn học";
@@ -128,7 +158,7 @@
           '<td style="width:36px" onclick="event.stopPropagation()"><input type="checkbox" class="book-row-check" aria-label="Chọn ' + thanhPhan.escapeHtml(book.name) + '"></td>' +
           '<td>' +
             '<div class="book-cell">' +
-              '<span class="book-cover ' + coverColor + '">' + thanhPhan.escapeHtml(book.name.charAt(0)) + '</span>' +
+              '<span class="book-cover ' + coverColor + '" data-book-cover="' + idx + '">' + thanhPhan.escapeHtml(book.name.charAt(0)) + '</span>' +
               '<div>' +
                 '<span class="book-title">' + thanhPhan.escapeHtml(book.name) + '</span>' +
                 '<span class="book-author">' + thanhPhan.escapeHtml(book.author) + (book.year ? ' • ' + book.year : '') + '</span>' +
@@ -164,6 +194,9 @@
           '</td>' +
         '</tr>';
       }).join("");
+      danhSachHienThi.forEach(function (entry) {
+        ganAnhBia(bang.querySelector('[data-book-cover="' + entry.index + '"]'), entry.book);
+      });
     }
 
     var totalTitles = sach.length;

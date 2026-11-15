@@ -10,6 +10,8 @@ python "máy-chủ/server.py"
 
 Mở <http://127.0.0.1:8000>. Lần đầu, hệ thống yêu cầu tạo tài khoản quản trị viên. Sau đó, quản trị viên tạo và khóa/mở khóa tài khoản đăng nhập của thủ thư tại **Tài khoản thủ thư**.
 
+Khách chưa đăng nhập sẽ thấy trang giới thiệu Mộc Thư. Chọn **Bước vào thư viện** để chọn Độc giả, Quản trị viên hoặc Thủ thư rồi đăng nhập. Độc giả tự đăng ký được; tài khoản quản trị/thủ thư do hệ thống cấp. Quên mật khẩu cần email đã lưu trong hồ sơ; hồ sơ cũ chưa có email có thể chỉ nhập tên đăng nhập. Server cục bộ in mã một lần (15 phút) ra cửa sổ terminal; đây là cách khôi phục dành cho bản chạy nội bộ chưa cấu hình dịch vụ email.
+
 SQLite tự khởi tạo tại `data/thu_vien.sqlite3`. Mật khẩu được băm bằng PBKDF2-HMAC-SHA256; phiên đăng nhập được lưu dạng mã băm. Máy chủ chỉ lắng nghe trên `127.0.0.1`.
 
 ## Cấu trúc thư mục
@@ -29,6 +31,8 @@ index.html    điểm vào ứng dụng
 - **Quản trị viên:** dashboard, báo cáo, tạo và khóa/mở khóa tài khoản đăng nhập của thủ thư; có khung quản lý thẻ thư viện.
 - **Thủ thư:** xem, thêm, sửa, xóa danh mục sách, quản lý kho và có khung quản lý thẻ thư viện.
 - **Độc giả:** xem danh mục sách; trang đăng nhập có khung đăng ký tài khoản độc giả.
+
+Trang chủ công khai dẫn vào màn chọn vai trò. Trang đăng nhập chỉ nhận tài khoản đúng vai trò đã chọn; server cũng kiểm tra vai trò đó. Ảnh bìa dùng ảnh bìa trực tuyến đã ghép theo tên sách hoặc tra theo tên sách qua Open Library; nếu nguồn ảnh không có bản phù hợp, danh mục vẫn hiện chữ cái đầu làm ảnh dự phòng.
 
 Máy chủ kiểm tra quyền cho cả trang theo vai trò và API. Tài khoản bị khóa sẽ mất hiệu lực phiên đăng nhập. Tài khoản không được tạo sẵn; lần chạy đầu tiên yêu cầu tạo quản trị viên. Chỉ quản trị viên đăng nhập mới có thể chuyển sang tài khoản hoạt động đầu tiên của vai trò khác để xem thử; để quay lại quản trị, hãy đăng xuất rồi đăng nhập lại.
 

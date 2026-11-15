@@ -1,43 +1,36 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f8f6f0">
-  <title>Đăng nhập · Mộc Thư</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f4f0e7">
+  <title>Đăng nhập hệ thống · Mộc Thư</title>
   <link rel="stylesheet" href="../../dùng-chung/giao%20di%E1%BB%87n/giao-di%E1%BB%87n.css">
   <link rel="stylesheet" href="dang-nhap.css">
 </head>
 <body class="auth-page">
-  <main class="auth-card card" style="text-align:center;">
-    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">
-      <img src="../../dùng-chung/giao%20di%E1%BB%87n/logo-moc-thu.png" alt="Logo Mộc Thư" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
-      <a class="auth-brand" href="/" style="font-size:26px;">Mộc Thư</a>
-    </div>
-    <p class="auth-kicker">KHÔNG GIAN TRI THỨC</p>
-    <h1 id="authTitle" style="text-align:center;">Đăng nhập</h1>
-    <p class="auth-intro" id="authIntro" style="text-align:center;">Đăng nhập để vào đúng khu vực làm việc của bạn.</p>
+  <main class="login-card">
+    <header class="login-card-head">
+      <a class="back-home" href="/">← Trang chủ</a>
+      <a class="auth-brandline" href="/"><img src="../../dùng-chung/giao%20di%E1%BB%87n/logo-moc-thu.png" alt=""><span>Mộc Thư</span></a>
+      <p class="step-label" id="roleLabel">CỔNG THÔNG TIN THƯ VIỆN</p>
+      <h1 id="authTitle">Đăng nhập hệ thống</h1>
+      <p class="auth-intro" id="authIntro">Nhập thông tin để tiếp tục.</p>
+    </header>
     <div class="auth-error" id="authError" role="alert" hidden></div>
-
     <form id="loginForm" class="auth-form" hidden>
-      <label>Tên đăng nhập<input name="username" autocomplete="username" minlength="3" required></label>
-      <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required></label>
+      <label>Tên đăng nhập hoặc email<input name="username" type="text" autocomplete="username" required></label>
+      <label>Mật khẩu<span class="password-field"><input id="loginPassword" name="password" type="password" autocomplete="current-password" required><button class="show-password" type="button" data-toggle-password="loginPassword" aria-label="Hiện mật khẩu">Hiện</button></span></label>
+      <div class="form-row"><label class="remember"><input type="checkbox" name="remember"> Ghi nhớ tên đăng nhập</label><button class="text-link" id="forgotLink" type="button">Quên mật khẩu?</button></div>
       <button class="button primary auth-submit" type="submit">Đăng nhập</button>
-      
     </form>
-
     <form id="setupForm" class="auth-form" hidden>
       <p class="setup-note">Tạo tài khoản quản trị đầu tiên. Mật khẩu cần ít nhất 12 ký tự.</p>
       <label>Họ và tên<input name="fullName" autocomplete="name" required maxlength="100"></label>
+      <label>Email khôi phục<input name="email" type="email" autocomplete="email" required maxlength="255"></label>
       <label>Tên đăng nhập<input name="username" autocomplete="username" minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]+" required></label>
-      <label>Mật khẩu<input name="password" type="password" autocomplete="new-password" minlength="12" required></label>
+      <label>Mật khẩu<span class="password-field"><input name="password" type="password" autocomplete="new-password" minlength="12" required><button class="show-password" type="button" data-toggle-password="setupPassword" aria-label="Hiện mật khẩu">Hiện</button></span></label>
       <button class="button primary auth-submit" type="submit">Tạo quản trị viên</button>
     </form>
-    <form id="readerSignupForm" class="auth-form" hidden>
-      <p class="setup-note">Tài khoản này dùng để đăng nhập. Thẻ thư viện là hồ sơ riêng do thư viện cấp.</p>
+    <form id="signupForm" class="auth-form" hidden>
       <label>Họ và tên<input name="fullName" autocomplete="name" required maxlength="100"></label>
       <label>Tên đăng nhập<input name="username" autocomplete="username" minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]+" required></label>
       <label>Email<input name="email" type="email" autocomplete="email" required maxlength="255"></label>
@@ -45,8 +38,21 @@
       <label>Nhập lại mật khẩu<input name="confirmPassword" type="password" autocomplete="new-password" minlength="10" required></label>
       <button class="button primary auth-submit" type="submit">Tạo tài khoản độc giả</button>
     </form>
-    <p class="auth-footnote" id="authSwitch"><span id="authSwitchText">Chưa có tài khoản độc giả?</span> <button class="text-link" id="authSwitchButton" type="button" hidden>Tạo tài khoản</button></p>
+    <form id="forgotForm" class="auth-form" hidden>
+      <p class="setup-note">Nhập email đã đăng ký nếu tài khoản có email. Mã dùng một lần sẽ hiện trong cửa sổ máy chủ.</p>
+      <label>Tên đăng nhập<input name="username" autocomplete="username" required></label>
+      <label>Email (nếu đã đăng ký)<input name="email" type="email" autocomplete="email"></label>
+      <button class="button primary auth-submit" type="submit">Gửi mã khôi phục</button>
+    </form>
+    <form id="resetForm" class="auth-form" hidden>
+      <p class="setup-note">Mã khôi phục chỉ dùng một lần và hết hạn sau 15 phút.</p>
+      <label>Mã khôi phục<input name="token" autocomplete="one-time-code" required></label>
+      <label>Mật khẩu mới<input name="password" type="password" autocomplete="new-password" minlength="10" required></label>
+      <label>Nhập lại mật khẩu mới<input name="confirmPassword" type="password" autocomplete="new-password" minlength="10" required></label>
+      <button class="button primary auth-submit" type="submit">Đặt lại mật khẩu</button>
+    </form>
+    <p class="auth-switch" id="authSwitch" hidden><span id="authSwitchText"></span> <button class="text-link" id="authSwitchButton" type="button">Đăng ký</button></p>
   </main>
-  <script src="../chức%20n%C4%83ng/dang-nhap.js"></script>
+  <script src="../ch%E1%BB%A9c%20n%C4%83ng/dang-nhap.js"></script>
 </body>
 </html>
