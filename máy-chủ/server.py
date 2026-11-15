@@ -37,11 +37,28 @@ ROLE_PREFIX = {
     "/Độc giả/": "reader",
 }
 SEED_BOOKS = [
-    ("Nhà giả kim", "Paulo Coelho", "VH-00124", "Văn học", 25, 18, 5, "A-02-14", "Tốt"),
-    ("Tuổi trẻ đáng giá bao nhiêu", "Rosie Nguyễn", "KN-00087", "Kỹ năng sống", 20, 14, 8, "B-01-08", "Tốt"),
-    ("Đắc nhân tâm", "Dale Carnegie", "KN-00031", "Kỹ năng sống", 3, 2, 5, "B-03-02", "Cũ"),
-    ("Rừng Na Uy", "Haruki Murakami", "VH-00209", "Văn học", 18, 11, 5, "A-04-22", "Tốt"),
-    ("Sống xanh mỗi ngày", "Katherine Martinko", "MT-00064", "Khác", 4, 0, 3, "C-02-01", "Tốt"),
+    ("Nhà giả kim", "Paulo Coelho", "VH-00124", "Văn học", "vi", 25, 18, 5, "A-02-14", "Tốt"),
+    ("Tuổi trẻ đáng giá bao nhiêu", "Rosie Nguyễn", "KN-00087", "Kỹ năng sống", "vi", 20, 14, 8, "B-01-08", "Tốt"),
+    ("Đắc nhân tâm", "Dale Carnegie", "KN-00031", "Kỹ năng sống", "vi", 3, 2, 5, "B-03-02", "Cũ"),
+    ("Rừng Na Uy", "Haruki Murakami", "VH-00209", "Văn học", "vi", 18, 11, 5, "A-04-22", "Tốt"),
+    ("Sống xanh mỗi ngày", "Katherine Martinko", "MT-00064", "Khác", "vi", 4, 0, 3, "C-02-01", "Tốt"),
+    ("Tư duy nhanh và chậm", "Daniel Kahneman", "KT-00089", "Kinh tế - Tâm lý", "vi", 12, 5, 3, "B-01-12", "Tốt"),
+    ("Sapiens: Lược sử loài người", "Yuval Noah Harari", "LS-00204", "Lịch sử - Khoa học", "vi", 14, 6, 4, "C-03-02", "Tốt"),
+    ("Hoàng tử bé", "Antoine de Saint-Exupéry", "TN-00018", "Văn học thiếu nhi", "vi", 9, 2, 3, "C-01-04", "Tốt"),
+    ("Cây cam ngọt của tôi", "José Mauro de Vasconcelos", "VH-00310", "Văn học", "vi", 11, 3, 3, "A-02-09", "Tốt"),
+    ("The Little Prince", "Antoine de Saint-Exupéry", "EN-00018", "Children's fiction", "en", 6, 1, 2, "C-01-05", "Tốt"),
+    ("Atomic Habits", "James Clear", "EN-00042", "Self-development", "en", 8, 3, 2, "B-02-10", "Tốt"),
+    ("Pride and Prejudice", "Jane Austen", "EN-00057", "Classic literature", "en", 5, 2, 2, "A-01-06", "Tốt"),
+    ("A Brief History of Time", "Stephen Hawking", "EN-00063", "Science", "en", 4, 1, 1, "C-02-08", "Cũ"),
+    ("Cho tôi xin một vé đi tuổi thơ", "Nguyễn Nhật Ánh", "TN-00032", "Văn học thiếu nhi", "vi", 10, 4, 3, "C-01-08", "Tốt"),
+    ("Dám bị ghét", "Kishimi Ichiro", "TL-00075", "Kinh tế - Tâm lý", "vi", 7, 2, 2, "B-03-11", "Tốt"),
+    ("Muôn kiếp nhân sinh", "Nguyên Phong", "VH-00401", "Văn học", "vi", 8, 2, 2, "A-03-05", "Tốt"),
+    ("Khéo ăn khéo nói sẽ có được thiên hạ", "Trác Nhã", "KN-00402", "Kỹ năng sống", "vi", 6, 1, 2, "B-02-04", "Tốt"),
+    ("Sống đơn giản cho mình thanh thản", "Shunmyo Masuno", "TL-00403", "Kinh tế - Tâm lý", "vi", 5, 1, 2, "B-03-14", "Tốt"),
+    ("Đi tìm lẽ sống", "Viktor E. Frankl", "TL-00404", "Kinh tế - Tâm lý", "vi", 9, 3, 2, "B-03-16", "Tốt"),
+    ("Bí mật của may mắn", "Alex Rovira", "KN-00405", "Kỹ năng sống", "vi", 7, 2, 2, "B-01-18", "Tốt"),
+    ("Dế mèn phiêu lưu ký", "Tô Hoài", "TN-00406", "Văn học thiếu nhi", "vi", 12, 3, 3, "C-01-10", "Tốt"),
+    ("Lược sử vạn vật", "Bill Bryson", "KH-00407", "Lịch sử - Khoa học", "vi", 5, 2, 2, "C-02-12", "Tốt"),
 ]
 
 
@@ -106,6 +123,7 @@ def initialize_db() -> None:
                 author TEXT NOT NULL,
                 code TEXT NOT NULL COLLATE NOCASE UNIQUE,
                 category TEXT NOT NULL DEFAULT 'Khác',
+                language TEXT NOT NULL DEFAULT 'vi',
                 stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
                 borrowed INTEGER NOT NULL DEFAULT 0 CHECK (borrowed >= 0 AND borrowed <= stock),
                 minimum INTEGER NOT NULL DEFAULT 0 CHECK (minimum >= 0),
@@ -204,6 +222,8 @@ def initialize_db() -> None:
         book_columns = {row["name"] for row in db.execute("PRAGMA table_info(books)")}
         if "summary" not in book_columns:
             db.execute("ALTER TABLE books ADD COLUMN summary TEXT NOT NULL DEFAULT ''")
+        if "language" not in book_columns:
+            db.execute("ALTER TABLE books ADD COLUMN language TEXT NOT NULL DEFAULT 'vi'")
         user_columns = {row["name"] for row in db.execute("PRAGMA table_info(users)")}
         if "email" not in user_columns:
             db.execute("ALTER TABLE users ADD COLUMN email TEXT NOT NULL DEFAULT ''")
@@ -226,14 +246,13 @@ def initialize_db() -> None:
         if "copy_id" not in reservation_columns:
             db.execute("ALTER TABLE reservations ADD COLUMN copy_id INTEGER REFERENCES book_copies(id) ON DELETE SET NULL")
 
-        if db.execute("SELECT COUNT(*) FROM books").fetchone()[0] == 0:
-            now = utc_now()
-            db.executemany(
-                """INSERT INTO books
-                (name, author, code, category, stock, borrowed, minimum, location, quality, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                [(*book, now, now) for book in SEED_BOOKS],
-            )
+        now = utc_now()
+        db.executemany(
+            """INSERT OR IGNORE INTO books
+            (name, author, code, category, language, stock, borrowed, minimum, location, quality, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [(*book, now, now) for book in SEED_BOOKS],
+        )
 
         for book in db.execute("SELECT id, code, stock, borrowed, location FROM books").fetchall():
             existing = db.execute("SELECT COUNT(*) FROM book_copies WHERE book_id = ?", (book["id"],)).fetchone()[0]
@@ -495,10 +514,15 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             with connect_db() as db:
                 expire_reservations(db)
                 if user:
-                    rows = db.execute("SELECT * FROM books ORDER BY id DESC").fetchall()
+                    rows = db.execute(
+                        """SELECT b.*, (SELECT COUNT(*) FROM book_copies c WHERE c.book_id = b.id AND c.status = 'available') AS available_copies
+                           FROM books b ORDER BY b.id DESC"""
+                    ).fetchall()
                 else:
                     rows = db.execute(
-                        "SELECT id, name, author, code, category, stock, borrowed FROM books ORDER BY id DESC"
+                        """SELECT b.id, b.name, b.author, b.code, b.category, b.stock, b.borrowed,
+                                  (SELECT COUNT(*) FROM book_copies c WHERE c.book_id = b.id AND c.status = 'available') AS available_copies
+                           FROM books b ORDER BY b.id DESC"""
                     ).fetchall()
             self.send_json(200, {"books": [dict(row) for row in rows]})
             return
@@ -514,7 +538,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                     """SELECT id, name, author, code, category, stock, borrowed FROM books
                        WHERE (? = '' OR name LIKE ? OR author LIKE ? OR code LIKE ? OR category LIKE ?)
                          AND (? = '' OR author LIKE ?) AND (? = '' OR category = ?)
-                         AND (? = 0 OR stock > borrowed)
+                         AND (? = 0 OR EXISTS (SELECT 1 FROM book_copies c WHERE c.book_id = books.id AND c.status = 'available'))
                        ORDER BY name COLLATE NOCASE LIMIT 200""",
                     (term, f"%{term}%", f"%{term}%", f"%{term}%", f"%{term}%",
                      author, f"%{author}%", category, category, 1 if available_only else 0),
@@ -1567,9 +1591,9 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 now = utc_now()
                 with connect_db() as db:
                     cursor = db.execute(
-                        """INSERT INTO books
-                           (name, author, code, category, stock, borrowed, minimum, location, quality, summary, created_at, updated_at)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO books
+                           (name, author, code, category, language, stock, borrowed, minimum, location, quality, summary, created_at, updated_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                         (*book, now, now),
                     )
                     row = db.execute("SELECT * FROM books WHERE id = ?", (cursor.lastrowid,)).fetchone()
@@ -1598,7 +1622,10 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             raise ValueError("Số lượng phải là số nguyên không âm.")
         if borrowed > stock:
             raise ValueError("Số bản đang mượn không thể vượt số bản trong kho.")
-        return (name, author, code, str(data.get("category", "Khác")), stock, borrowed, minimum,
+        language = str(data.get("language", "vi")).strip().lower()
+        if language not in {"vi", "en"}:
+            raise ValueError("Ngôn ngữ tài liệu không hợp lệ.")
+        return (name, author, code, str(data.get("category", "Khác")), language, stock, borrowed, minimum,
                 str(data.get("location", "")).strip(), str(data.get("quality", "Tốt")),
                 str(data.get("summary", "")).strip()[:300])
 
@@ -1832,7 +1859,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 with connect_db() as db:
                     db.execute(
                         """UPDATE books
-                           SET name=?, author=?, code=?, category=?, stock=?, borrowed=?, minimum=?, location=?,
+                           SET name=?, author=?, code=?, category=?, language=?, stock=?, borrowed=?, minimum=?, location=?,
                                quality=?, summary=?, updated_at=?
                            WHERE id=?""",
                         (*book, utc_now(), book_id),

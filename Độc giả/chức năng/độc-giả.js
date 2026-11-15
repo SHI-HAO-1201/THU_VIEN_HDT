@@ -14,7 +14,7 @@
       var book = books.find(function (item) { return card.dataset.bookId === String(item.id); });
       var matches = card.textContent.toLocaleLowerCase("vi").indexOf(query) !== -1 &&
         (!categoryFilter || !categoryFilter.value || (book && book.category === categoryFilter.value)) &&
-        (!availableOnly || !availableOnly.checked || (book && book.stock > book.borrowed));
+        (!availableOnly || !availableOnly.checked || (book && Number(book.available_copies ?? (book.stock - book.borrowed)) > 0));
       card.hidden = !matches;
     });
   }
@@ -26,6 +26,16 @@
       var result = await global.MocThu.auth.request("/api/profile");
       form.elements.fullName.value = result.profile.full_name || "";
       form.elements.email.value = result.profile.email || "";
+      var username = document.getElementById("readerUsername");
+      var joined = document.getElementById("readerCreatedAt");
+      var card = document.getElementById("readerProfileCard");
+      var cardStatus = document.getElementById("readerProfileStatus");
+      var expiry = document.getElementById("readerProfileExpiry");
+      if (username) username.value = result.profile.username || "";
+      if (joined) joined.value = result.profile.created_at ? new Date(result.profile.created_at).toLocaleDateString("vi-VN") : "";
+      if (card) card.textContent = result.profile.card_code || "Chưa cấp thẻ";
+      if (cardStatus) cardStatus.textContent = result.profile.card_status === "active" ? "Thẻ đang hoạt động" : "Thẻ chưa hoạt động";
+      if (expiry) expiry.textContent = result.profile.expires_at ? new Date(result.profile.expires_at).toLocaleDateString("vi-VN") : "—";
       var headerName = document.getElementById("topUserName");
       if (headerName) headerName.textContent = result.profile.full_name;
       form.addEventListener("submit", async function (event) {
@@ -47,27 +57,38 @@
 
   async function loadHistory() {
     var container = document.getElementById("readerHistoryList");
-    if (!container) return;
+    var loansContainer = document.getElementById("readerLoansList");
+    var reservationsContainer = document.getElementById("readerReservationsList");
+    if (!container && !loansContainer && !reservationsContainer) return;
     try {
       var result = await global.MocThu.auth.request("/api/reader/history");
       var openLoans = result.loans.filter(function (loan) { return !loan.returned_at; });
       var activeReservations = result.reservations.filter(function (item) { return item.status === "pending"; });
-      document.getElementById("readerLoanCount").textContent = String(openLoans.length);
-      document.getElementById("readerReservationCount").textContent = String(activeReservations.length);
-      var entries = result.loans.map(function (loan) {
-        return '<article class="card" style="padding:13px 16px"><strong>' + global.MocThu.thanhPhan.escapeHtml(loan.book_name) + '</strong>' +
-          '<div style="font-size:12px;color:var(--muted);margin-top:5px">Mượn: ' + new Date(loan.borrowed_at).toLocaleDateString("vi-VN") +
-          ' · Hạn trả: ' + new Date(loan.due_at).toLocaleDateString("vi-VN") + ' · ' + (loan.returned_at ? "Đã trả" : "Đang mượn") +
-          (loan.returned_at ? "" : ' <button class="button small soft" type="button" data-reader-renew="' + loan.id + '">Gia hạn</button>') + '</div></article>';
-      }).concat(result.reservations.map(function (item) {
+      var loanCount = document.getElementById("readerLoanCount");
+      var reservationCount = document.getElementById("readerReservationCount");
+      if (loanCount) loanCount.textContent = String(openLoans.length);
+      if (reservationCount) reservationCount.textContent = String(activeReservations.length);
+      var loanEntries = result.loans.map(function (loan) {
+        var due = new Date(loan.due_at);
+        var overdue = !loan.returned_at && due.getTime() < Date.now();
+        return '<article class="reader-record"><div><h3>' + global.MocThu.thanhPhan.escapeHtml(loan.book_name) + '</h3>' +
+          '<p>Mã phiếu PM-' + String(loan.id).padStart(5, "0") + ' · Mượn ngày ' + new Date(loan.borrowed_at).toLocaleDateString("vi-VN") +
+          ' · Hạn trả ' + due.toLocaleDateString("vi-VN") + (loan.returned_at ? ' · Đã trả ngày ' + new Date(loan.returned_at).toLocaleDateString("vi-VN") : '') + '</p></div>' +
+          '<div><span class="reader-status" style="' + (overdue ? 'background:#fbebea;color:#a13c35' : '') + '">' + (loan.returned_at ? "Đã trả" : (overdue ? "Quá hạn" : "Đang mượn")) + '</span>' +
+          (loan.returned_at ? "" : ' <button class="button small soft" type="button" data-reader-renew="' + loan.id + '">Gia hạn 7 ngày</button>') + '</div></article>';
+      });
+      var reservationEntries = result.reservations.map(function (item) {
         var labels = { pending: "Đang chờ", fulfilled: "Đã nhận", cancelled: "Đã hủy" };
-        return '<article class="card" style="padding:13px 16px"><strong>Đặt chỗ: ' + global.MocThu.thanhPhan.escapeHtml(item.book_name) + '</strong>' +
-          '<div style="font-size:12px;color:var(--muted);margin-top:5px">' + (labels[item.status] || item.status) +
+        return '<article class="reader-record"><div><h3>' + global.MocThu.thanhPhan.escapeHtml(item.book_name) + '</h3><p>' + (labels[item.status] || item.status) +
           (item.expires_at ? ' · Giữ đến ' + new Date(item.expires_at).toLocaleDateString("vi-VN") : " · Đang chờ bản có sẵn") +
-          (item.status === "pending" ? ' <button class="button small soft" type="button" data-cancel-reservation="' + item.id + '">Hủy đặt chỗ</button>' : "") + '</div></article>';
-      }));
-      container.innerHTML = entries.length ? entries.join("") : '<p class="card" style="padding:14px">Chưa có lịch sử mượn hoặc đặt chỗ.</p>';
-    } catch (error) { container.innerHTML = '<p>' + global.MocThu.thanhPhan.escapeHtml(error.message) + '</p>'; }
+          '</p></div>' + (item.status === "pending" ? '<button class="button small soft" type="button" data-cancel-reservation="' + item.id + '">Hủy yêu cầu</button>' : '<span class="reader-status">' + (labels[item.status] || item.status) + '</span>') + '</article>';
+      });
+      if (loansContainer) loansContainer.innerHTML = loanEntries.length ? loanEntries.join("") : '<p class="reader-record"><span>Bạn chưa có phiếu mượn nào.</span></p>';
+      if (reservationsContainer) reservationsContainer.innerHTML = reservationEntries.length ? reservationEntries.join("") : '<p class="reader-record"><span>Bạn chưa đặt chỗ sách nào.</span></p>';
+      if (container) container.innerHTML = loanEntries.concat(reservationEntries).join("") || '<p class="card" style="padding:14px">Chưa có lịch sử mượn hoặc đặt chỗ.</p>';
+    } catch (error) {
+      [container, loansContainer, reservationsContainer].filter(Boolean).forEach(function (target) { target.innerHTML = '<p>' + global.MocThu.thanhPhan.escapeHtml(error.message) + '</p>'; });
+    }
   }
 
   async function khoiTao() {
@@ -80,20 +101,37 @@
     if (input) input.addEventListener("input", filterCatalog);
     if (categoryFilter) categoryFilter.addEventListener("change", filterCatalog);
     if (availableOnly) availableOnly.addEventListener("change", filterCatalog);
-    var result = await global.MocThu.auth.request("/api/books");
-    books = result.books;
     await Promise.all([loadProfile(), loadHistory()]);
+    if (grid || document.querySelector("[data-reader-reserve], .stitch-borrow-btn, [data-reader-detail]")) {
+      try {
+        var result = await global.MocThu.auth.request("/api/books");
+        books = result.books || [];
+      } catch (error) {
+        if (grid) grid.innerHTML = '<p class="reader-record">' + global.MocThu.thanhPhan.escapeHtml(error.message) + '</p>';
+        return;
+      }
+    }
     if (!grid) return;
-    grid.innerHTML = books.map(function (book, index) {
+    if (categoryFilter) {
+      var selectedCategory = categoryFilter.value;
+      var categories = Array.from(new Set(books.map(function (book) { return book.category; }).filter(Boolean))).sort(function (a, b) { return a.localeCompare(b, "vi"); });
+      categoryFilter.innerHTML = '<option value="">Mọi thể loại</option>' + categories.map(function (category) {
+        return '<option value="' + global.MocThu.thanhPhan.escapeHtml(category) + '">' + global.MocThu.thanhPhan.escapeHtml(category) + '</option>';
+      }).join("");
+      if (categories.includes(selectedCategory)) categoryFilter.value = selectedCategory;
+    }
+    var latestLimit = Number(grid.dataset.readerLatest || 0);
+    var visibleBooks = latestLimit > 0 ? books.slice(0, latestLimit) : books;
+    grid.innerHTML = visibleBooks.map(function (book, index) {
       var cover = index % 4 ? " cover-" + (index % 4 + 1) : "";
-      var remaining = Math.max(0, book.stock - book.borrowed);
+      var remaining = Math.max(0, Number(book.available_copies ?? (book.stock - book.borrowed)));
       return '<article class="reader-book-card" data-book-id="' + book.id + '"><div class="reader-book-cover' + cover + '">' + global.MocThu.thanhPhan.escapeHtml(book.name) + '</div>' +
         '<div class="reader-book-info"><h3>' + global.MocThu.thanhPhan.escapeHtml(book.name) + '</h3>' +
         '<p>' + global.MocThu.thanhPhan.escapeHtml(book.author) + ' · ' + global.MocThu.thanhPhan.escapeHtml(book.category) + '</p>' +
         '<div class="reader-book-meta"><span>' + (remaining ? 'Còn ' + remaining + ' bản' : 'Đang hết bản') + '</span>' +
         '<button type="button" data-reader-detail data-book-id="' + book.id + '">Chi tiết</button>' +
         '<button data-borrow data-book-id="' + book.id + '"' + (remaining ? '' : ' disabled') + '>Đặt trước</button></div></div></article>';
-    }).join("");
+    }).join("") || '<p class="reader-record">Chưa có đầu sách trong danh mục.</p>';
     if (global.MocThu.biaSach) global.MocThu.biaSach.enhance(grid);
     filterCatalog();
   }
