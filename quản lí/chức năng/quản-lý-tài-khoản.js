@@ -16,11 +16,11 @@
     tbody.innerHTML = users.map(function (user) {
       var active = user.status === "active";
       var status = active ? '<span class="badge">Đang hoạt động</span>' : '<span class="badge danger">Đã khóa</span>';
-      var action = '<div style="display:flex;gap:5px;flex-wrap:wrap">' +
-        '<button class="button small ' + (active ? "" : "soft") + '" data-user-id="' + user.id + '" data-user-action="toggle" data-next-status="' + (active ? "disabled" : "active") + '">' + (active ? "Khóa" : "Mở khóa") + '</button>' +
-        '<button class="button small soft" data-user-id="' + user.id + '" data-user-action="edit">Sửa</button>' +
+      var action = '<div class="account-actions">' +
+        '<button class="button small ' + (active ? "soft" : "") + '" aria-label="' + (active ? "Khóa tài khoản" : "Mở khóa tài khoản") + '" title="' + (active ? "Khóa tài khoản" : "Mở khóa tài khoản") + '" data-user-id="' + user.id + '" data-user-action="toggle" data-next-status="' + (active ? "disabled" : "active") + '">' + (active ? "Khóa" : "Mở khóa") + '</button>' +
+        '<button class="button small" data-user-id="' + user.id + '" data-user-action="edit">✎ Sửa</button>' +
         '<button class="button small soft" data-user-id="' + user.id + '" data-user-action="reset">Đặt mật khẩu</button>' +
-        '<button class="button small soft" data-user-id="' + user.id + '" data-user-action="delete">Xóa</button></div>';
+        '<button class="button small danger" data-user-id="' + user.id + '" data-user-action="delete">Xóa</button></div>';
       var title = user.role === "admin" ? "Quản trị viên" : "Thủ thư";
       return '<tr><td><strong>' + escape(user.fullName) + '</strong></td><td>' + escape(user.username) + '</td><td>' + escape(user.email) + '<br><small>' + title + '</small></td><td class="account-status">' + status + '</td><td>' + action + '</td></tr>';
     }).join("");
@@ -54,6 +54,32 @@
       } finally { submit.disabled = false; }
     });
     document.getElementById("reloadUsers").addEventListener("click", load);
+    function editDialog(userId, row) {
+      var dialog = document.getElementById("staffEditDialog");
+      if (!dialog) {
+        dialog = document.createElement("dialog");
+        dialog.id = "staffEditDialog";
+        dialog.className = "staff-edit-dialog";
+        dialog.innerHTML = '<form method="dialog" id="staffEditForm"><div class="staff-dialog-head"><div><span class="eyebrow">HỒ SƠ NHÂN SỰ</span><h2>Chỉnh sửa tài khoản</h2><p>Cập nhật thông tin định danh và email khôi phục.</p></div><button class="icon-action" value="cancel" aria-label="Đóng">×</button></div><label>Họ và tên<input name="fullName" required maxlength="100"></label><label>Tên đăng nhập<input name="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]+"></label><label>Email<input name="email" type="email" required maxlength="255"></label><div class="staff-dialog-actions"><button class="button soft" value="cancel">Hủy</button><button class="button primary" type="button" id="saveStaffEdit">Lưu thay đổi</button></div></form>';
+        document.body.appendChild(dialog);
+        dialog.querySelector("#saveStaffEdit").addEventListener("click", async function () {
+          var form = dialog.querySelector("form"), submit = dialog.querySelector("#saveStaffEdit");
+          if (!form.reportValidity()) return;
+          submit.disabled = true;
+          try {
+            await api("/api/users/" + dialog.dataset.userId, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(new FormData(form).entries())) });
+            dialog.close(); await load(); global.MocThu.thanhPhan.hienThongBao("Đã cập nhật thông tin nhân sự.");
+          } catch (error) { global.MocThu.thanhPhan.hienThongBao(error.message); }
+          finally { submit.disabled = false; }
+        });
+      }
+      dialog.dataset.userId = userId;
+      var form = dialog.querySelector("form");
+      form.elements.fullName.value = row.querySelector("td:nth-child(1)").textContent.trim();
+      form.elements.username.value = row.querySelector("td:nth-child(2)").textContent.trim();
+      form.elements.email.value = row.querySelector("td:nth-child(3)").childNodes[0].textContent.trim();
+      dialog.showModal();
+    }
     tbody.addEventListener("click", async function (event) {
       var button = event.target.closest("[data-user-id]");
       if (!button) return;
@@ -63,17 +89,8 @@
         if (button.dataset.nextStatus === "disabled" && !global.confirm("Khóa tài khoản này?")) return;
         update = { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: button.dataset.nextStatus }) };
       } else if (action === "edit") {
-        var row = button.closest("tr");
-        var currentName = row.querySelector("td:nth-child(1)").textContent.trim();
-        var currentUsername = row.querySelector("td:nth-child(2)").textContent.trim();
-        var currentEmail = row.querySelector("td:nth-child(3)").childNodes[0].textContent.trim();
-        var fullName = global.prompt("Họ và tên", currentName);
-        if (fullName === null) return;
-        var username = global.prompt("Tên đăng nhập", currentUsername);
-        if (username === null) return;
-        var email = global.prompt("Email", currentEmail);
-        if (email === null) return;
-        update = { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fullName: fullName, username: username, email: email }) };
+        editDialog(button.dataset.userId, button.closest("tr"));
+        return;
       } else if (action === "reset") {
         if (!global.confirm("Đặt lại mật khẩu và kết thúc các phiên đăng nhập của tài khoản này?")) return;
         button.disabled = true;

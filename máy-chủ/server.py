@@ -107,6 +107,15 @@ def initialize_db() -> None:
                 expires_at TEXT NOT NULL,
                 issued_by INTEGER REFERENCES users(id) ON DELETE SET NULL
             );
+            CREATE TABLE IF NOT EXISTS card_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                note TEXT NOT NULL DEFAULT '',
+                status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+                created_at TEXT NOT NULL,
+                resolved_at TEXT,
+                resolved_by INTEGER REFERENCES users(id) ON DELETE SET NULL
+            );
             CREATE TABLE IF NOT EXISTS reservations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -531,17 +540,21 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             term = str(query.get("q", [""])[0]).strip()
             author = str(query.get("author", [""])[0]).strip()
             category = str(query.get("category", [""])[0]).strip()
+            language = str(query.get("language", [""])[0]).strip().lower()
             available_only = query.get("available", [""])[0] == "1"
             with connect_db() as db:
                 expire_reservations(db)
                 rows = db.execute(
-                    """SELECT id, name, author, code, category, stock, borrowed FROM books
+                    """SELECT books.id, books.name, books.author, books.code, books.category, books.language, books.stock, books.borrowed,
+                              (SELECT COUNT(*) FROM book_copies c WHERE c.book_id = books.id AND c.status = 'available') AS available_copies
+                       FROM books
                        WHERE (? = '' OR name LIKE ? OR author LIKE ? OR code LIKE ? OR category LIKE ?)
                          AND (? = '' OR author LIKE ?) AND (? = '' OR category = ?)
+                         AND (? = '' OR language = ?)
                          AND (? = 0 OR EXISTS (SELECT 1 FROM book_copies c WHERE c.book_id = books.id AND c.status = 'available'))
                        ORDER BY name COLLATE NOCASE LIMIT 200""",
                     (term, f"%{term}%", f"%{term}%", f"%{term}%", f"%{term}%",
-                     author, f"%{author}%", category, category, 1 if available_only else 0),
+                     author, f"%{author}%", category, category, language, language, 1 if available_only else 0),
                 ).fetchall()
             self.send_json(200, {"books": [dict(row) for row in rows]})
             return
@@ -624,6 +637,18 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 ).fetchall()
             self.send_json(200, {"cards": [dict(row) for row in rows]})
             return
+        if path == "/api/card-requests":
+            if not self.require_user({"librarian"}):
+                return
+            with connect_db() as db:
+                rows = db.execute(
+                    """SELECT r.*, u.full_name, u.email, u.username, c.card_code
+                       FROM card_requests r JOIN users u ON u.id = r.user_id
+                       LEFT JOIN library_cards c ON c.user_id = r.user_id
+                       ORDER BY CASE r.status WHEN 'pending' THEN 0 ELSE 1 END, r.id DESC"""
+                ).fetchall()
+            self.send_json(200, {"requests": [dict(row) for row in rows]})
+            return
         if path == "/api/suppliers":
             if not self.require_user({"admin", "librarian"}):
                 return
@@ -676,6 +701,22 @@ class LibraryHandler(SimpleHTTPRequestHandler):
         if path == "/api/stats":
             if not self.require_user({"admin"}):
                 return
+            query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+            start_date = str(query.get("from", [""])[0]).strip()
+            end_date = str(query.get("to", [""])[0]).strip()
+            for value in (start_date, end_date):
+                if value and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+                    self.send_json(400, {"error": "Khoảng ngày không hợp lệ."})
+                    return
+                if value:
+                    try:
+                        datetime.fromisoformat(value)
+                    except ValueError:
+                        self.send_json(400, {"error": "Khoảng ngày không hợp lệ."})
+                        return
+            if start_date and end_date and start_date > end_date:
+                self.send_json(400, {"error": "Ngày bắt đầu phải trước hoặc bằng ngày kết thúc."})
+                return
             with connect_db() as db:
                 result = {
                     "books": db.execute("SELECT COUNT(*) FROM books").fetchone()[0],
@@ -696,6 +737,46 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                     "lateFinesThisMonth": db.execute("SELECT COALESCE(SUM(amount), 0) FROM fines WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')").fetchone()[0],
                     "activeSuppliers": db.execute("SELECT COUNT(*) FROM suppliers WHERE status = 'active'").fetchone()[0],
                 }
+                if start_date or end_date:
+                    start_bound = start_date or end_date or datetime.now(timezone.utc).date().isoformat()
+                    end_bound = end_date or start_date or datetime.now(timezone.utc).date().isoformat()
+                    period_params = (start_bound, end_bound)
+                    result["loansInPeriod"] = db.execute("SELECT COUNT(*) FROM loans WHERE date(borrowed_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["returnsInPeriod"] = db.execute("SELECT COUNT(*) FROM loans WHERE returned_at IS NOT NULL AND date(returned_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["onTimeReturnsInPeriod"] = db.execute("SELECT COUNT(*) FROM loans WHERE returned_at IS NOT NULL AND returned_at <= due_at AND date(returned_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["totalReturnsInPeriod"] = db.execute("SELECT COUNT(*) FROM loans WHERE returned_at IS NOT NULL AND date(returned_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["finesInPeriod"] = db.execute("SELECT COALESCE(SUM(amount), 0) FROM fines WHERE date(created_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["unpaidFinesInPeriod"] = db.execute("SELECT COALESCE(SUM(amount), 0) FROM fines WHERE status = 'unpaid' AND date(created_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["receiptValueInPeriod"] = db.execute("SELECT COALESCE(SUM(i.quantity * i.unit_cost), 0) FROM receipt_items i JOIN receipts r ON r.id = i.receipt_id WHERE date(r.received_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["exportsInPeriod"] = db.execute("SELECT COUNT(*) FROM exports WHERE date(exported_at) BETWEEN date(?) AND date(?)", period_params).fetchone()[0]
+                    result["topBooks"] = [dict(row) for row in db.execute(
+                        """SELECT b.name, b.code, COUNT(l.id) AS loan_count FROM books b LEFT JOIN loans l
+                           ON l.book_id = b.id AND date(l.borrowed_at) BETWEEN date(?) AND date(?)
+                           GROUP BY b.id ORDER BY loan_count DESC, b.name LIMIT 10""", period_params
+                    ).fetchall()]
+                    trend_from = datetime.fromisoformat(start_bound).date()
+                    trend_to = datetime.fromisoformat(end_bound).date()
+                    total_days = max(1, (trend_to - trend_from).days + 1)
+                    trend = []
+                    for index in range(7):
+                        if total_days < 7 and index >= total_days:
+                            trend.append({"label": "", "loans": 0, "returns": 0})
+                            continue
+                        if total_days < 7:
+                            bucket_start = trend_from + timedelta(days=index)
+                            bucket_end = bucket_start
+                        else:
+                            bucket_start = trend_from + timedelta(days=(index * total_days) // 7)
+                            bucket_end = trend_from + timedelta(days=(((index + 1) * total_days) // 7) - 1)
+                            if bucket_end < bucket_start:
+                                bucket_end = bucket_start
+                        bounds = (bucket_start.isoformat(), bucket_end.isoformat())
+                        trend.append({
+                            "label": bucket_start.strftime("%d/%m") if bucket_start == bucket_end else bucket_start.strftime("%d/%m") + "–" + bucket_end.strftime("%d/%m"),
+                            "loans": db.execute("SELECT COUNT(*) FROM loans WHERE date(borrowed_at) BETWEEN date(?) AND date(?)", bounds).fetchone()[0],
+                            "returns": db.execute("SELECT COUNT(*) FROM loans WHERE returned_at IS NOT NULL AND date(returned_at) BETWEEN date(?) AND date(?)", bounds).fetchone()[0],
+                        })
+                    result["trend"] = trend
                 result["topBooks"] = [dict(row) for row in db.execute(
                     """SELECT b.name, b.code, COUNT(l.id) AS loan_count
                        FROM books b LEFT JOIN loans l ON l.book_id = b.id
@@ -1331,6 +1412,52 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                 self.send_json(201, {"user": safe_user(row), "cardCode": card_code, "expiresAt": expires})
             except sqlite3.IntegrityError:
                 self.send_json(409, {"error": "Tên đăng nhập hoặc email đã tồn tại."})
+            return
+
+        if path == "/api/card-requests":
+            actor = self.require_user({"reader"})
+            if not actor:
+                return
+            with connect_db() as db:
+                pending = db.execute("SELECT id FROM card_requests WHERE user_id = ? AND status = 'pending'", (actor["id"],)).fetchone()
+                if pending:
+                    self.send_json(409, {"error": "Bạn đã có yêu cầu thẻ đang chờ xử lý."})
+                    return
+                cursor = db.execute("INSERT INTO card_requests (user_id, note, created_at) VALUES (?, ?, ?)", (actor["id"], str(data.get("note", "")).strip()[:300], utc_now()))
+                log_action(db, actor["id"], "library_card_requested", str(cursor.lastrowid))
+            self.send_json(201, {"ok": True, "requestId": cursor.lastrowid})
+            return
+
+        card_request_match = re.fullmatch(r"/api/card-requests/(\d+)/resolve", path)
+        if card_request_match:
+            actor = self.require_user({"librarian"})
+            if not actor:
+                return
+            request_id = int(card_request_match.group(1))
+            action = str(data.get("action", ""))
+            if action not in {"approve", "reject"}:
+                self.send_json(400, {"error": "Thao tác xử lý yêu cầu không hợp lệ."})
+                return
+            now = datetime.now(timezone.utc)
+            with connect_db() as db:
+                db.execute("BEGIN IMMEDIATE")
+                request = db.execute("SELECT * FROM card_requests WHERE id = ? AND status = 'pending'", (request_id,)).fetchone()
+                if not request:
+                    self.send_json(404, {"error": "Yêu cầu thẻ không tồn tại hoặc đã được xử lý."})
+                    return
+                card_code = None
+                if action == "approve":
+                    card = db.execute("SELECT id, card_code FROM library_cards WHERE user_id = ?", (request["user_id"],)).fetchone()
+                    expires = (now + timedelta(days=365)).isoformat(timespec="seconds")
+                    if card:
+                        card_code = card["card_code"]
+                        db.execute("UPDATE library_cards SET status='active', issued_at=?, expires_at=?, issued_by=? WHERE id=?", (now.isoformat(timespec="seconds"), expires, actor["id"], card["id"]))
+                    else:
+                        card_code = f"DG-{request['user_id']:06d}"
+                        db.execute("INSERT INTO library_cards (user_id, card_code, issued_at, expires_at, issued_by) VALUES (?, ?, ?, ?, ?)", (request["user_id"], card_code, now.isoformat(timespec="seconds"), expires, actor["id"]))
+                db.execute("UPDATE card_requests SET status=?, resolved_at=?, resolved_by=? WHERE id=?", ("approved" if action == "approve" else "rejected", now.isoformat(timespec="seconds"), actor["id"], request_id))
+                log_action(db, actor["id"], "library_card_request_" + action, str(request_id))
+            self.send_json(200, {"ok": True, "cardCode": card_code})
             return
 
         if path == "/api/reservations":

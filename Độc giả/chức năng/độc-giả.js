@@ -5,7 +5,59 @@
   var input = document.getElementById("readerSearch");
   var categoryFilter = document.getElementById("readerCategoryFilter");
   var availableOnly = document.getElementById("readerAvailableOnly");
+  var languageFilter = document.getElementById("readerLanguageFilter");
   var heroInput = document.getElementById("userHeroSearch");
+  var searchTimer = null;
+
+  function imageUrl(book) {
+    var covers = global.MocThu.biaSach && global.MocThu.biaSach.covers || [];
+    var normalize = function (value) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase(); };
+    var found = covers.find(function (cover) { return normalize(book.name).startsWith(normalize(cover.title)) || normalize(cover.title).startsWith(normalize(book.name)); });
+    return found ? found.image : "https://covers.openlibrary.org/b/title/" + encodeURIComponent(book.name) + "-M.jpg?default=false";
+  }
+
+  function coverHtml(book) {
+    return '<img class="reader-book-cover-image" src="' + global.MocThu.thanhPhan.escapeHtml(imageUrl(book)) + '" alt="Bìa ' + global.MocThu.thanhPhan.escapeHtml(book.name) + '" loading="lazy" onerror="this.hidden=true">';
+  }
+
+  function renderBooks() {
+    if (!grid) return;
+    var latestLimit = Number(grid.dataset.readerLatest || 0);
+    var visibleBooks = latestLimit > 0 ? books.slice(0, latestLimit) : books;
+    grid.innerHTML = visibleBooks.map(function (book) {
+      var remaining = Math.max(0, Number(book.available_copies ?? (book.stock - book.borrowed)));
+      return '<article class="reader-book-card" data-book-id="' + book.id + '"><div class="reader-book-cover">' + coverHtml(book) + '<span>' + global.MocThu.thanhPhan.escapeHtml(book.name) + '</span></div>' +
+        '<div class="reader-book-info"><h3>' + global.MocThu.thanhPhan.escapeHtml(book.name) + '</h3>' +
+        '<p>' + global.MocThu.thanhPhan.escapeHtml(book.author) + ' · ' + global.MocThu.thanhPhan.escapeHtml(book.category) + '</p>' +
+        '<div class="reader-book-meta"><span>' + (remaining ? 'Còn ' + remaining + ' bản' : 'Đang hết bản') + '</span>' +
+        '<button type="button" data-reader-detail data-book-id="' + book.id + '">Chi tiết</button>' +
+        '<button type="button" data-borrow data-book-id="' + book.id + '"' + (remaining ? '' : ' disabled') + '>Đặt trước</button></div></div></article>';
+    }).join("") || '<p class="reader-record">Không tìm thấy sách phù hợp.</p>';
+    filterCatalog();
+  }
+
+  async function searchBooks() {
+    if (!grid) return;
+    var params = new URLSearchParams();
+    if (input && input.value.trim()) params.set("q", input.value.trim());
+    if (categoryFilter && categoryFilter.value) params.set("category", categoryFilter.value);
+    if (languageFilter && languageFilter.value) params.set("language", languageFilter.value);
+    if (availableOnly && availableOnly.checked) params.set("available", "1");
+    grid.setAttribute("aria-busy", "true");
+    try {
+      var result = await global.MocThu.auth.request("/api/search?" + params.toString());
+      books = result.books || [];
+      renderBooks();
+      if (global.MocThu.biaSach) global.MocThu.biaSach.enhance(grid);
+    } catch (error) {
+      grid.innerHTML = '<p class="reader-record">' + global.MocThu.thanhPhan.escapeHtml(error.message) + '</p>';
+    } finally { grid.removeAttribute("aria-busy"); }
+  }
+
+  function scheduleSearch() {
+    global.clearTimeout(searchTimer);
+    searchTimer = global.setTimeout(searchBooks, 220);
+  }
 
   function filterCatalog() {
     if (!grid) return;
@@ -91,16 +143,61 @@
     }
   }
 
+  async function openBookDetails(bookId, fallbackBook) {
+    var book = fallbackBook || books.find(function (item) { return String(item.id) === String(bookId); });
+    try {
+      if (bookId) book = (await global.MocThu.auth.request("/api/books/" + bookId)).book;
+    } catch (error) { global.MocThu.thanhPhan.hienThongBao(error.message); return; }
+    if (!book) { global.MocThu.thanhPhan.hienThongBao("Không tìm thấy thông tin sách."); return; }
+    var available = Number(book.available_copies ?? Math.max(0, book.stock - book.borrowed));
+    var backdrop = document.getElementById("readerBookModal");
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.id = "readerBookModal";
+      backdrop.className = "reader-modal-backdrop";
+      backdrop.innerHTML = '<section class="reader-book-modal" role="dialog" aria-modal="true" aria-labelledby="readerModalTitle"><button class="reader-modal-close" type="button" data-close-reader-modal aria-label="Đóng">×</button><div class="reader-modal-content"></div></section>';
+      document.body.appendChild(backdrop);
+      backdrop.addEventListener("click", function (event) { if (event.target === backdrop || event.target.closest("[data-close-reader-modal]")) backdrop.classList.remove("open"); });
+      document.addEventListener("keydown", function (event) { if (event.key === "Escape") backdrop.classList.remove("open"); });
+    }
+    var content = backdrop.querySelector(".reader-modal-content");
+    content.innerHTML = '<div class="reader-modal-cover">' + coverHtml(book) + '</div><div class="reader-modal-details"><div class="reader-section-kicker">CHI TIẾT ĐẦU SÁCH</div><h2 id="readerModalTitle">' + global.MocThu.thanhPhan.escapeHtml(book.name) + '</h2><p class="reader-modal-author">' + global.MocThu.thanhPhan.escapeHtml(book.author) + '</p><div class="reader-modal-tags"><span>' + global.MocThu.thanhPhan.escapeHtml(book.category) + '</span><span>' + (book.language === "en" ? "Tiếng Anh" : "Tiếng Việt") + '</span><span>' + (available > 0 ? "Còn " + available + " bản" : "Tạm hết") + '</span></div><p class="reader-modal-summary">' + global.MocThu.thanhPhan.escapeHtml(book.summary || "Tài liệu hiện chưa có phần giới thiệu chi tiết.") + '</p><dl><div><dt>Mã tài liệu</dt><dd>' + global.MocThu.thanhPhan.escapeHtml(book.code) + '</dd></div><div><dt>Vị trí</dt><dd>' + global.MocThu.thanhPhan.escapeHtml(book.location || "Liên hệ thủ thư") + '</dd></div><div><dt>Trong kho</dt><dd>' + Number(book.stock || 0) + ' bản</dd></div></dl><button class="button primary reader-modal-reserve" type="button" data-modal-reserve="' + book.id + '"' + (available > 0 ? '' : ' disabled') + '>' + (available > 0 ? 'Gửi yêu cầu mượn sách' : 'Hết bản sẵn sàng') + '</button></div>';
+    backdrop.classList.add("open");
+    var reserveButton = content.querySelector("[data-modal-reserve]");
+    reserveButton.addEventListener("click", async function () {
+      reserveButton.disabled = true;
+      try {
+        await global.MocThu.auth.request("/api/reservations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bookId: Number(book.id) }) });
+        backdrop.classList.remove("open");
+        await loadHistory();
+        global.MocThu.thanhPhan.hienThongBao("Đã gửi yêu cầu đặt " + book.name + ".");
+      } catch (error) { reserveButton.disabled = false; global.MocThu.thanhPhan.hienThongBao(error.message); }
+    });
+  }
+
   async function khoiTao() {
+    var requestCardButton = document.getElementById("requestLibraryCardButton");
+    if (requestCardButton) requestCardButton.addEventListener("click", async function () {
+      requestCardButton.disabled = true;
+      try {
+        await global.MocThu.auth.request("/api/card-requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: "Yêu cầu cấp hoặc gia hạn thẻ thư viện" }) });
+        global.MocThu.thanhPhan.hienThongBao("Đã gửi yêu cầu thẻ. Thủ thư sẽ kiểm tra và xử lý.");
+        requestCardButton.textContent = "Đã gửi yêu cầu";
+      } catch (error) {
+        global.MocThu.thanhPhan.hienThongBao(error.message);
+        requestCardButton.disabled = false;
+      }
+    });
     if (heroInput) heroInput.addEventListener("input", function () {
       var query = heroInput.value.trim().toLocaleLowerCase("vi");
       document.querySelectorAll(".stitch-book-card").forEach(function (card) {
         card.hidden = card.textContent.toLocaleLowerCase("vi").indexOf(query) === -1;
       });
     });
-    if (input) input.addEventListener("input", filterCatalog);
-    if (categoryFilter) categoryFilter.addEventListener("change", filterCatalog);
-    if (availableOnly) availableOnly.addEventListener("change", filterCatalog);
+    if (input) input.addEventListener("input", scheduleSearch);
+    if (categoryFilter) categoryFilter.addEventListener("change", searchBooks);
+    if (languageFilter) languageFilter.addEventListener("change", searchBooks);
+    if (availableOnly) availableOnly.addEventListener("change", searchBooks);
     await Promise.all([loadProfile(), loadHistory()]);
     if (grid || document.querySelector("[data-reader-reserve], .stitch-borrow-btn, [data-reader-detail]")) {
       try {
@@ -120,20 +217,8 @@
       }).join("");
       if (categories.includes(selectedCategory)) categoryFilter.value = selectedCategory;
     }
-    var latestLimit = Number(grid.dataset.readerLatest || 0);
-    var visibleBooks = latestLimit > 0 ? books.slice(0, latestLimit) : books;
-    grid.innerHTML = visibleBooks.map(function (book, index) {
-      var cover = index % 4 ? " cover-" + (index % 4 + 1) : "";
-      var remaining = Math.max(0, Number(book.available_copies ?? (book.stock - book.borrowed)));
-      return '<article class="reader-book-card" data-book-id="' + book.id + '"><div class="reader-book-cover' + cover + '">' + global.MocThu.thanhPhan.escapeHtml(book.name) + '</div>' +
-        '<div class="reader-book-info"><h3>' + global.MocThu.thanhPhan.escapeHtml(book.name) + '</h3>' +
-        '<p>' + global.MocThu.thanhPhan.escapeHtml(book.author) + ' · ' + global.MocThu.thanhPhan.escapeHtml(book.category) + '</p>' +
-        '<div class="reader-book-meta"><span>' + (remaining ? 'Còn ' + remaining + ' bản' : 'Đang hết bản') + '</span>' +
-        '<button type="button" data-reader-detail data-book-id="' + book.id + '">Chi tiết</button>' +
-        '<button data-borrow data-book-id="' + book.id + '"' + (remaining ? '' : ' disabled') + '>Đặt trước</button></div></div></article>';
-    }).join("") || '<p class="reader-record">Chưa có đầu sách trong danh mục.</p>';
+    renderBooks();
     if (global.MocThu.biaSach) global.MocThu.biaSach.enhance(grid);
-    filterCatalog();
   }
 
   document.addEventListener("click", async function (event) {
@@ -162,20 +247,10 @@
     var detail = event.target.closest("[data-reader-detail]");
     if (detail) {
       var detailId = detail.dataset.bookId;
-      if (detailId) {
-        try {
-          var result = await global.MocThu.auth.request("/api/books/" + detailId);
-          var item = result.book;
-          var copyStates = result.copies.reduce(function (counts, copy) { counts[copy.status] = (counts[copy.status] || 0) + 1; return counts; }, {});
-          global.MocThu.thanhPhan.hienThongBao((item.summary || item.name) + " · Vị trí: " + (item.location || "Chưa cập nhật") +
-            " · Bản sao: " + (copyStates.available || 0) + " sẵn sàng, " + (copyStates.loaned || 0) + " đang mượn, " + (copyStates.reserved || 0) + " giữ chỗ.");
-        } catch (error) { global.MocThu.thanhPhan.hienThongBao(error.message); }
-        return;
-      }
       var detailCard = detail.closest(".stitch-book-card");
       var detailName = detailCard && detailCard.querySelector(".stitch-book-name");
       var detailBook = books.find(function (book) { return detailName && detailName.textContent.toLocaleLowerCase("vi").includes(book.name.toLocaleLowerCase("vi")); });
-      global.MocThu.thanhPhan.hienThongBao(detailBook ? (detailBook.summary || detailBook.name) : "Thông tin chi tiết chưa được cập nhật trong danh mục.");
+      openBookDetails(detailId || (detailBook && detailBook.id), detailBook);
       return;
     }
     if (!reserve) return;

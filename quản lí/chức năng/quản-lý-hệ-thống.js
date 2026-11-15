@@ -6,8 +6,29 @@
   var auditSearch = document.getElementById("auditSearch");
   var backupForm = document.getElementById("backupSettingsForm");
   var reportStats = null;
+  var reportRange = { from: "", to: "" };
   function escape(value) { return global.MocThu.thanhPhan.escapeHtml(value == null ? "" : value); }
   function csvCell(value) { return '"' + String(value == null ? "" : value).replace(/"/g, '""') + '"'; }
+  function renderTrend(points) {
+    var svg = document.querySelector(".bar-chart-svg");
+    if (!svg || !points || !points.length) return;
+    var bars = Array.from(svg.querySelectorAll("rect"));
+    var labels = Array.from(svg.querySelectorAll("text")).filter(function (node) { return Number(node.getAttribute("y")) === 196; });
+    var maximum = Math.max(1, ...points.map(function (point) { return Math.max(Number(point.loans), Number(point.returns)); }));
+    var scale = 155 / maximum;
+    points.forEach(function (point, index) {
+      var loanBar = bars[index * 2], returnBar = bars[index * 2 + 1];
+      [[loanBar, point.loans], [returnBar, point.returns]].forEach(function (entry) {
+        if (!entry[0]) return;
+        var height = Math.max(1, Number(entry[1]) * scale);
+        entry[0].setAttribute("height", height.toFixed(1));
+        entry[0].setAttribute("y", (180 - height).toFixed(1));
+      });
+      if (labels[index]) labels[index].textContent = point.label;
+    });
+    var ticks = Array.from(svg.querySelectorAll("text")).filter(function (node) { return Number(node.getAttribute("x")) === 28; });
+    ticks.forEach(function (tick, index) { tick.textContent = String(Math.round(maximum * (4 - index) / 4)); });
+  }
   function exportReport() {
     if (!reportStats) { global.MocThu.thanhPhan.hienThongBao("Thống kê đang tải, hãy thử lại sau."); return; }
     var rows = [["Báo cáo thư viện", "Giá trị"], ["Tổng đầu sách", reportStats.books], ["Tổng bản sách", reportStats.copies], ["Đang mượn", reportStats.openLoans], ["Quá hạn", reportStats.overdueLoans], ["Độc giả hoạt động", reportStats.activeReaders], ["Thẻ thư viện hoạt động", reportStats.activeCards], ["Tiền phạt chưa thu", reportStats.unpaidFines], ["Tiền phạt ghi nhận tháng này", reportStats.lateFinesThisMonth], [], ["Thể loại", "Đầu sách", "Tổng bản", "Đang mượn"]];
@@ -45,25 +66,29 @@
       document.getElementById("backupLastRun").textContent = result.settings.last_backup_at ? "Sao lưu gần nhất: " + new Date(result.settings.last_backup_at).toLocaleString("vi-VN") : "Chưa có bản sao lưu.";
     } catch (error) { global.MocThu.thanhPhan.hienThongBao(error.message); }
   }
-  async function loadStats() {
+  async function loadStats(range) {
     var titleNode = document.getElementById("statTitles");
     if (!titleNode) return;
     try {
-      var result = await api("/api/stats");
+      var params = new URLSearchParams(range || reportRange);
+      var result = await api("/api/stats?" + params.toString());
       var stats = result.stats;
       reportStats = stats;
+      renderTrend(stats.trend);
       titleNode.textContent = String(stats.books);
       document.getElementById("statOpenLoans").innerHTML = escape(stats.openLoans) + ' <span class="unit">lượt</span>';
       document.getElementById("statUnpaidFines").innerHTML = Number(stats.unpaidFines).toLocaleString("vi-VN") + ' <span class="unit">đ</span>';
       document.getElementById("statLowStock").innerHTML = escape(stats.lowStock) + ' <span class="unit">đầu sách</span>';
       var reportFines = document.getElementById("reportFinesMonth");
-      if (reportFines) reportFines.innerHTML = Number(stats.lateFinesThisMonth).toLocaleString("vi-VN") + ' <span class="unit">đ</span>';
+      if (reportFines) reportFines.innerHTML = Number(stats.finesInPeriod ?? stats.lateFinesThisMonth).toLocaleString("vi-VN") + ' <span class="unit">đ</span>';
       var reportLoans = document.getElementById("reportLoansMonth");
-      if (reportLoans) reportLoans.innerHTML = escape(stats.loansThisMonth) + ' <span class="unit">lượt</span>';
+      if (reportLoans) reportLoans.innerHTML = escape(stats.loansInPeriod ?? stats.loansThisMonth) + ' <span class="unit">lượt</span>';
       var ratio = stats.copies ? (Number(stats.openLoans) * 100 / Number(stats.copies)) : 0;
       var resourceRatio = document.getElementById("reportResourceRatio");
       if (resourceRatio) resourceRatio.innerHTML = ratio.toFixed(1) + ' <span class="unit">%</span>';
-      var onTime = stats.totalReturns ? (Number(stats.onTimeReturns) * 100 / Number(stats.totalReturns)) : 0;
+      var returns = Number(stats.totalReturnsInPeriod ?? stats.totalReturns);
+      var onTimeReturns = Number(stats.onTimeReturnsInPeriod ?? stats.onTimeReturns);
+      var onTime = returns ? (onTimeReturns * 100 / returns) : 0;
       var onTimeRatio = document.getElementById("reportOnTimeRatio");
       if (onTimeRatio) onTimeRatio.innerHTML = onTime.toFixed(1) + ' <span class="unit">%</span>';
       var categories = document.getElementById("reportCategories");
@@ -74,10 +99,77 @@
       if (topBooks) topBooks.innerHTML = stats.topBooks.length ? stats.topBooks.map(function (item) {
         return '<tr><td>' + escape(item.name) + '</td><td>' + escape(item.code) + '</td><td>' + item.loan_count + '</td></tr>';
       }).join("") : '<tr><td colspan="3" class="table-empty">Chưa có dữ liệu mượn.</td></tr>';
+      if (document.getElementById("reportTopic")) applyTopic();
     } catch (error) { global.MocThu.thanhPhan.hienThongBao(error.message); }
   }
+  function dateOnly(date) { return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0"); }
+  function applyReportPeriod(period) {
+    var now = new Date(), from = new Date(now), to = new Date(now);
+    if (period === "week") { from.setDate(now.getDate() - ((now.getDay() + 6) % 7)); }
+    else if (period === "month") { from.setDate(1); }
+    else if (period === "quarter") { from.setMonth(Math.floor(now.getMonth() / 3) * 3, 1); }
+    else if (period === "year") { from.setMonth(0, 1); }
+    reportRange = { from: dateOnly(from), to: dateOnly(to) };
+    document.getElementById("reportFrom").value = reportRange.from;
+    document.getElementById("reportTo").value = reportRange.to;
+    loadStats(reportRange);
+  }
+  function applyTopic() {
+    if (!reportStats) return;
+    var topic = document.getElementById("reportTopic").value;
+    var label = document.querySelector("#reportFinesMonth")?.closest(".admin-stat-card")?.querySelector(".admin-stat-label");
+    var value = document.getElementById("reportFinesMonth");
+    var foot = value?.closest(".admin-stat-card")?.querySelector(".admin-stat-foot");
+    var loansValue = document.getElementById("reportLoansMonth");
+    if (topic === "fines") {
+      label.textContent = "TIỀN PHẠT / BỒI THƯỜNG GHI NHẬN TRONG KỲ";
+      value.innerHTML = Number(reportStats.finesInPeriod ?? reportStats.lateFinesThisMonth).toLocaleString("vi-VN") + ' <span class="unit">đ</span>';
+      foot.textContent = "Tổng khoản phạt và bồi thường đã ghi nhận trong khoảng thời gian.";
+      loansValue.closest(".admin-stat-card").querySelector(".admin-stat-label").textContent = "KHOẢN CHƯA THANH TOÁN TRONG KỲ";
+      loansValue.innerHTML = Number(reportStats.unpaidFinesInPeriod ?? reportStats.unpaidFines).toLocaleString("vi-VN") + ' <span class="unit">đ</span>';
+    } else if (topic === "circulation") {
+      label.textContent = "LƯỢT MƯỢN GHI NHẬN TRONG KỲ";
+      value.innerHTML = escape(reportStats.loansInPeriod ?? reportStats.loansThisMonth) + ' <span class="unit">lượt</span>';
+      foot.textContent = "Thống kê theo ngày tạo phiếu mượn.";
+      loansValue.closest(".admin-stat-card").querySelector(".admin-stat-label").textContent = "ĐẦU SÁCH ĐƯỢC THEO DÕI";
+      loansValue.innerHTML = escape(reportStats.books) + ' <span class="unit">đầu sách</span>';
+    } else if (topic === "returns") {
+      label.textContent = "LƯỢT TRẢ ĐÚNG HẠN TRONG KỲ";
+      value.innerHTML = escape(reportStats.onTimeReturnsInPeriod ?? reportStats.onTimeReturns) + ' <span class="unit">lượt</span>';
+      foot.textContent = "Đối chiếu thời điểm trả với hạn trả của từng phiếu.";
+      loansValue.closest(".admin-stat-card").querySelector(".admin-stat-label").textContent = "LƯỢT TRẢ TRONG KỲ";
+      loansValue.innerHTML = escape(reportStats.returnsInPeriod ?? reportStats.totalReturns) + ' <span class="unit">lượt</span>';
+    } else {
+      label.textContent = "GIÁ TRỊ NHẬP KHO TRONG KỲ";
+      value.innerHTML = Number(reportStats.receiptValueInPeriod || 0).toLocaleString("vi-VN") + ' <span class="unit">đ</span>';
+      foot.textContent = "Tổng giá trị theo các phiếu nhập kho trong khoảng ngày.";
+      loansValue.closest(".admin-stat-card").querySelector(".admin-stat-label").textContent = "LƯỢT XUẤT KHO TRONG KỲ";
+      loansValue.innerHTML = escape(reportStats.exportsInPeriod || 0) + ' <span class="unit">phiếu</span>';
+    }
+  }
   function init() {
-    loadStats();
+    var overviewButtons = document.querySelectorAll("[data-overview-period]");
+    overviewButtons.forEach(function (button) { button.addEventListener("click", function () {
+      overviewButtons.forEach(function (item) { item.classList.toggle("active", item === button); });
+      var now = new Date(), from = new Date(now);
+      if (button.dataset.overviewPeriod === "week") from.setDate(now.getDate() - 6);
+      else if (button.dataset.overviewPeriod === "month") from.setDate(1);
+      loadStats({ from: dateOnly(from), to: dateOnly(now) });
+    }); });
+    var reportButtons = document.querySelectorAll("[data-report-period]");
+    reportButtons.forEach(function (button) { button.addEventListener("click", function () {
+      reportButtons.forEach(function (item) { item.classList.toggle("active", item === button); });
+      applyReportPeriod(button.dataset.reportPeriod);
+    }); });
+    var fromInput = document.getElementById("reportFrom"), toInput = document.getElementById("reportTo");
+    if (fromInput && toInput) {
+      fromInput.addEventListener("change", function () { reportRange.from = fromInput.value; reportRange.to = toInput.value; loadStats(reportRange); });
+      toInput.addEventListener("change", function () { reportRange.from = fromInput.value; reportRange.to = toInput.value; loadStats(reportRange); });
+    }
+    var topic = document.getElementById("reportTopic");
+    if (topic) topic.addEventListener("change", applyTopic);
+    if (topic) applyReportPeriod("month");
+    else loadStats();
     var exportButton = document.getElementById("reportsExportExcel");
     var pdfButton = document.getElementById("reportsExportPdf");
     if (exportButton) exportButton.addEventListener("click", exportReport);

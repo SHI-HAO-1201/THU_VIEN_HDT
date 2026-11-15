@@ -782,3 +782,18 @@
   background: #f5efe6;
   border-color: #e3dbce;
 }
+.account-list td .account-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; min-width:250px; }
+.account-list td .account-actions .button.small { min-height:32px; padding:5px 11px; border-radius:8px; box-shadow:0 1px 2px #432b160b; transition:transform .16s ease,box-shadow .16s ease,background .16s ease; }
+.account-list td .account-actions .button.small:hover { transform:translateY(-1px); box-shadow:0 5px 12px #432b1614; }
+.account-list td .account-actions .button.small.danger { color:#a64038; background:#fff7f5; border-color:#edd1cb; }
+.account-list td .account-actions .button.small.danger:hover { background:#fbe9e5; }
+.staff-edit-dialog { width:min(480px,calc(100% - 32px)); padding:0; border:1px solid #e9dfd3; border-radius:16px; color:var(--ink); background:#fffdf9; box-shadow:0 25px 80px #1c281e40; }
+.staff-edit-dialog::backdrop { background:#18221dcc; backdrop-filter:blur(4px); }
+.staff-edit-dialog form { display:grid; gap:15px; padding:26px; }
+.staff-dialog-head { display:flex; justify-content:space-between; gap:16px; margin-bottom:4px; }
+.staff-dialog-head h2 { margin:5px 0; font-family:var(--font-serif); }
+.staff-dialog-head p { margin:0; color:var(--muted); font-size:13px; }
+.staff-edit-dialog label { display:grid; gap:7px; color:var(--ink); font-size:13px; font-weight:700; }
+.staff-edit-dialog input { min-height:42px; padding:9px 12px; border:1px solid #ded5c8; border-radius:8px; font:inherit; }
+.staff-edit-dialog input:focus { outline:3px solid #b8cbbd80; border-color:#527b60; }
+.staff-dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }

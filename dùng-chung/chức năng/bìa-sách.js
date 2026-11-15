@@ -20,7 +20,7 @@
     (root || document).querySelectorAll(".stitch-book-card, .reader-book-card").forEach(function (card) {
       var title = card.querySelector(".stitch-book-name, h3");
       var container = card.querySelector(".stitch-book-cover, .reader-book-cover");
-      if (!title || !container || container.querySelector(".book-cover-media")) return;
+      if (!title || !container || container.querySelector(".book-cover-media, .reader-book-cover-image")) return;
       var name = title.textContent.trim();
       var match = covers.find(function (entry) { return normalize(name).indexOf(normalize(entry.title)) === 0; });
       if (!match) return;

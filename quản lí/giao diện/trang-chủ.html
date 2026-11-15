@@ -69,9 +69,9 @@
             </div>
             <div class="admin-header-actions">
               <div class="period-pill-group">
-                <button class="period-pill active" type="button">Hôm nay</button>
-                <button class="period-pill" type="button">Tuần này</button>
-                <button class="period-pill" type="button">Tháng này</button>
+                <button class="period-pill active" type="button" data-overview-period="today">Hôm nay</button>
+                <button class="period-pill" type="button" data-overview-period="week">Tuần này</button>
+                <button class="period-pill" type="button" data-overview-period="month">Tháng này</button>
               </div>
               <button class="button primary" id="dashboardExport" type="button" style="background:var(--wood);border-color:var(--wood);">
                 <span>↧</span> <span>Xuất báo cáo tổng hợp (Excel/PDF)</span>
@@ -447,29 +447,29 @@
           <div class="reports-filter-bar">
             <div class="reports-filter-item">
               <label>Chuyên đề báo cáo</label>
-              <select aria-label="Chuyên đề">
-                <option>Doanh thu &amp; Tiền phạt vi phạm</option>
-                <option>Tần suất lưu hành đầu sách</option>
-                <option>Hiệu suất trả sách &amp; Quá hạn</option>
-                <option>Nguồn tài trợ &amp; Thanh lý</option>
+              <select id="reportTopic" aria-label="Chuyên đề">
+                <option value="fines">Doanh thu &amp; Tiền phạt vi phạm</option>
+                <option value="circulation">Tần suất lưu hành đầu sách</option>
+                <option value="returns">Hiệu suất trả sách &amp; Quá hạn</option>
+                <option value="inventory">Nguồn tài trợ &amp; Thanh lý</option>
               </select>
             </div>
 
             <div class="reports-filter-item">
               <label>Kỳ thống kê</label>
               <div class="period-pill-group">
-                <button class="period-pill" type="button">Tuần này</button>
-                <button class="period-pill active" type="button">Tháng 10/2023</button>
-                <button class="period-pill" type="button">Quý 3</button>
-                <button class="period-pill" type="button">Năm nay</button>
+                <button class="period-pill" type="button" data-report-period="week">Tuần này</button>
+                <button class="period-pill active" type="button" data-report-period="month">Tháng này</button>
+                <button class="period-pill" type="button" data-report-period="quarter">Quý này</button>
+                <button class="period-pill" type="button" data-report-period="year">Năm nay</button>
               </div>
             </div>
 
             <div class="reports-filter-item">
               <label>Khoảng ngày cụ thể</label>
-              <input type="text" value="01/10/2023" style="width:90px;" aria-label="Từ ngày">
+              <input id="reportFrom" type="date" style="width:140px;" aria-label="Từ ngày">
               <span>—</span>
-              <input type="text" value="31/10/2023" style="width:90px;" aria-label="Đến ngày">
+              <input id="reportTo" type="date" style="width:140px;" aria-label="Đến ngày">
             </div>
           </div>
 
