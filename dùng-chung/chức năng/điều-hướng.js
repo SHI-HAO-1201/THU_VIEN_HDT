@@ -9,6 +9,7 @@
   var mode = document.body.dataset.role || "librarian";
   var activePage = mode === "reader" ? "reader-home" : (mode === "librarian" ? "books" : "dashboard");
   var activeWarehouseSection = "warehouse-overview";
+  var loanFilter = "all";
   var backdrop = document.getElementById("modalBackdrop");
 
   function veMenu() {
@@ -247,44 +248,7 @@
     }
     var returnLoanButton = event.target.closest("[data-return-loan]");
     if (returnLoanButton) {
-      var loanId = returnLoanButton.dataset.returnLoan;
-      if (!loanId || !global.confirm("Xác nhận đã nhận trả sách trong phiếu này?")) return;
-      var condition = global.prompt("Tình trạng tài liệu: nhập 1 nếu bình thường, 2 nếu hư hỏng, 3 nếu mất.", "1");
-      if (condition === null) return;
-      if (!["1", "2", "3"].includes(condition.trim())) {
-        thanhPhan.hienThongBao("Vui lòng chọn 1, 2 hoặc 3.");
-        return;
-      }
-      var compensation = 0;
-      if (condition.trim() !== "1") {
-        var amount = global.prompt("Nhập số tiền bồi thường (đồng). Nhập 0 nếu chưa xác định.", "0");
-        if (amount === null) return;
-        compensation = Number(amount);
-        if (!Number.isSafeInteger(compensation) || compensation < 0) {
-          thanhPhan.hienThongBao("Số tiền bồi thường không hợp lệ.");
-          return;
-        }
-        if (compensation === 0) {
-          thanhPhan.hienThongBao("Cần ghi nhận giá trị bồi thường trước khi kết thúc phiếu.");
-          return;
-        }
-      }
-      returnLoanButton.disabled = true;
-      global.MocThu.auth.request("/api/loans/" + loanId + "/return", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ damaged: condition.trim() === "2", lost: condition.trim() === "3", compensationAmount: compensation })
-      }).then(async function (result) {
-        if (sach) {
-          await sach.taiDanhSach();
-          sach.veBang();
-        }
-        await taiPhieuMuon();
-        thanhPhan.hienThongBao(result.totalDue ? "Đã nhận trả. Ghi nhận tiền phạt/bồi thường " + result.totalDue.toLocaleString("vi-VN") + "đ và khóa thẻ đến khi xử lý." : "Đã nhận trả sách và cập nhật tồn kho.");
-      }).catch(function (error) {
-        returnLoanButton.disabled = false;
-        thanhPhan.hienThongBao(error.message);
-      });
+      if (global.MocThu.quanLyNghiepVu) global.MocThu.quanLyNghiepVu.moNhanTra(returnLoanButton.dataset.returnLoan);
       return;
     }
     if (event.target.closest("#dashboardExport")) {
@@ -298,15 +262,6 @@
     var reportButton = event.target.closest("#reportsExport, #loansExport, #readersExport, #receiptsExport");
     if (reportButton) {
       baoCao.xuatBaoCao(danhSachSach, reportButton);
-      return;
-    }
-    if (event.target.closest("#newLoanButton")) {
-      moTrang("books");
-      thanhPhan.hienThongBao("Chọn đầu sách rồi lập phiếu mượn từ phần xem chi tiết.");
-      return;
-    }
-    if (event.target.closest("#newReceiptButton")) {
-      thanhPhan.hienThongBao("Khung lập phiếu nhập sẵn sàng kết nối với nhà cung cấp.");
       return;
     }
     if (event.target.closest("#notificationButton")) {
@@ -367,19 +322,22 @@
         dueDay.setHours(0, 0, 0, 0);
         var daysLeft = Math.ceil((dueDay.getTime() - today.getTime()) / 86400000);
         var returned = Boolean(loan.returnedAt);
+        var state = returned ? "returned" : (daysLeft < 0 ? "overdue" : (daysLeft <= 3 ? "due" : "active"));
         var status = returned ? '<span class="badge">Đã trả</span>' :
           (daysLeft < 0 ? '<span class="badge danger">Quá hạn ' + Math.abs(daysLeft) + ' ngày</span>' :
             (daysLeft <= 3 ? '<span class="badge warning">Sắp đến hạn</span>' : '<span class="badge">Đang mượn</span>'));
         var action = returned ? "Đã nhận trả" :
           '<button class="button small soft" data-return-loan="' + loan.id + '" type="button">Nhận trả</button>';
         var loanCode = "PM-" + borrowed.getFullYear() + "-" + String(loan.id).padStart(4, "0");
-        return '<tr data-loan-id="' + loan.id + '">' +
+        return '<tr data-loan-id="' + loan.id + '" data-loan-state="' + state + '">' +
           '<td><strong>' + thanhPhan.escapeHtml(loanCode) + '</strong></td>' +
           '<td>' + thanhPhan.escapeHtml(loan.readerCode) + '<br><small>' + thanhPhan.escapeHtml(loan.bookName) + '</small></td>' +
           '<td>' + borrowed.toLocaleDateString("vi-VN") + '</td>' +
           '<td>' + due.toLocaleDateString("vi-VN") + '</td>' +
           '<td>1 cuốn</td><td>' + status + '</td><td>' + action + '</td></tr>';
       }).join("");
+      var search = document.getElementById("loanSearch");
+      if (search) search.dispatchEvent(new Event("input", { bubbles: true }));
     } catch (error) {
       table.innerHTML = '<tr><td class="table-empty" colspan="7">Không tải được danh sách phiếu mượn.</td></tr>';
       thanhPhan.hienThongBao(error.message);
@@ -388,12 +346,22 @@
 
   function khoiTao() {
     document.addEventListener("click", xuLyDieuHuong);
-    var loanSearch = document.getElementById("loanSearch");
-    if (loanSearch) loanSearch.addEventListener("input", function (event) {
-      var query = event.target.value.toLocaleLowerCase("vi");
-      document.querySelectorAll("#loansTable tr").forEach(function (row) {
-        row.hidden = row.textContent.toLocaleLowerCase("vi").indexOf(query) === -1;
+    function applyLoanFilters() {
+      var query = (document.getElementById("loanSearch")?.value || "").toLocaleLowerCase("vi");
+      document.querySelectorAll("#loansTable tr[data-loan-state]").forEach(function (row) {
+        row.hidden = Boolean((query && row.textContent.toLocaleLowerCase("vi").indexOf(query) === -1) ||
+          (loanFilter !== "all" && row.dataset.loanState !== loanFilter));
       });
+    }
+    var loanSearch = document.getElementById("loanSearch");
+    if (loanSearch) loanSearch.addEventListener("input", applyLoanFilters);
+    var loanFilters = document.getElementById("loanFilters");
+    if (loanFilters) loanFilters.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-loan-filter]");
+      if (!button) return;
+      loanFilter = button.dataset.loanFilter;
+      loanFilters.querySelectorAll("[data-loan-filter]").forEach(function (item) { item.classList.toggle("active", item === button); });
+      applyLoanFilters();
     });
     var mobileMenu = document.getElementById("mobileMenuButton");
     if (mobileMenu) mobileMenu.addEventListener("click", function () {
@@ -407,6 +375,10 @@
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
         dongModalVaiTro();
+        ["loanModalBackdrop", "returnModalBackdrop"].forEach(function (id) {
+          var dialog = document.getElementById(id);
+          if (dialog) dialog.classList.remove("open");
+        });
         if (sach && sach.dongDrawer) sach.dongDrawer();
         if (sach && sach.dongBieuMau) sach.dongBieuMau();
       }

@@ -65,7 +65,8 @@
               <p class="page-subtitle">Quản lý định dạng 1.250 đầu sách thực tế, đồng bộ mã kệ, theo dõi tồn kho và tình trạng mượn trả.</p>
             </div>
             <div class="heading-actions">
-              <button class="button" id="importExcelBtn" type="button">↑ Nhập Excel/CSV</button>
+              <button class="button" id="importExcelBtn" type="button">↑ Nhập CSV</button>
+              <input id="bookImportFile" type="file" accept=".csv,text/csv" hidden>
               <button class="button" id="booksExport" type="button">↓ Xuất danh mục</button>
               <button class="button primary" data-open-book type="button">＋ Thêm sách mới</button>
             </div>
@@ -173,7 +174,7 @@
             <article class="card stat-card"><div class="stat-top"><span>Sắp đến hạn</span><span class="stat-icon gold">◷</span></div><div class="stat-number" id="loanDueSoonCount">0</div><div class="stat-foot">Trong 3 ngày tới</div></article>
             <article class="card stat-card"><div class="stat-top"><span>Quá hạn</span><span class="stat-icon red">!</span></div><div class="stat-number" id="loanOverdueCount">0</div><div class="stat-foot">Cần liên hệ độc giả</div></article>
           </div>
-          <div class="toolbar-row"><div class="filter-group"><button class="filter-button active">Tất cả phiếu</button><button class="filter-button">Đang mượn</button><button class="filter-button">Sắp đến hạn</button><button class="filter-button">Quá hạn</button></div><label class="search-box"><span>⌕</span><input id="loanSearch" type="search" placeholder="Tìm độc giả, mã phiếu..."></label></div>
+          <div class="toolbar-row"><div class="filter-group" id="loanFilters"><button class="filter-button active" type="button" data-loan-filter="all">Tất cả phiếu</button><button class="filter-button" type="button" data-loan-filter="active">Đang mượn</button><button class="filter-button" type="button" data-loan-filter="due">Sắp đến hạn</button><button class="filter-button" type="button" data-loan-filter="overdue">Quá hạn</button><button class="filter-button" type="button" data-loan-filter="returned">Đã trả</button></div><label class="search-box"><span>⌕</span><input id="loanSearch" type="search" placeholder="Tìm độc giả, mã phiếu..."></label></div>
           <article class="card table-card"><div class="table-scroll"><table><thead><tr><th>Mã phiếu</th><th>Độc giả</th><th>Ngày mượn</th><th>Hẹn trả</th><th>Số cuốn</th><th>Tình trạng</th><th>Thao tác</th></tr></thead>
             <tbody id="loansTable">
               <tr><td class="table-empty" colspan="7">Đang tải phiếu mượn...</td></tr>
@@ -225,7 +226,7 @@
             <div>
               <div class="eyebrow" style="color:#788e74;font-size:10.5px;font-weight:700;letter-spacing:.8px;">HỆ THỐNG NỘI BỘ • QUẢN LÝ KHO / LƯU TRỮ &amp; KIỂM KÊ</div>
               <h1 style="font-size:26px;font-weight:700;margin:4px 0 6px;color:var(--ink);">Kiểm Kê Tồn Kho &amp; Vận Hành Lưu Trữ</h1>
-              <p class="page-subtitle" style="font-size:12px;color:var(--muted);margin:0;">Bảo toàn số lượng và chất lượng 18.520 bản sách vật lý; tuân chuẩn quy trình kiểm kê định kỳ và đối soát hư hại.</p>
+              <p class="page-subtitle" style="font-size:12px;color:var(--muted);margin:0;">Theo dõi số bản sao, vị trí kệ, lượt mượn và tình trạng tài liệu theo dữ liệu thực trong thư viện.</p>
             </div>
             <div class="heading-actions" style="display:flex;gap:8px;">
               <button class="button soft" type="button">▦ Quét mã kiểm đếm</button>
@@ -241,10 +242,10 @@
                 <span style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;">TỔNG SÁCH TRONG KHO VẬT LÝ</span>
                 <span class="stat-icon" style="background:#f3edf8;color:#765593;">▥</span>
               </div>
-              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;">18.520 <span style="font-size:14px;color:var(--muted);">bản</span></div>
+              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;"><span id="warehouseTotalCopies">0</span> <span style="font-size:14px;color:var(--muted);">bản</span></div>
               <div class="stat-foot" style="font-size:11px;color:var(--muted);">
-                <span>● Trên kệ tra cứu: 14.850</span><br>
-                <span>● Kho lưu trữ: 3.670</span>
+                <span>● Tổng số bản sao đang quản lý</span><br>
+                <span>● Số liệu cập nhật trực tiếp từ hệ thống</span>
               </div>
             </article>
 
@@ -253,10 +254,10 @@
                 <span style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;">SÁCH ĐANG CHO MƯỢN</span>
                 <span class="stat-icon blue">📇</span>
               </div>
-              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;">1.420 <span style="font-size:14px;color:var(--muted);">bản</span></div>
+              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;"><span id="warehouseLoanedCopies">0</span> <span style="font-size:14px;color:var(--muted);">bản</span></div>
               <div class="stat-foot" style="font-size:11px;color:var(--muted);">
-                <span style="color:#2e663e;font-weight:600;">↗ +4.2% tuần này</span><br>
-                <span>Tỷ lệ luân chuyển: 92.8% giá trị</span>
+                <span style="color:#2e663e;font-weight:600;">Đang có phiếu mượn</span><br>
+                <span>Số liệu tính theo trạng thái bản sao</span>
               </div>
             </article>
 
@@ -265,10 +266,10 @@
                 <span style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;">CẦN THANH LÝ &amp; ĐỀN BÙ</span>
                 <span class="stat-icon" style="background:#fdf3e7;color:#b7762c;">📦</span>
               </div>
-              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;">385 <span style="font-size:14px;color:var(--muted);">bản</span></div>
+              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;"><span id="warehouseDamagedCopies">0</span> <span style="font-size:14px;color:var(--muted);">bản</span></div>
               <div class="stat-foot" style="font-size:11px;color:var(--muted);">
-                <span style="color:#b7762c;font-weight:600;">Giảm 30% - 70%</span><br>
-                <span>Sách rách/hỏng mất trang; quy can</span>
+                <span style="color:#b7762c;font-weight:600;">Hỏng hoặc đã thanh lý</span><br>
+                <span>Có thể lập phiếu xuất để lưu dấu</span>
               </div>
             </article>
 
@@ -277,19 +278,19 @@
                 <span style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;">CẢNH BÁO TỒN DƯỚI MỨC AN TOÀN</span>
                 <span class="stat-icon red">⚠️</span>
               </div>
-              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;color:#c44d42;">12 <span style="font-size:14px;color:var(--muted);">đầu sách</span></div>
+              <div class="stat-number" style="font-size:28px;margin:10px 0 4px;color:#c44d42;"><span id="warehouseLowBooks">0</span> <span style="font-size:14px;color:var(--muted);">đầu sách</span></div>
               <div class="stat-foot" style="font-size:11px;display:flex;justify-content:space-between;align-items:center;">
-                <span style="color:#c44d42;">Sắp hết tồn kho giao dịch (&lt;3 bản)</span>
-                <button class="button small soft" type="button" style="color:#c44d42;padding:2px 8px;font-size:10px;">Xem ngay</button>
+                <span style="color:#c44d42;">Số bản sẵn sàng không vượt định mức</span>
+                <button class="button small soft" id="warehouseShowLow" type="button" style="color:#c44d42;padding:2px 8px;font-size:10px;">Xem ngay</button>
               </div>
             </article>
           </div>
 
           <!-- Warehouse Tabs -->
           <div class="wh-tabs" id="warehouse-movements">
-            <button class="wh-tab active" type="button">Kiểm kê số lượng &amp; Chất lượng</button>
-            <button class="wh-tab" type="button">Quản lý Phiếu Nhập Kho</button>
-            <button class="wh-tab" type="button">Quản lý Phiếu Xuất Kho</button>
+            <button class="wh-tab active" type="button" data-wh-target="copy-inventory">Kiểm kê số lượng &amp; Chất lượng</button>
+            <button class="wh-tab" type="button" data-wh-target="receipt-list">Quản lý Phiếu Nhập Kho</button>
+            <button class="wh-tab" type="button" data-wh-target="export-list">Quản lý Phiếu Xuất Kho</button>
           </div>
 
           <form class="card account-create" id="receiptForm" hidden style="padding:18px;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
@@ -316,13 +317,13 @@
           <div class="toolbar-row" style="margin-bottom:16px;">
             <label class="search-box" style="flex:1;">
               <span>⌕</span>
-              <input type="search" placeholder="Tìm theo mã xuất, mã kệ (KDT-1...), hoặc tên sản phẩm..." aria-label="Tìm kiểm kê">
+              <input id="warehouseSearch" type="search" placeholder="Tìm theo mã, tên sách, vị trí..." aria-label="Tìm kiểm kê">
             </label>
-            <select class="select-quiet" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;" aria-label="Vị trí kệ kho">
-              <option>Tất cả vị trí kệ kho</option>
-              <option>Khu A - Văn học</option>
-              <option>Khu B - Kỹ năng &amp; Xã hội</option>
-              <option>Khu C - Thiếu nhi &amp; Khoa học</option>
+            <select class="select-quiet" id="warehouseLocationFilter" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;" aria-label="Vị trí kệ kho">
+              <option value="all">Tất cả vị trí kệ kho</option>
+            </select>
+            <select class="select-quiet" id="warehouseStatusFilter" aria-label="Lọc tình trạng kho">
+              <option value="all">Mọi tình trạng</option><option value="low">Dưới định mức</option><option value="damaged">Có bản hỏng</option><option value="available">Còn bản sẵn sàng</option>
             </select>
             <button class="button" id="warehouseExport" type="button">↧ Xuất Excel</button>
             <button class="button soft" type="button">⚡ Bộ lọc nâng cao</button>
@@ -344,7 +345,7 @@
                     <th>Nhu cầu nhập</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="warehouseTable">
                   <tr>
                     <td><strong class="tx-code">MT-09252-01</strong><br><span style="font-size:9.5px;color:var(--muted);">ĐK: 19804812001</span></td>
                     <td>
@@ -679,13 +680,41 @@
           <div class="field full"><label for="bookName">Tên sách *</label><input id="bookName" name="name" required maxlength="120" placeholder="Ví dụ: Nhà giả kim"></div>
           <div class="field"><label for="bookAuthor">Tác giả *</label><input id="bookAuthor" name="author" required maxlength="100" placeholder="Tên tác giả"></div>
           <div class="field"><label for="bookCode">Mã tài liệu *</label><input id="bookCode" name="code" required maxlength="20" placeholder="VH-00124"></div>
-          <div class="field"><label for="bookCategory">Thể loại</label><select id="bookCategory" name="category"><option>Văn học</option><option>Kỹ năng sống</option><option>Khoa học</option><option>Thiếu nhi</option><option>Lịch sử</option><option>Khác</option></select></div>
+          <div class="field"><label for="bookCategory">Thể loại</label><select id="bookCategory" name="category"><option>Văn học</option><option>Kinh tế - Tâm lý</option><option>Lịch sử - Khoa học</option><option>Kỹ năng sống</option><option>Văn học thiếu nhi</option><option>Khác</option></select></div>
+          <div class="field"><label for="bookLanguage">Ngôn ngữ</label><select id="bookLanguage" name="language"><option value="vi">Tiếng Việt</option><option value="en">Tiếng Anh</option></select></div>
           <div class="field"><label for="bookStock">Số lượng trong kho *</label><input id="bookStock" name="stock" type="number" min="0" step="1" value="1" required></div>
           <div class="field"><label for="bookMinimum">Mức tồn tối thiểu</label><input id="bookMinimum" name="minimum" type="number" min="0" step="1" value="3"></div>
           <div class="field"><label for="bookLocation">Vị trí lưu trữ</label><input id="bookLocation" name="location" maxlength="20" placeholder="A-02-14"></div>
           <div class="field full"><label for="bookDescription">Mô tả ngắn</label><textarea id="bookDescription" name="description" maxlength="300" placeholder="Thông tin bổ sung về sách..."></textarea></div>
         </div>
         <div class="modal-footer"><button class="button" type="button" data-close-modal>Hủy</button><button class="button primary" type="submit">Lưu đầu sách</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="modal-backdrop" id="loanModalBackdrop" role="presentation">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="loanModalTitle">
+      <form id="loanForm">
+        <div class="modal-header"><div><h2 id="loanModalTitle">Tạo phiếu mượn</h2><p>Chọn thẻ độc giả và đầu sách còn bản sẵn sàng.</p></div><button class="close-button" type="button" data-close-loan aria-label="Đóng">×</button></div>
+        <div class="modal-body">
+          <div class="field full"><label for="loanReaderCode">Thẻ độc giả</label><select id="loanReaderCode" name="readerCode" required><option value="">Đang tải thẻ…</option></select></div>
+          <div class="field full"><label for="loanBookId">Đầu sách</label><select id="loanBookId" name="bookId" required><option value="">Đang tải sách…</option></select></div>
+          <p class="field full" id="loanAvailabilityNote" aria-live="polite">Mỗi phiếu mượn có hạn 14 ngày.</p>
+        </div>
+        <div class="modal-footer"><button class="button" type="button" data-close-loan>Hủy</button><button class="button primary" type="submit">Tạo phiếu mượn</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="modal-backdrop" id="returnModalBackdrop" role="presentation">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="returnModalTitle">
+      <form id="returnForm">
+        <input type="hidden" name="loanId">
+        <div class="modal-header"><div><h2 id="returnModalTitle">Nhận trả tài liệu</h2><p id="returnLoanSummary">Kiểm tra tình trạng sách khi nhận trả.</p></div><button class="close-button" type="button" data-close-return aria-label="Đóng">×</button></div>
+        <div class="modal-body">
+          <div class="field full"><label for="returnCondition">Tình trạng khi trả</label><select id="returnCondition" name="condition"><option value="normal">Bình thường</option><option value="damaged">Hư hỏng</option><option value="lost">Bị mất</option></select></div>
+          <label class="field full" id="compensationField" hidden><span>Số tiền bồi thường (đ)</span><input name="compensationAmount" type="number" min="1" step="1000" value="100000"></label>
+          <p class="field full">Phí trễ hạn được tính tự động: 2.000đ/ngày.</p>
+        </div>
+        <div class="modal-footer"><button class="button" type="button" data-close-return>Hủy</button><button class="button primary" type="submit">Xác nhận nhận trả</button></div>
       </form>
     </section>
   </div>

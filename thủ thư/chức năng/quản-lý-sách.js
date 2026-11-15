@@ -6,8 +6,13 @@
   var thanhPhan = global.MocThu.thanhPhan;
   var boLocTrangThai = "all";
   var boLocTheLoai = "all";
+  var boLocNgonNgu = "all";
   var viTriDangSua = -1;
   var cuonSachDangXem = null;
+
+  function soBanSanSang(book) {
+    return Math.max(0, Number(book.available_copies ?? (book.stock - (book.borrowed || 0))));
+  }
 
   var nenMo = document.getElementById("modalBackdrop");
   var drawerBackdrop = document.getElementById("drawerBackdrop");
@@ -56,7 +61,7 @@
     if (!book) return;
     cuonSachDangXem = index;
 
-    var avail = Math.max(0, book.stock - (book.borrowed || 0));
+    var avail = soBanSanSang(book);
     var cover = document.getElementById("drawerCover");
     var badge = document.getElementById("drawerBadge");
     var title = document.getElementById("drawerTitle");
@@ -109,6 +114,15 @@
       var result = await global.MocThu.auth.request("/api/books");
       if (result && Array.isArray(result.books)) {
         sach.splice.apply(sach, [0, sach.length].concat(result.books));
+        var categorySelect = document.getElementById("filterCategory");
+        if (categorySelect) {
+          var selected = categorySelect.value;
+          var categories = Array.from(new Set(sach.map(function (book) { return book.category; }).filter(Boolean))).sort(function (a, b) { return a.localeCompare(b, "vi"); });
+          categorySelect.innerHTML = '<option value="all">Tất cả thể loại</option>' + categories.map(function (category) {
+            return '<option value="' + thanhPhan.escapeHtml(category) + '">' + thanhPhan.escapeHtml(category) + '</option>';
+          }).join("");
+          categorySelect.value = categories.includes(selected) ? selected : "all";
+        }
       }
     } catch (error) {
       console.warn("Không thể tải danh mục sách từ máy chủ:", error);
@@ -124,15 +138,16 @@
       return { book: book, index: index };
     }).filter(function (entry) {
       var book = entry.book;
-      var avail = Math.max(0, book.stock - (book.borrowed || 0));
+      var avail = soBanSanSang(book);
       var khopTimKiem = [book.name, book.author, book.code, book.category, book.isbn || ""].join(" ").toLocaleLowerCase("vi").indexOf(query) !== -1;
-      var khopTheLoai = boLocTheLoai === "all" || (book.category && book.category.indexOf(boLocTheLoai) !== -1);
+      var khopTheLoai = boLocTheLoai === "all" || book.category === boLocTheLoai;
+      var khopNgonNgu = boLocNgonNgu === "all" || (book.language || "vi") === boLocNgonNgu;
       var khopTrangThai = boLocTrangThai === "all" ||
         (boLocTrangThai === "available" && avail > 0) ||
         (boLocTrangThai === "low" && avail > 0 && avail <= book.minimum + 2) ||
         (boLocTrangThai === "out" && avail === 0);
 
-      return khopTimKiem && khopTheLoai && khopTrangThai;
+      return khopTimKiem && khopTheLoai && khopTrangThai && khopNgonNgu;
     });
 
     var bang = document.getElementById("booksTable");
@@ -145,7 +160,7 @@
         var book = entry.book;
         var idx = entry.index;
         var borrowed = book.borrowed || 0;
-        var avail = Math.max(0, book.stock - borrowed);
+        var avail = soBanSanSang(book);
         var total = Math.max(1, book.stock);
         var availPercent = Math.round((avail / total) * 100);
         var borrowedPercent = 100 - availPercent;
@@ -162,7 +177,7 @@
               '<div>' +
                 '<span class="book-title">' + thanhPhan.escapeHtml(book.name) + '</span>' +
                 '<span class="book-author">' + thanhPhan.escapeHtml(book.author) + (book.year ? ' • ' + book.year : '') + '</span>' +
-                '<div style="font-size:9.5px;color:var(--muted);margin-top:2px">ISBN: ' + thanhPhan.escapeHtml(book.isbn || book.code) + '</div>' +
+                '<div style="font-size:9.5px;color:var(--muted);margin-top:2px">ISBN: ' + thanhPhan.escapeHtml(book.isbn || book.code) + ' · ' + ((book.language || "vi") === "en" ? "Tiếng Anh" : "Tiếng Việt") + '</div>' +
               '</div>' +
             '</div>' +
           '</td>' +
@@ -202,7 +217,7 @@
     var totalTitles = sach.length;
     var totalCopies = sach.reduce(function (s, b) { return s + b.stock; }, 0);
     var totalBorrowed = sach.reduce(function (s, b) { return s + (b.borrowed || 0); }, 0);
-    var totalReady = totalCopies - totalBorrowed;
+    var totalReady = sach.reduce(function (sum, book) { return sum + soBanSanSang(book); }, 0);
 
     var visibleElem = document.getElementById("visibleBookCount");
     if (visibleElem) visibleElem.textContent = String(danhSachHienThi.length);
@@ -230,6 +245,7 @@
       form.elements.author.value = book.author;
       form.elements.code.value = book.code;
       form.elements.category.value = book.category;
+      if (form.elements.language) form.elements.language.value = book.language || "vi";
       form.elements.stock.value = book.stock;
       form.elements.minimum.value = book.minimum;
       form.elements.location.value = book.location || "";
@@ -273,6 +289,7 @@
       author: String(duLieu.get("author")).trim(),
       code: maSach,
       category: String(duLieu.get("category")),
+      language: String(duLieu.get("language") || "vi"),
       stock: Math.max(0, Number(duLieu.get("stock")) || 0),
       borrowed: viTriDangSua >= 0 ? sach[viTriDangSua].borrowed : 0,
       minimum: Math.max(0, Number(duLieu.get("minimum")) || 0),
@@ -304,7 +321,7 @@
     }
   }
 
-  async function xuLyMuonNhanh() {
+  function xuLyMuonNhanh() {
     if (cuonSachDangXem === null) return;
     var book = sach[cuonSachDangXem];
     if (!book || !book.id) {
@@ -312,35 +329,50 @@
       return;
     }
 
-    var avail = Math.max(0, book.stock - (book.borrowed || 0));
+    var avail = soBanSanSang(book);
     if (avail <= 0) {
       thanhPhan.hienThongBao("Đầu sách này hiện đã hết bản khả dụng trong kho.");
       return;
     }
 
-    var readerCode = prompt("Nhập mã độc giả hoặc mã thẻ thư viện:", "");
-    if (!readerCode || !readerCode.trim()) return;
+    if (global.MocThu.quanLyNghiepVu) global.MocThu.quanLyNghiepVu.moPhieuMuon(book.id);
+  }
 
-    var button = document.getElementById("drawerQuickBorrowBtn");
-    if (button) button.disabled = true;
-    try {
-      var result = await global.MocThu.auth.request("/api/loans", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookId: book.id, readerCode: readerCode.trim() })
-      });
-      Object.assign(book, result.book);
-      veBangSach();
-      moDrawer(cuonSachDangXem);
-      if (global.MocThu.dieuHuong && global.MocThu.dieuHuong.taiPhieuMuon) {
-        await global.MocThu.dieuHuong.taiPhieuMuon();
-      }
-      thanhPhan.hienThongBao("Đã lập phiếu mượn " + result.loan.id + " cho mã độc giả " + result.loan.readerCode + ".");
-    } catch (error) {
-      thanhPhan.hienThongBao(error.message);
-    } finally {
-      if (button) button.disabled = false;
+  function docCsv(text) {
+    var rows = [], row = [], cell = "", quoted = false;
+    for (var i = 0; i < text.length; i += 1) {
+      var char = text[i];
+      if (quoted && char === '"' && text[i + 1] === '"') { cell += '"'; i += 1; }
+      else if (char === '"') quoted = !quoted;
+      else if (char === "," && !quoted) { row.push(cell); cell = ""; }
+      else if ((char === "\n" || char === "\r") && !quoted) {
+        if (char === "\r" && text[i + 1] === "\n") i += 1;
+        row.push(cell); cell = "";
+        if (row.some(function (value) { return value.trim(); })) rows.push(row);
+        row = [];
+      } else cell += char;
     }
+    row.push(cell);
+    if (row.some(function (value) { return value.trim(); })) rows.push(row);
+    if (rows.length < 2) throw new Error("Tệp CSV chưa có dòng dữ liệu.");
+    var aliases = { "tên sách": "name", "tên đầu sách": "name", "tác giả": "author", "mã sách": "code", "thể loại": "category", "ngôn ngữ": "language", "số lượng": "stock", "tồn kho": "stock", "tồn tối thiểu": "minimum", "vị trí": "location", "mô tả": "summary" };
+    var headers = rows.shift().map(function (value) {
+      var key = value.replace(/^\uFEFF/, "").trim().toLocaleLowerCase("vi");
+      return aliases[key] || key;
+    });
+    if (!headers.includes("name") || !headers.includes("author") || !headers.includes("code")) {
+      throw new Error("CSV cần có cột name, author, code (hoặc Tên sách, Tác giả, Mã sách).");
+    }
+    return rows.map(function (values) {
+      var item = {};
+      headers.forEach(function (header, index) { item[header] = (values[index] || "").trim(); });
+      return {
+        name: item.name, author: item.author, code: item.code,
+        category: item.category || "Khác", language: item.language === "en" ? "en" : "vi",
+        stock: Number(item.stock || 0), borrowed: 0, minimum: Number(item.minimum || 0),
+        location: item.location || "", summary: item.summary || "", quality: "Tốt"
+      };
+    }).filter(function (item) { return item.name && item.author && item.code; });
   }
 
   function khoiTao() {
@@ -362,13 +394,21 @@
       veBangSach();
     });
 
+    var languageSelect = document.getElementById("filterLang");
+    if (languageSelect) languageSelect.addEventListener("change", function (e) {
+      boLocNgonNgu = e.target.value;
+      veBangSach();
+    });
+
     var resetBtn = document.getElementById("resetFiltersBtn");
     if (resetBtn) resetBtn.addEventListener("click", function () {
       if (searchInput) searchInput.value = "";
       if (catSelect) catSelect.value = "all";
       if (statusSelect) statusSelect.value = "all";
+      if (languageSelect) languageSelect.value = "all";
       boLocTheLoai = "all";
       boLocTrangThai = "all";
+      boLocNgonNgu = "all";
       veBangSach();
     });
 
@@ -403,11 +443,6 @@
       finally { drawerHistoryBtn.disabled = false; }
     });
 
-    var drawerHistoryBtn = document.getElementById("drawerHistoryBtn");
-    if (drawerHistoryBtn) drawerHistoryBtn.addEventListener("click", function () {
-      thanhPhan.hienThongBao("Tài liệu có 14 lượt mượn trong tháng này, tỷ lệ trả đúng hạn 96%.");
-    });
-
     var booksTable = document.getElementById("booksTable");
     if (booksTable) {
       booksTable.addEventListener("click", function (event) {
@@ -433,8 +468,26 @@
     }
 
     var importBtn = document.getElementById("importExcelBtn");
-    if (importBtn) importBtn.addEventListener("click", function () {
-      thanhPhan.hienThongBao("Tính năng nhập từ Excel/CSV (.xlsx, .csv) sẵn sàng tiếp nhận tệp.");
+    var importFile = document.getElementById("bookImportFile");
+    if (importBtn && importFile) importBtn.addEventListener("click", function () { importFile.click(); });
+    if (importFile) importFile.addEventListener("change", async function () {
+      var file = importFile.files && importFile.files[0];
+      if (!file) return;
+      importBtn.disabled = true;
+      try {
+        var records = docCsv(await file.text());
+        if (!records.length) throw new Error("Không tìm thấy dòng sách hợp lệ.");
+        var added = 0, errors = [];
+        for (var i = 0; i < records.length; i += 1) {
+          try {
+            await global.MocThu.auth.request("/api/books", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(records[i]) });
+            added += 1;
+          } catch (error) { errors.push(records[i].code + ": " + error.message); }
+        }
+        await taiDanhSach(); veBangSach();
+        thanhPhan.hienThongBao("Đã nhập " + added + "/" + records.length + " đầu sách." + (errors.length ? " Một số dòng lỗi: " + errors.slice(0, 3).join("; ") : ""));
+      } catch (error) { thanhPhan.hienThongBao(error.message); }
+      finally { importBtn.disabled = false; importFile.value = ""; }
     });
   }
 

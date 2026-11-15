@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f8f6f0">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../dùng-chung/giao%20di%E1%BB%87n/giao-di%E1%BB%87n.css"><link rel="stylesheet" href="doc-gia.css">
+  <title>Mộc Thư — Hồ sơ độc giả</title>
+</head>
+<body data-role="reader">
+  <div class="reader-shell">
+    <header class="topbar"><div class="brand"><button class="mobile-menu" id="mobileMenuButton" aria-label="Mở menu">☰</button><img src="../../dùng-chung/giao%20di%E1%BB%87n/logo-moc-thu.png" alt="Logo Mộc Thư" class="brand-logo-img"><div class="brand-name">Mộc Thư</div></div>
+      <nav class="top-nav-links" aria-label="Điều hướng độc giả"><a href="trang-chủ.html" class="top-nav-link">Trang chủ</a><a href="danh-mục.html" class="top-nav-link">Danh mục sách</a><a href="sách-mới.html" class="top-nav-link">Sách mới</a><a href="phiếu-mượn.html" class="top-nav-link">Mượn &amp; đặt chỗ</a><a href="hồ-sơ.html" class="top-nav-link active">Hồ sơ</a></nav>
+      <div class="top-actions"><div class="user-chip"><div class="avatar" id="topAvatar">DG</div><div class="user-details"><div class="user-name" id="topUserName">Độc giả</div><div class="user-role" id="topUserRole">Độc giả</div></div></div><button class="button small soft" id="logoutButton" type="button">Đăng xuất</button></div>
+    </header>
+    <main class="reader-page-main">
+      <section class="reader-page-hero"><div><div class="reader-section-kicker">THÔNG TIN TÀI KHOẢN</div><h1>Hồ sơ độc giả</h1><p>Cập nhật thông tin liên hệ để nhận hỗ trợ về thẻ, phiếu mượn và yêu cầu đặt chỗ.</p></div></section>
+      <div class="reader-content-card" style="margin-bottom:20px"><div class="stats-grid"><article class="card stat-card"><div class="stat-top"><span>Mã thẻ thư viện</span><span class="stat-icon blue">▣</span></div><div class="stat-number" id="readerProfileCard">Đang tải</div><div class="stat-foot" id="readerProfileStatus">Thẻ thư viện</div></article><article class="card stat-card"><div class="stat-top"><span>Ngày hết hạn</span><span class="stat-icon gold">◷</span></div><div class="stat-number" id="readerProfileExpiry">—</div><div class="stat-foot">Liên hệ thủ thư để gia hạn thẻ</div></article></div></div>
+      <form class="reader-content-card reader-profile-grid" id="readerProfileForm">
+        <div class="field"><label for="readerFullName">Họ và tên</label><input id="readerFullName" name="fullName" required maxlength="100"></div>
+        <div class="field"><label for="readerEmail">Email liên hệ</label><input id="readerEmail" name="email" type="email" required maxlength="255"></div>
+        <div class="field"><label>Tên đăng nhập</label><input id="readerUsername" disabled></div>
+        <div class="field"><label>Ngày tham gia</label><input id="readerCreatedAt" disabled></div>
+        <div class="reader-page-actions" style="grid-column:1/-1"><button class="button primary" type="submit">Lưu thay đổi</button><a class="button" href="phiếu-mượn.html">Xem phiếu mượn</a></div>
+      </form>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="../../dùng-chung/chức%20n%C4%83ng/quy%E1%BB%81n-h%E1%BA%A1n.js"></script><script src="../../dùng-chung/chức%20n%C4%83ng/th%C3%A0nh-ph%E1%BA%A7n-d%C3%B9ng-chung.js"></script><script src="../../dùng-chung/chức%20n%C4%83ng/d%E1%BB%AF-li%E1%BB%87u-m%E1%BA%ABu.js"></script><script src="../../dùng-chung/chức năng/bìa-sách.js"></script><script src="../chức năng/độc-giả.js"></script><script src="../../dùng-chung/chức%20n%C4%83ng/đi%E1%BB%81u-h%C6%B0%E1%BB%9Bng.js"></script><script src="../../dùng-chung/chức%20n%C4%83ng/kh%E1%BB%9Fi-%C4%91%E1%BB%99ng.js"></script>
+</body></html>

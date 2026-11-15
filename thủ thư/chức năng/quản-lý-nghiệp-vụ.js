@@ -7,6 +7,8 @@
   var exportForm = document.getElementById("exportForm");
   var copiesTable = document.getElementById("copiesTable");
   var finesTable = document.getElementById("finesTable");
+  var loanForm = document.getElementById("loanForm");
+  var returnForm = document.getElementById("returnForm");
   var state = { suppliers: [], books: [], copies: [], fines: [] };
   function esc(value) { return global.MocThu.thanhPhan.escapeHtml(value == null ? "" : value); }
   function renderSuppliers() {
@@ -76,7 +78,115 @@
     } catch (error) { finesTable.innerHTML = '<tr><td colspan="7" class="table-empty">' + esc(error.message) + '</td></tr>'; }
   }
   function toggle(form) { if (!form) return; form.hidden = !form.hidden; form.style.display = form.hidden ? "none" : "grid"; }
+
+  function closeDialog(id) {
+    var backdrop = document.getElementById(id);
+    if (backdrop) backdrop.classList.remove("open");
+  }
+
+  async function openLoanDialog(bookId) {
+    if (!loanForm) return;
+    var readerSelect = document.getElementById("loanReaderCode");
+    var bookSelect = document.getElementById("loanBookId");
+    readerSelect.innerHTML = '<option value="">Đang tải thẻ…</option>';
+    bookSelect.innerHTML = '<option value="">Đang tải sách…</option>';
+    document.getElementById("loanModalBackdrop").classList.add("open");
+    try {
+      var result = await Promise.all([api("/api/readers"), api("/api/books"), api("/api/copies")]);
+      var readers = (result[0].readers || []).filter(function (reader) {
+        return reader.status === "active" && reader.card_status === "active" && reader.card_code;
+      });
+      var availableCounts = {};
+      (result[2].copies || []).forEach(function (copy) {
+        if (copy.status === "available") availableCounts[copy.book_id] = (availableCounts[copy.book_id] || 0) + 1;
+      });
+      var books = (result[1].books || []).filter(function (book) { return availableCounts[book.id] > 0; });
+      readerSelect.innerHTML = '<option value="">Chọn thẻ độc giả</option>' + readers.map(function (reader) {
+        return '<option value="' + esc(reader.card_code) + '">' + esc(reader.full_name) + ' · ' + esc(reader.card_code) + '</option>';
+      }).join("");
+      bookSelect.innerHTML = '<option value="">Chọn đầu sách</option>' + books.map(function (book) {
+        return '<option value="' + book.id + '">' + esc(book.name) + ' · còn ' + availableCounts[book.id] + ' bản</option>';
+      }).join("");
+      if (bookId && books.some(function (book) { return String(book.id) === String(bookId); })) bookSelect.value = String(bookId);
+      if (!readers.length) readerSelect.innerHTML = '<option value="">Chưa có thẻ độc giả hoạt động</option>';
+      if (!books.length) bookSelect.innerHTML = '<option value="">Không còn bản sẵn sàng</option>';
+      bookSelect.focus();
+    } catch (error) {
+      closeDialog("loanModalBackdrop");
+      global.MocThu.thanhPhan.hienThongBao(error.message);
+    }
+  }
+
+  function openReturnDialog(loanId) {
+    if (!returnForm) return;
+    var row = document.querySelector('#loansTable tr[data-loan-id="' + loanId + '"]');
+    document.getElementById("returnLoanSummary").textContent = row ? row.cells[1].textContent.replace(/\s+/g, " · ").trim() : "Kiểm tra tình trạng sách khi nhận trả.";
+    returnForm.elements.loanId.value = loanId;
+    returnForm.elements.condition.value = "normal";
+    document.getElementById("compensationField").hidden = true;
+    document.getElementById("returnModalBackdrop").classList.add("open");
+    document.getElementById("returnCondition").focus();
+  }
+
   function init() {
+    var newLoanButton = document.getElementById("newLoanButton");
+    if (newLoanButton) newLoanButton.addEventListener("click", function (event) {
+      event.stopPropagation();
+      openLoanDialog();
+    });
+    if (loanForm) loanForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var submit = loanForm.querySelector('[type="submit"]');
+      submit.disabled = true;
+      try {
+        var payload = Object.fromEntries(new FormData(loanForm).entries());
+        payload.bookId = Number(payload.bookId);
+        var result = await api("/api/loans", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        closeDialog("loanModalBackdrop");
+        loanForm.reset();
+        await Promise.all([global.MocThu.dieuHuong.taiPhieuMuon(), loadBooks(), global.MocThu.quanLyKho && global.MocThu.quanLyKho.taiKho()]);
+        global.MocThu.thanhPhan.hienThongBao("Đã tạo phiếu mượn " + result.loan.id + " · hạn trả " + new Date(result.loan.dueAt).toLocaleDateString("vi-VN") + ".");
+      } catch (error) { global.MocThu.thanhPhan.hienThongBao(error.message); }
+      finally { submit.disabled = false; }
+    });
+    document.querySelectorAll("[data-close-loan]").forEach(function (button) { button.addEventListener("click", function () { closeDialog("loanModalBackdrop"); }); });
+    var loanBackdrop = document.getElementById("loanModalBackdrop");
+    if (loanBackdrop) loanBackdrop.addEventListener("click", function (event) { if (event.target === loanBackdrop) closeDialog("loanModalBackdrop"); });
+
+    var conditionSelect = document.getElementById("returnCondition");
+    if (conditionSelect) conditionSelect.addEventListener("change", function () {
+      var required = conditionSelect.value !== "normal";
+      document.getElementById("compensationField").hidden = !required;
+      returnForm.elements.compensationAmount.required = required;
+    });
+    var loansTable = document.getElementById("loansTable");
+    if (loansTable) loansTable.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-return-loan]");
+      if (!button) return;
+      event.stopPropagation();
+      openReturnDialog(button.dataset.returnLoan);
+    });
+    if (returnForm) returnForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var submit = returnForm.querySelector('[type="submit"]');
+      submit.disabled = true;
+      var condition = returnForm.elements.condition.value;
+      var compensationAmount = condition === "normal" ? 0 : Number(returnForm.elements.compensationAmount.value);
+      try {
+        var result = await api("/api/loans/" + returnForm.elements.loanId.value + "/return", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ damaged: condition === "damaged", lost: condition === "lost", compensationAmount: compensationAmount })
+        });
+        closeDialog("returnModalBackdrop");
+        await Promise.all([global.MocThu.dieuHuong.taiPhieuMuon(), loadBooks(), loadFines(), global.MocThu.quanLyKho && global.MocThu.quanLyKho.taiKho()]);
+        global.MocThu.thanhPhan.hienThongBao(result.totalDue ? "Đã nhận trả. Cần xử lý " + result.totalDue.toLocaleString("vi-VN") + "đ tiền phạt/bồi thường." : "Đã nhận trả sách và cập nhật tồn kho.");
+      } catch (error) { global.MocThu.thanhPhan.hienThongBao(error.message); }
+      finally { submit.disabled = false; }
+    });
+    document.querySelectorAll("[data-close-return]").forEach(function (button) { button.addEventListener("click", function () { closeDialog("returnModalBackdrop"); }); });
+    var returnBackdrop = document.getElementById("returnModalBackdrop");
+    if (returnBackdrop) returnBackdrop.addEventListener("click", function (event) { if (event.target === returnBackdrop) closeDialog("returnModalBackdrop"); });
+
     if (supplierForm) {
       document.getElementById("toggleSupplierForm").addEventListener("click", function () { toggle(supplierForm); });
       document.getElementById("supplierSearch").addEventListener("input", renderSuppliers);
@@ -156,5 +266,5 @@
     }
   }
   global.MocThu = global.MocThu || {};
-  global.MocThu.quanLyNghiepVu = { khoiTao: init, taiPhieuNhap: loadReceipts, taiPhieuXuat: loadExports };
+  global.MocThu.quanLyNghiepVu = { khoiTao: init, taiPhieuNhap: loadReceipts, taiPhieuXuat: loadExports, moPhieuMuon: openLoanDialog, moNhanTra: openReturnDialog };
 }(window));

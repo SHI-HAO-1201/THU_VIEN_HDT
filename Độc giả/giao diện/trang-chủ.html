@@ -23,11 +23,11 @@
 
       <!-- Top Navigation Tabs Độc Giả (Dành riêng cho bạn đọc, nằm gọn trên 1 hàng ngang duy nhất) -->
       <nav class="top-nav-links" aria-label="Menu đỉnh">
-        <a href="#home" class="top-nav-link active">Trang chủ</a>
-        <a href="#popular" class="top-nav-link">Tuyển tập chọn lọc</a>
-        <a href="#new" class="top-nav-link">Sách mới phát hành</a>
-        <a href="#guide" class="top-nav-link">Hướng dẫn mượn sách</a>
-        <a href="#shelf" class="top-nav-link">Tủ sách của tôi</a>
+        <a href="trang-chủ.html" class="top-nav-link active">Trang chủ</a>
+        <a href="danh-mục.html" class="top-nav-link">Danh mục sách</a>
+        <a href="sách-mới.html" class="top-nav-link">Sách mới</a>
+        <a href="phiếu-mượn.html" class="top-nav-link">Mượn &amp; đặt chỗ</a>
+        <a href="hồ-sơ.html" class="top-nav-link">Hồ sơ</a>
       </nav>
 
       <div class="top-actions">
@@ -327,72 +327,15 @@
         </div>
       </section>
 
-      <!-- 7. Tủ Sách Của Tôi (Personal Shelf) -->
       <section class="reader-section" id="shelf" style="padding-top:20px;">
         <div class="reader-section-header">
-          <div>
-            <div class="reader-section-tag">GÓC ĐỌC CÁ NHÂN</div>
-            <h2>Tủ sách của tôi &amp; Ấn phẩm đang mượn</h2>
-          </div>
+          <div><div class="reader-section-tag">GÓC ĐỌC CÁ NHÂN</div><h2>Hoạt động thư viện của bạn</h2></div>
           <span style="font-size:12px;color:var(--muted);">Đang mượn: <strong id="readerLoanCount" style="color:var(--wood-dark);">0</strong> · Đặt chỗ: <strong id="readerReservationCount" style="color:var(--wood-dark);">0</strong></span>
         </div>
-
-        <form id="readerProfileForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:16px;margin:0 0 18px;background:#fffefa;border:1px solid #e2d8ca;border-radius:8px">
-          <label>Họ và tên<input name="fullName" required maxlength="100"></label>
-          <label>Email<input name="email" type="email" required maxlength="255"></label>
-          <button class="button small primary" type="submit">Cập nhật hồ sơ</button>
-        </form>
-        <div id="readerHistoryList" style="display:grid;gap:10px;margin-bottom:20px"><p>Đang tải lịch sử mượn và đặt chỗ…</p></div>
-
-        <div class="stitch-cards-row">
-          <article class="stitch-book-card" style="border:1.5px solid #d4c5b3;">
-            <div class="stitch-book-cover">
-              <div class="stitch-cover-spine" style="background:#8b6b47;">Cây Cam</div>
-            </div>
-            <div class="stitch-book-body">
-              <span class="badge" style="background:#eef6f0;color:#2e663e;margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">Đang mượn</span>
-              <h3 class="stitch-book-name">Cây Cam Ngọt Của Tôi</h3>
-              <div class="stitch-book-author">José Mauro de Vasconcelos</div>
-              <div style="font-size:11px;color:#c93b2b;font-weight:600;margin-bottom:12px;">Hạn trả: 22/11/2026 (Còn 8 ngày)</div>
-              <div class="stitch-book-actions">
-                <button class="button small soft" type="button" onclick="alert('Đã gửi yêu cầu gia hạn thêm 7 ngày!')">Gia hạn sách</button>
-              </div>
-            </div>
-          </article>
-
-          <article class="stitch-book-card" style="border:1.5px solid #d4c5b3;">
-            <div class="stitch-book-cover">
-              <div class="stitch-cover-spine" style="background:#5a6d58;">Nhà Giả Kim</div>
-            </div>
-            <div class="stitch-book-body">
-              <span class="badge" style="background:#eef6f0;color:#2e663e;margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">Đang mượn</span>
-              <h3 class="stitch-book-name">Nhà Giả Kim</h3>
-              <div class="stitch-book-author">Paulo Coelho</div>
-              <div style="font-size:11px;color:#2e663e;font-weight:600;margin-bottom:12px;">Hạn trả: 28/11/2026 (Còn 14 ngày)</div>
-              <div class="stitch-book-actions">
-                <button class="button small soft" type="button" onclick="alert('Đã gửi yêu cầu gia hạn thêm 7 ngày!')">Gia hạn sách</button>
-              </div>
-            </div>
-          </article>
-
-          <article class="stitch-book-card" style="border:1.5px dashed #d4c5b3;background:#faf8f5;">
-            <div class="stitch-book-cover">
-              <div class="stitch-cover-spine" style="background:#a6836f;">Đắc Nhân Tâm</div>
-            </div>
-            <div class="stitch-book-body">
-              <span class="badge" style="background:#f5efe6;color:var(--wood-dark);margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;">Đã lưu vào danh sách</span>
-              <h3 class="stitch-book-name">Đắc Nhân Tâm</h3>
-              <div class="stitch-book-author">Dale Carnegie</div>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Lưu ngày: Hôm qua</div>
-              <div class="stitch-book-actions">
-                <button class="button small primary" type="button" style="background:var(--wood);border-color:var(--wood);" onclick="alert('Đã đăng ký giữ sách tại quầy!')">Mượn ngay</button>
-              </div>
-            </div>
-          </article>
-        </div>
+        <div class="reader-page-hero"><div><h2>Theo dõi mọi phiếu mượn tại một nơi</h2><p>Kiểm tra ngày hẹn trả, gia hạn lượt mượn, hủy yêu cầu đặt chỗ và cập nhật thông tin độc giả.</p><div class="reader-page-actions"><a class="button primary" href="phiếu-mượn.html">Xem phiếu mượn</a><a class="button" href="hồ-sơ.html">Cập nhật hồ sơ</a></div></div></div>
+        <div id="readerHistoryList" class="reader-record-list"><p>Đang tải hoạt động thư viện…</p></div>
       </section>
     </main>
-
     <!-- Footer -->
     <footer class="reader-footer">
       <div class="reader-footer-inner">
